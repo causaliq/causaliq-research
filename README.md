@@ -1,36 +1,37 @@
-# causaliq-repo-template
+# causaliq-research
 
 ![Python Versions](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
 
-This is a template for **creating new CausalIQ repos** which provides a new **capability** and follows CausalIQ development practices. It is part of the [CausalIQ ecosystem](https:/causaliq.org/) for intelligent causal discovery.
+CausalIQ Research is a curated collection of experimental setups, benchmark datasets, and published results that enable reproducible research and method comparison in the field of causal discovery and inference. It is part of the [CausalIQ ecosystem](https:/causaliq.org/) for intelligent causal discovery and inference.
 
 
 ## Status
 
 🚧 **Active Development** 
 
-- This repository is currently in active development. It will be updated periodically to align with the latest approaches used in CausalIQ repos.
-- New repos within the CausalIQ project should follow the naming convention causaliq-[newcapability], e.g. "causaliq-discovery" or "causaliq-analysis".
+- This repository is currently in active development. 
+- Work for new publiched papers will be created in this repo.
+- Work from previously published papers will be migrated from the legacy monolithic discovery repo as the CausalIQ ecosystem supports the required functionality.
 
 
 ## Features
 
 Completed releases:
 
-- **Release v1.0.0 Foundation**: ready for use as template for new CausalIQ repos
+- None
 
 Planned releases:
 
-- **Release v1.1.0 Maintenance**: Maintenance to include new features into template
+- **Release v0.1.0 - Graph Averaging** *(in development)*: Models and workflows for LLM-assisted graph averaging
 
 ### Feature Overview
 
 - 📁 **Standardised project structure**: following current best practices
 - ⌨️ **CLI Interface**: An initial dummy command-line interface.
 - 📖 **Documentation framework**: using mkdocs with shared CausalIQ branding.
-- 🐍 **Python setup**: providing virtual environments for Python 3.9, 3.10, 3.11 and 3.12.
+- 🐍 **Python setup**: providing virtual environments for Python 3.9, 3.10, 3.11, 3.12 and 3.13.
 - 🔬 **pytest test framework**: for unit, functional and integration testing including code coverage.
 - 🔄 **Continuous Integration testing**: across Python versions and operating systems using GitHub actions 
 
@@ -43,20 +44,19 @@ Full instructions on using this as a template to start a new CausalIQ repo are g
 
 ## Upcoming Key Innovations
 
-### 🤷 None planned
-- **not applicable** - for this repo template, but will be for concrete projects
+### 🤷 TO BE COMPLETED
+- tbc
 
 ## Integration with CausalIQ Ecosystem
 
-- 💯 **All CausalIQ projects** - this repo template is used as a starting point for all CausalIQ repos.
+- 💯 **tbc** - to be completed.
 
 ## LLM Support
 
 The following provides project-specific context for this repo which should be provided after the [personal and ecosystem context](https://github.com/causaliq/causaliq/blob/main/LLM_DEVELOPMENT_GUIDE.md):
 
 ```text
-I wish to migrate the code in legacy/core/metrics.py following all CausalIQ development guidelines
-so that the legacy repo can use the migrated code instead. 
+to be completed
 ```
 
 ## Quick Start
@@ -70,15 +70,15 @@ so that the legacy repo can use the migrated code instead.
 ### Prerequisites
 
 - Git 
-- Latest stable versions of Python 3.9, 3.10. 3.11 and 3.12
+- Latest stable versions of Python 3.9, 3.10. 3.11, 3.12 and 3.13
 
 
 ### Clone the new repo locally and check that it works
 
-Clone the causaliq-newcapability repo locally as normal
+Clone the causaliq-research repo locally as normal
 
 ```bash
-git clone https://github.com/causaliq/causaliq-newcapability.git
+git clone https://github.com/causaliq/causaliq-research.git
 ```
 
 Set up the Python virtual environments and activate the default Python virtual environment. You may see
@@ -119,7 +119,7 @@ This repository is part of the CausalIQ ecosystem. For development setup:
 
 ---
 
-**Supported Python Versions**: 3.9, 3.10, 3.11, 3.12  
+**Supported Python Versions**: 3.9, 3.10, 3.11, 3.12, 3.13  
 **Default Python Version**: 3.11  
 **License**: MIT
 

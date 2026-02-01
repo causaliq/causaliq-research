@@ -4,7 +4,7 @@ This template repo provides a simple template CLI as a starting point for CLI im
 
 ## CLI entry point
 
-::: causaliq_repo_template.cli
+::: causaliq_research.cli
     options:
         show_root_heading: true
         show_source: false

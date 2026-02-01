@@ -45,7 +45,7 @@ Write-Host "Activating Python $DisplayVersion environment..." -ForegroundColor B
 
 if ($Version -eq "311") {
     Write-Host ""
-    Write-Host "$([char]0x2713) causaliq-repo-template CLI is now available!" -ForegroundColor Green
-    Write-Host "Test it: causaliq-repo-template --help" -ForegroundColor Cyan
+    Write-Host "$([char]0x2713) causaliq-research CLI is now available!" -ForegroundColor Green
+    Write-Host "Test it: causaliq-research --help" -ForegroundColor Cyan
     Write-Host ""
 }

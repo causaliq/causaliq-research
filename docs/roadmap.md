@@ -10,7 +10,7 @@ This project roadmap fits into the [overall ecosystem roadmap](https:/https://ca
 
 Commits:
 
-- `4a1b021` fix: change template shorthand CLI command from "crt" to "cqcrt"
+- `4a1b021` fix: change template shorthand CLI command from "crt" to "cqrsch"
 - `67cef98` fix: default CI testing to just Python 3.11 on Ubuntu
 
 ---
