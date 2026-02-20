@@ -4,7 +4,46 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
 
-CausalIQ Research is a curated collection of experimental setups, benchmark datasets, and published results that enable reproducible research and method comparison in the field of causal discovery and inference. It is part of the [CausalIQ ecosystem](https:/causaliq.org/) for intelligent causal discovery and inference.
+CausalIQ Research is for developing, publishing, and reproducing research
+work based on the CausalIQ ecosystem. It provides a curated collection of
+experimental setups, benchmark datasets, and published results that enable
+reproducible research and method comparison in causal discovery and inference.
+
+It is part of the [CausalIQ ecosystem](https://causaliq.org/) for intelligent
+causal discovery and inference.
+
+
+## Repository Structure
+
+This repository is organised around research concepts rather than file types:
+
+```
+causaliq-research/
+├── src/              # Minimal code (CLI, utilities)
+├── models/           # Bayesian model specifications - by model
+│   └── asia/
+│   └── sachs/
+├── experiments/      # Workflows + results - by series
+│   └── llm-benchmark-2026/
+│       ├── workflow.yaml
+│       └── results.db
+├── papers/           # Generated assets - by paper
+│   └── llm-priors-2026/
+│       ├── tables/
+│       └── figures/
+└── scratch/          # Gitignored working directory
+```
+
+- **models/** - Reusable Bayesian model specifications, organised by model
+- **experiments/** - Workflows and result caches, organised by experiment series
+- **papers/** - Generated tables and figures, organised by paper
+- **scratch/** - Gitignored scratch space for development work
+
+### Asset Management
+
+Currently, workflows, model specifications, and result caches are committed
+to GitHub for safety and reproducibility. The CLI will eventually support
+downloading assets from Zenodo for published work.
 
 
 ## Status
@@ -12,7 +51,7 @@ CausalIQ Research is a curated collection of experimental setups, benchmark data
 🚧 **Active Development** 
 
 - This repository is currently in active development. 
-- Work for new publiched papers will be created in this repo.
+- Work for new published papers will be created in this repo.
 - Work from previously published papers will be migrated from the legacy monolithic discovery repo as the CausalIQ ecosystem supports the required functionality.
 
 

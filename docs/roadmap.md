@@ -1,32 +1,39 @@
-# CausalIQ Repo Template - Development Roadmap
+# CausalIQ Research - Development Roadmap
 
-**Last updated**: November 21, 2025  
+**Last updated**: February 20, 2026
 
-This project roadmap fits into the [overall ecosystem roadmap](https:/https://causaliq.org/projects/ecosystem_roadmap/)
+This project roadmap fits into the [overall ecosystem roadmap](https://causaliq.org/projects/ecosystem_roadmap/)
 
-## 🎯 Current Release
+## 🚧  Under development
 
-**✅ BACKGROUND**: 1.1 Maintenance
+- **v0.1.0 Foundation Models** [March 2026]
 
-Commits:
+Develop models and workflows to support initial LLM and BNSL fusion.
 
-- `4a1b021` fix: change template shorthand CLI command from "crt" to "cqrsch"
-- `67cef98` fix: default CI testing to just Python 3.11 on Ubuntu
+**Scope**
 
----
+- initial true graphs and LLM contexts for PGM 2026 paper
+- workflows for PGM 2026 results 
+
 
 ## ✅ Previous Releases
 
-*See Git commit history for detailed implementation progress*
-
-- 📋 **1.0 Foundation**: ready for use as template for new CausalIQ repos
-
+- none
 
 ## 🛣️ Upcoming Implementation
 
-### Release 1.1: Maintenance
-**Key Deliverables**: Maintenance 
+- none scoped yet
 
-**Commit 1.1.0: Maintenance Task**
 
-- [ ] **maintenance** - as required
+
+
+## 🚀 Possible Future Features
+
+**Legacy Migration** (After robust test infrastructure):
+
+- networks, experiments and results for previous papers
+
+---
+
+*This roadmap leverages Git commit history for completed work, provides detailed
+release-based planning for upcoming functionality, and outlines future possibilities.*

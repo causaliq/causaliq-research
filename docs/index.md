@@ -8,7 +8,27 @@
 
 ## Welcome
 
-Welcome to the documentation for CausalIQ Research which is a curated collection of experimental setups, benchmark datasets, and published results that enable reproducible research and method comparison in the field of causal discovery and inference. It is part of the [CausalIQ ecosystem](https:/causaliq.org/) for intelligent causal discovery and inference.
+Welcome to the documentation for CausalIQ Research - a repository for
+developing, publishing, and reproducing research work based on the CausalIQ
+ecosystem. It provides experimental setups, benchmark datasets, and published
+results that enable reproducible research and method comparison in causal
+discovery and inference.
+
+It is part of the [CausalIQ ecosystem](https://causaliq.org/) for intelligent
+causal discovery and inference.
+
+---
+
+## Repository Structure
+
+The repository is organised around research concepts:
+
+| Directory | Purpose | Organisation |
+|-----------|---------|---------------|
+| `models/` | Bayesian model specifications | By model (e.g., asia, sachs) |
+| `experiments/` | Workflows and result caches | By experiment series |
+| `papers/` | Generated tables and figures | By paper |
+| `scratch/` | Working directory (gitignored) | - |
 
 ---
 
@@ -56,5 +76,5 @@ For the latest code and releases, visit the [causaliq-research GitHub repository
 
 ---
 
-**Supported Python Versions**: 3.9, 3.10, 3.11, 3.12  
+**Supported Python Versions**: 3.9, 3.10, 3.11, 3.12, 3.13  
 **Default Python Version**: 3.11

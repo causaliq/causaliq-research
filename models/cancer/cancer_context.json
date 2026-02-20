@@ -1,0 +1,553 @@
+{
+    "schema_version": "2.0",
+    "network": "cancer",
+    "domain": "pulmonary_oncology_screening",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a pulmonary malignancy screening model, with disguised variable names to prevent benchmark memorization.",
+    "provenance": {
+        "source_network": "cancer",
+        "source_reference": "Korb2010BayesianAI",
+        "source_url": "https://www.bnlearn.com/bnrepository/discrete-small.html#cancer",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "moderate",
+        "notes": "The Cancer network is a small but well-known BN benchmark. Variable names are semantically similar to originals but rephrased to reduce pattern matching. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a screening model for pulmonary malignancy (lung tumors).",
+            "Consider causal ordering: environmental/lifestyle exposures → disease development → clinical manifestations.",
+            "Risk factor exposures are independent—one does not cause the other.",
+            "Disease causes observable findings, not vice versa.",
+            "Some variables may have multiple independent causes (converging arrows)."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge & naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, conditional rates, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "base_rate",
+                "conditional_rates",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "Pollution",
+            "display_name": "Environmental Air Quality",
+            "aliases": [
+                "Pollution",
+                "air_pollution",
+                "environmental_exposure"
+            ],
+            "type": "binary",
+            "states": [
+                "poor",
+                "acceptable"
+            ],
+            "role": "exogenous",
+            "category": "environmental_exposure",
+            "short_description": "Quality of air in patient's residential/occupational environment.",
+            "extended_description": "Environmental air quality captures chronic exposure to airborne particulates and carcinogens. Poor air quality indicates elevated levels of PM2.5, industrial emissions, or vehicular exhaust in the patient's living or working environment. This is an established independent risk factor for pulmonary malignancies through chronic inflammation and DNA damage pathways.",
+            "base_rate": {
+                "poor": 0.1,
+                "acceptable": 0.9
+            },
+            "sensitivity_hints": "Air quality is an environmental risk factor operating independently of lifestyle choices. It does not influence personal habits like tobacco use in this model.",
+            "related_domain_knowledge": [
+                "Chronic exposure to airborne carcinogens increases malignancy risk.",
+                "PM2.5 and PM10 particles cause oxidative stress in lung tissue.",
+                "Industrial and urban environments typically have worse air quality.",
+                "Environmental and lifestyle risk factors contribute independently to disease risk."
+            ],
+            "references": [
+                "IARC2013AirPollution",
+                "WHO_AirQuality_Guidelines"
+            ],
+            "llm_name": "air_quality_index"
+        },
+        {
+            "name": "Smoker",
+            "display_name": "Tobacco Use History",
+            "aliases": [
+                "Smoker",
+                "smoking",
+                "cigarette_use"
+            ],
+            "type": "binary",
+            "states": [
+                "never",
+                "ever"
+            ],
+            "role": "exogenous",
+            "category": "lifestyle_exposure",
+            "short_description": "Whether patient has history of tobacco smoking.",
+            "extended_description": "Tobacco use history indicates current or former cigarette smoking. Tobacco smoke contains numerous carcinogens that directly damage bronchial epithelium. This is the dominant risk factor for pulmonary malignancy, responsible for the majority of cases. The effect is dose-dependent but simplified here to binary classification.",
+            "base_rate": {
+                "never": 0.7,
+                "ever": 0.3
+            },
+            "sensitivity_hints": "Tobacco use is the strongest single risk factor for lung malignancy. Its effect is independent of environmental air quality—both pathways contribute separately to disease risk.",
+            "related_domain_knowledge": [
+                "Tobacco smoke is the primary cause of pulmonary malignancy.",
+                "Over 70 carcinogens identified in tobacco smoke.",
+                "Risk is proportional to pack-years of exposure.",
+                "Cessation reduces but does not eliminate accumulated risk.",
+                "Tobacco and environmental exposures act through independent mechanisms."
+            ],
+            "references": [
+                "SurgeonGeneral2014Tobacco",
+                "Doll2004BMJ"
+            ],
+            "llm_name": "tobacco_history"
+        },
+        {
+            "name": "Cancer",
+            "display_name": "Pulmonary Malignancy Status",
+            "aliases": [
+                "Cancer",
+                "lung_cancer",
+                "malignancy"
+            ],
+            "type": "binary",
+            "states": [
+                "absent",
+                "present"
+            ],
+            "role": "endogenous",
+            "category": "disease",
+            "short_description": "Whether malignant tumor is present in lung tissue.",
+            "extended_description": "Pulmonary neoplasm indicates the presence of malignant cells in lung parenchyma. In this model, neoplasm risk is elevated by both environmental exposures (poor air quality) and lifestyle factors (tobacco use). These risk factors act independently, each contributing to cumulative genetic damage that may result in malignant transformation.",
+            "conditional_rates": {
+                "poor_air_ever_tobacco": 0.05,
+                "poor_air_never_tobacco": 0.02,
+                "acceptable_air_ever_tobacco": 0.03,
+                "acceptable_air_never_tobacco": 0.001
+            },
+            "sensitivity_hints": "Malignancy is CAUSED by exposures (air quality, tobacco). It CAUSES downstream clinical findings (imaging abnormalities, symptoms). This is the central node connecting risk factors to observations.",
+            "related_domain_knowledge": [
+                "Malignancy develops through accumulation of oncogenic mutations.",
+                "Multiple independent risk factors can contribute (multi-hit model).",
+                "Disease presence causes detectable changes in imaging and symptoms.",
+                "Diagnostic findings are effects of disease, not causes."
+            ],
+            "references": [
+                "Hanahan2011Hallmarks",
+                "NCCN_LungCancer_Guidelines"
+            ],
+            "llm_name": "pulmonary_neoplasm"
+        },
+        {
+            "name": "Xray",
+            "display_name": "Chest Radiograph Result",
+            "aliases": [
+                "Xray",
+                "chest_xray",
+                "CXR"
+            ],
+            "type": "binary",
+            "states": [
+                "unremarkable",
+                "abnormal"
+            ],
+            "role": "endogenous",
+            "category": "diagnostic_imaging",
+            "short_description": "Findings from chest radiograph examination.",
+            "extended_description": "Chest radiograph (X-ray) is a standard screening tool that can detect pulmonary masses, nodules, and infiltrates. When malignancy is present, the tumor typically causes visible abnormalities. However, the test has limitations—small tumors may be missed (false negatives) and benign conditions can mimic malignancy (false positives).",
+            "conditional_rates": {
+                "no_malignancy": {
+                    "unremarkable": 0.8,
+                    "abnormal": 0.2
+                },
+                "malignancy_present": {
+                    "unremarkable": 0.1,
+                    "abnormal": 0.9
+                }
+            },
+            "sensitivity_hints": "Radiographic findings are CAUSED by malignancy presence. The imaging detects disease—it does not influence whether disease exists. Exposures (air, tobacco) do not directly affect imaging; they only affect imaging indirectly through causing disease.",
+            "related_domain_knowledge": [
+                "Chest X-ray sensitivity ~90% for visible tumors.",
+                "Specificity ~80%; benign nodules can cause false positives.",
+                "Imaging is a downstream effect of disease, not a cause.",
+                "X-ray result is conditionally independent of exposures given disease status."
+            ],
+            "references": [
+                "ACR_ChestImaging",
+                "NLST2011NEJM"
+            ],
+            "llm_name": "radiographic_findings"
+        },
+        {
+            "name": "Dyspnoea",
+            "display_name": "Respiratory Difficulty",
+            "aliases": [
+                "Dyspnoea",
+                "dyspnea",
+                "shortness_of_breath"
+            ],
+            "type": "binary",
+            "states": [
+                "absent",
+                "present"
+            ],
+            "role": "endogenous",
+            "category": "clinical_symptom",
+            "short_description": "Whether patient experiences difficulty breathing.",
+            "extended_description": "Breathing difficulty (dyspnea) is a subjective sensation of labored or uncomfortable respiration. In the context of pulmonary malignancy, it can result from tumor mass effect, airway obstruction, pleural effusion, or reduced functional lung capacity. However, dyspnea is non-specific and has many other causes including cardiac disease, anemia, and anxiety.",
+            "conditional_rates": {
+                "no_malignancy": {
+                    "absent": 0.7,
+                    "present": 0.3
+                },
+                "malignancy_present": {
+                    "absent": 0.35,
+                    "present": 0.65
+                }
+            },
+            "sensitivity_hints": "Breathing difficulty is a symptom CAUSED by malignancy (when present). It is NOT a cause of malignancy. Note: 30% baseline rate even without malignancy reflects other causes not modeled here.",
+            "related_domain_knowledge": [
+                "Dyspnea is a non-specific symptom with multiple potential etiologies.",
+                "In malignancy, dyspnea often indicates advanced disease.",
+                "Symptom is an observable effect of underlying pathology.",
+                "Like imaging, symptoms are downstream of disease, not causes."
+            ],
+            "references": [
+                "ATS_Dyspnea_Statement",
+                "Kvale2007Palliation"
+            ],
+            "llm_name": "breathing_difficulty"
+        }
+    ],
+    "constraints": {
+        "forbidden_edges": [
+            [
+                "radiographic_findings",
+                "pulmonary_neoplasm"
+            ],
+            [
+                "radiographic_findings",
+                "air_quality_index"
+            ],
+            [
+                "radiographic_findings",
+                "tobacco_history"
+            ],
+            [
+                "breathing_difficulty",
+                "pulmonary_neoplasm"
+            ],
+            [
+                "breathing_difficulty",
+                "air_quality_index"
+            ],
+            [
+                "breathing_difficulty",
+                "tobacco_history"
+            ],
+            [
+                "pulmonary_neoplasm",
+                "air_quality_index"
+            ],
+            [
+                "pulmonary_neoplasm",
+                "tobacco_history"
+            ],
+            [
+                "air_quality_index",
+                "tobacco_history"
+            ],
+            [
+                "tobacco_history",
+                "air_quality_index"
+            ]
+        ],
+        "partial_order": [
+            [
+                "air_quality_index",
+                "pulmonary_neoplasm"
+            ],
+            [
+                "tobacco_history",
+                "pulmonary_neoplasm"
+            ],
+            [
+                "pulmonary_neoplasm",
+                "radiographic_findings"
+            ],
+            [
+                "pulmonary_neoplasm",
+                "breathing_difficulty"
+            ]
+        ],
+        "tiers": {
+            "exposure": [
+                "air_quality_index",
+                "tobacco_history"
+            ],
+            "disease": [
+                "pulmonary_neoplasm"
+            ],
+            "observable": [
+                "radiographic_findings",
+                "breathing_difficulty"
+            ]
+        },
+        "notes": "Exposures are independent root causes. Disease is caused by exposures. Observables are caused by disease."
+    },
+    "causal_principles": [
+        {
+            "id": "exposure_disease_observation",
+            "statement": "Causal flow is unidirectional: Exposures → Disease → Observations. Tests and symptoms detect disease but do not cause it.",
+            "references": [
+                "Sackett_ClinicalEpidemiology"
+            ]
+        },
+        {
+            "id": "independent_risk_factors",
+            "statement": "Environmental and lifestyle exposures are independent causes. Neither causes the other; both independently contribute to disease risk.",
+            "references": [
+                "Rothman_ModernEpidemiology"
+            ]
+        },
+        {
+            "id": "collider_at_disease",
+            "statement": "The disease node is a collider—two independent causes (exposures) converge on it. This creates a v-structure: Exposure1 → Disease ← Exposure2.",
+            "references": [
+                "Pearl2009Causality"
+            ]
+        },
+        {
+            "id": "common_cause_at_disease",
+            "statement": "Disease is a common cause of both imaging findings and symptoms. Conditional on disease status, these observations are independent.",
+            "references": [
+                "Pearl2009Causality"
+            ]
+        }
+    ],
+    "ground_truth": {
+        "v_structures": [
+            {
+                "canonical": [
+                    "Pollution",
+                    "Cancer",
+                    "Smoker"
+                ],
+                "experiment": [
+                    "air_quality_index",
+                    "pulmonary_neoplasm",
+                    "tobacco_history"
+                ],
+                "description": "Environmental and lifestyle exposures are independent causes of malignancy (collider)"
+            }
+        ],
+        "conditional_independencies": [
+            {
+                "statement": "Xray ⊥ Dyspnoea | Cancer",
+                "experiment_names": "radiographic_findings ⊥ breathing_difficulty | pulmonary_neoplasm",
+                "description": "Imaging and symptoms are conditionally independent given disease status"
+            },
+            {
+                "statement": "Pollution ⊥ Smoker",
+                "experiment_names": "air_quality_index ⊥ tobacco_history",
+                "description": "Environmental and lifestyle exposures are marginally independent"
+            }
+        ],
+        "markov_blanket": {
+            "canonical": {
+                "Pollution": [
+                    "Cancer",
+                    "Smoker"
+                ],
+                "Smoker": [
+                    "Cancer",
+                    "Pollution"
+                ],
+                "Cancer": [
+                    "Pollution",
+                    "Smoker",
+                    "Xray",
+                    "Dyspnoea"
+                ],
+                "Xray": [
+                    "Cancer"
+                ],
+                "Dyspnoea": [
+                    "Cancer"
+                ]
+            },
+            "experiment": {
+                "air_quality_index": [
+                    "pulmonary_neoplasm",
+                    "tobacco_history"
+                ],
+                "tobacco_history": [
+                    "pulmonary_neoplasm",
+                    "air_quality_index"
+                ],
+                "pulmonary_neoplasm": [
+                    "air_quality_index",
+                    "tobacco_history",
+                    "radiographic_findings",
+                    "breathing_difficulty"
+                ],
+                "radiographic_findings": [
+                    "pulmonary_neoplasm"
+                ],
+                "breathing_difficulty": [
+                    "pulmonary_neoplasm"
+                ]
+            }
+        },
+        "num_nodes": 5,
+        "num_edges": 4,
+        "max_parents": 2,
+        "max_children": 2,
+        "edges": [
+            [
+                "Pollution",
+                "Cancer"
+            ],
+            [
+                "Smoker",
+                "Cancer"
+            ],
+            [
+                "Cancer",
+                "Xray"
+            ],
+            [
+                "Cancer",
+                "Dyspnoea"
+            ]
+        ]
+    },
+    "conditional_probability_tables": {
+        "notes": "Extracted from cancer.xdsl for reference. These should NOT be provided to LLMs during structure learning.",
+        "tables": {
+            "Pollution": {
+                "high": 0.1,
+                "low": 0.9
+            },
+            "Smoker": {
+                "False": 0.7,
+                "True": 0.3
+            },
+            "Cancer": {
+                "parents": [
+                    "Pollution",
+                    "Smoker"
+                ],
+                "table": {
+                    "high_False": {
+                        "False": 0.98,
+                        "True": 0.02
+                    },
+                    "high_True": {
+                        "False": 0.95,
+                        "True": 0.05
+                    },
+                    "low_False": {
+                        "False": 0.999,
+                        "True": 0.001
+                    },
+                    "low_True": {
+                        "False": 0.97,
+                        "True": 0.03
+                    }
+                }
+            },
+            "Xray": {
+                "parents": [
+                    "Cancer"
+                ],
+                "table": {
+                    "False": {
+                        "negative": 0.8,
+                        "positive": 0.2
+                    },
+                    "True": {
+                        "negative": 0.1,
+                        "positive": 0.9
+                    }
+                }
+            },
+            "Dyspnoea": {
+                "parents": [
+                    "Cancer"
+                ],
+                "table": {
+                    "False": {
+                        "False": 0.7,
+                        "True": 0.3
+                    },
+                    "True": {
+                        "False": 0.35,
+                        "True": 0.65
+                    }
+                }
+            }
+        }
+    },
+    "references": [
+        {
+            "id": "Korb2010BayesianAI",
+            "citation": "Korb, K. B., & Nicholson, A. E. (2010). Bayesian Artificial Intelligence (2nd ed.). CRC Press.",
+            "why_relevant": "Textbook featuring the Cancer network as a teaching example."
+        },
+        {
+            "id": "Pearl2009Causality",
+            "citation": "Pearl, J. (2009). Causality: Models, Reasoning, and Inference (2nd ed.). Cambridge University Press.",
+            "why_relevant": "Theoretical foundation for causal graphs, colliders, and conditional independence."
+        },
+        {
+            "id": "IARC2013AirPollution",
+            "citation": "IARC. (2013). Outdoor air pollution a leading environmental cause of cancer deaths. Press Release No. 221.",
+            "why_relevant": "Classification of air pollution as Group 1 carcinogen."
+        },
+        {
+            "id": "SurgeonGeneral2014Tobacco",
+            "citation": "U.S. Department of Health and Human Services. (2014). The Health Consequences of Smoking—50 Years of Progress.",
+            "why_relevant": "Definitive evidence on tobacco-lung cancer causal relationship."
+        },
+        {
+            "id": "NLST2011NEJM",
+            "citation": "National Lung Screening Trial Research Team. (2011). Reduced lung-cancer mortality with low-dose computed tomographic screening. NEJM, 365(5), 395-409.",
+            "why_relevant": "Evidence on imaging performance for lung cancer detection."
+        },
+        {
+            "id": "Doll2004BMJ",
+            "citation": "Doll, R., Peto, R., Boreham, J., & Sutherland, I. (2004). Mortality in relation to smoking: 50 years' observations on male British doctors. BMJ, 328(7455), 1519.",
+            "why_relevant": "Landmark longitudinal study quantifying smoking-cancer relationship."
+        }
+    ]
+}

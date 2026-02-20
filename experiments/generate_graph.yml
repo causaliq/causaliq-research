@@ -1,0 +1,17 @@
+# Example matrix workflow using the built-in echo action
+# Run with: cqflow run echo_matrix_workflow.yml --mode=run
+
+description: "First graph generation test"
+id: "generate-graph-test"
+
+matrix:
+  network: ["cancer"]
+
+steps:
+  - name: "LLM generates graph"
+    uses: "causaliq-knowledge"
+    with:
+      action: "generate_graph"
+      llm_cache: models/{{network}}/{{network}}_llm_cache.db
+      network_context: models/{{network}}/{{network}}_context.json
+      output: "scratch/experiments/llm_graph.db"
