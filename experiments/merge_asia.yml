@@ -1,0 +1,16 @@
+# merge_asia.yml
+description: "Merge small graphs from workflow cache"
+id: "merge_asia_01"
+
+matrix:
+  network: [asia]
+  sample_size: [100, 1K]
+
+steps:
+  - name: "Merge network graphs"
+    uses: "causaliq-analysis"
+    with:
+      action: "merge_graphs"
+      input: "scratch/migrated.db"
+      output: "scratch/merged.db"
+

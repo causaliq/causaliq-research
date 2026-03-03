@@ -1,0 +1,20 @@
+# Example matrix workflow using the built-in echo action
+# Run with: cqflow run experiments/migrate_trace.yml --mode=run
+
+description: "Migrate graphs from legacy traces to graphml format"
+id: "migrate_trace_1"
+output: "migrate.db"
+
+matrix:
+  network: [asia, sports]
+  sample_size: [100, 1K]
+  seeds: [0, 1]
+
+steps:
+  - name: "Migrate trace to graph"
+    uses: "causaliq-analysis"
+    with:
+      action: "migrate_trace"
+      series: "TABU/SAMPLE/BASE"
+      root_dir: "c:/dev/causaliq/discovery/experiments"
+      output: "scratch/migrated.db"

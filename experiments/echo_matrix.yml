@@ -13,6 +13,4 @@ steps:
     uses: "causaliq-workflow"
     with:
       action: "echo"
-      message: "{{message}}"
-      nodes: "{{nodes}}"
-      output: "scratch/experiments/echo_matrix.db"
+      output: "scratch/echo_matrix.db"
