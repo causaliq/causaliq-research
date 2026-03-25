@@ -1,0 +1,12 @@
+
+# Evaluate each LLM optimal graph
+
+steps:
+
+ - name: "evaluate optimal DAG"
+   uses: "causaliq-analysis"
+   with:
+     action: "evaluate_graph"
+     reference: networks/{{network}}/{{network}}.xdsl
+     input: papers/pdg-merge/results/llm.db
+     metric: [f1, shd]

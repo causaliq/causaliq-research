@@ -1,0 +1,11 @@
+
+# Obtain best graphs from Tabu PDGs
+
+steps:
+ - name: "Construct best DAG"
+   uses: "causaliq-analysis"
+   with:
+     action: "best_graph"
+     threshold: 0.5
+     input: papers/pdg-merge/results/merge.db
+

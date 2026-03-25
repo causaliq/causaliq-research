@@ -1,0 +1,19 @@
+
+# Evaluate the merged graphs learnt by Tabu
+
+steps:
+  - name: "Evaluate merged graph"
+    uses: "causaliq-analysis"
+    with:
+      action: evaluate_graph
+      reference: networks/{{network}}/{{network}}.xdsl
+      input: "papers/pdg-merge/results/merge.db"
+      metric: [f1, shd, equiv.shd]
+
+  - name: "Summarise merged graph"
+    uses: "causaliq-analysis"
+    with:
+      action: summarise
+      input: "papers/pdg-merge/results/merge.db"
+      output: "papers/pdg-merge/results/merge.csv"
+      metric: [f1.mean, f1.count, f1.sd, shd.count, shd.mean, shd.sd]

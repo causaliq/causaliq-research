@@ -1,0 +1,6 @@
+
+# Ignore workflow caches
+**/*.db
+
+# Ignore summary results
+**/*.csv
