@@ -1,3 +1,7 @@
 # don't commit caches whilst still under development
 
 **/*.db
+
+# don't commit data files yet
+
+**/*.gz

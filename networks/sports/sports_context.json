@@ -1,0 +1,836 @@
+{
+    "schema_version": "2.0",
+    "network": "sports",
+    "domain": "football_match_prediction",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a football match outcome prediction model based on the Beta-Binomial Hybrid BN structure.",
+    "provenance": {
+        "source_network": "sports",
+        "source_reference": "Constantinou2021AsianHandicap",
+        "source_url": "https://journals.sagepub.com/doi/10.3233/JSA-200588",
+        "disguise_strategy": "none",
+        "memorization_risk": "low",
+        "notes": "Original model from Constantinou (2021) for English Premier League match prediction. Combines pi-ratings with hybrid Bayesian network to model possession → shots → shots on target → goals → outcome chain."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a sports analytics model for football (soccer) match outcome prediction.",
+            "Consider temporal ordering: team ratings → possession → shots → shots on target → goals → match outcome.",
+            "The model follows a Beta-Binomial Hybrid BN structure capturing match event progression.",
+            "Home and away teams have symmetric variable structure but different parameters.",
+            "RDlevel (Rating Difference Level) is the only observable input at prediction time; match events are latent."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges or conditional probability tables.",
+            "Train/test splits, bootstrap seeds, or any held-out statistics.",
+            "Actual betting odds or profitability data."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge & naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, measurement notes, sensitivity hints, domain knowledge, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "measurement_notes",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "RDlevel",
+            "llm_name": "rating_difference",
+            "display_name": "Rating Difference Level",
+            "aliases": [
+                "rating_diff",
+                "team_strength_diff",
+                "pi_rating_difference"
+            ],
+            "type": "categorical",
+            "states": [
+                "x1to23",
+                "x2to14",
+                "x5to17",
+                "x8to20",
+                "xto11",
+                "xto2",
+                "xto5",
+                "xto8"
+            ],
+            "role": "exogenous",
+            "category": "team_rating",
+            "short_description": "Discretized rating difference between home and away teams based on pi-ratings.",
+            "extended_description": "The Rating Difference Level (RDL) is derived from the pi-rating system which assigns 'home' and 'away' ratings to each team. RDL represents the pre-match difference between the home team's home rating and the away team's away rating (R_XH - R_YA). This difference is discretized into multiple levels to ensure sufficient data points for prior estimation. Higher RDL values favor the home team, lower values favor the away team.",
+            "measurement_notes": "Computed from historical match data using pi-rating learning rates λ=0.018 and γ=0.7. Ratings are revised after each match based on goal difference errors.",
+            "sensitivity_hints": "Strong linear relationship between rating difference and expected goal difference. Higher RDL indicates stronger home team advantage. This is the only observable input at prediction time.",
+            "related_domain_knowledge": [
+                "Pi-rating system determines team ability based on relative goal discrepancies between adversaries.",
+                "Teams have separate home and away ratings to account for home advantage.",
+                "Rating convergence requires approximately 38 matches (one season).",
+                "RDlevel is the root node influencing all downstream match events."
+            ],
+            "references": [
+                "Constantinou2021AsianHandicap",
+                "ConstantinouFenton2013PiRating"
+            ]
+        },
+        {
+            "name": "possession",
+            "llm_name": "ball_possession",
+            "display_name": "Ball Possession Rate",
+            "aliases": [
+                "ball_possession",
+                "home_possession",
+                "possession_pct"
+            ],
+            "type": "categorical",
+            "states": [
+                "lessThan38_",
+                "x6_",
+                "x7to56_",
+                "x7to65_",
+                "x8to46_"
+            ],
+            "role": "endogenous",
+            "category": "match_event",
+            "short_description": "Home team's ball possession rate during the match.",
+            "extended_description": "Ball possession represents the proportion of match time the home team controls the ball. Modeled as a Beta distribution where α represents minutes in possession for home team and β for away team. Possession is the first temporal event in the causal chain and is influenced by the relative strength difference between teams.",
+            "measurement_notes": "Recorded as percentage of total match time (assumed 90 playable minutes). Available in English Premier League data from season 2009/10 onwards.",
+            "sensitivity_hints": "Higher possession rates typically correlate with more shots created. However, possession alone is an indirect predictor of goals—shots on target are more impactful.",
+            "related_domain_knowledge": [
+                "Possession occurs before shots in the temporal sequence.",
+                "Possession is influenced by team rating difference.",
+                "The causal chain assumes Possession → Shots → Shots on Target → Goals.",
+                "Away possession is implicitly (1 - home_possession)."
+            ],
+            "references": [
+                "Constantinou2021AsianHandicap"
+            ]
+        },
+        {
+            "name": "HTshots",
+            "llm_name": "home_shots",
+            "display_name": "Home Team Shots",
+            "aliases": [
+                "home_shots",
+                "HT_total_shots"
+            ],
+            "type": "categorical",
+            "states": [
+                "x1_",
+                "x1to14",
+                "x5to20",
+                "xto10",
+                "xto6"
+            ],
+            "role": "endogenous",
+            "category": "match_event",
+            "short_description": "Total number of shots created by the home team.",
+            "extended_description": "The expected number of shots is modeled as a Binomial distribution B(n, p), where n represents minutes in possession (P × 90) and p is the probability of generating a shot per minute in possession. This variable captures the home team's offensive activity derived from their ball control.",
+            "measurement_notes": "Count data from official match statistics. Subject to recording consistency across seasons.",
+            "sensitivity_hints": "Shots are a hyperparameter for shots on target. More shots generally lead to more shots on target, but conversion rate varies by team quality.",
+            "related_domain_knowledge": [
+                "Shots are influenced by possession and rating difference.",
+                "Binomial process: shots ~ B(possession_minutes, shot_probability_per_minute).",
+                "Shot probability varies with team strength.",
+                "Home teams typically create more shots due to home advantage."
+            ],
+            "references": [
+                "Constantinou2021AsianHandicap"
+            ]
+        },
+        {
+            "name": "ATshots",
+            "llm_name": "away_shots",
+            "display_name": "Away Team Shots",
+            "aliases": [
+                "away_shots",
+                "AT_total_shots"
+            ],
+            "type": "categorical",
+            "states": [
+                "x1_",
+                "x1to14",
+                "x5to20",
+                "xto10",
+                "xto6"
+            ],
+            "role": "endogenous",
+            "category": "match_event",
+            "short_description": "Total number of shots created by the away team.",
+            "extended_description": "The expected number of shots for the away team, modeled as a Binomial distribution where n represents their minutes in possession ((1-P) × 90) and p is the probability of generating a shot per minute. Away teams typically face disadvantages reflected in both possession and shot creation efficiency.",
+            "measurement_notes": "Count data from official match statistics. Away team shots are derived from their possession time.",
+            "sensitivity_hints": "Away teams generally create fewer shots due to lower possession and home team defensive pressure. Away shot efficiency may differ from home.",
+            "related_domain_knowledge": [
+                "Away possession is (1 - home_possession).",
+                "Shot creation is influenced by team rating and defensive quality of opponent.",
+                "Away disadvantage is captured through pi-ratings.",
+                "Symmetric structure to HTshots but different parameters."
+            ],
+            "references": [
+                "Constantinou2021AsianHandicap"
+            ]
+        },
+        {
+            "name": "HTshotsOnTarget",
+            "llm_name": "home_shots_on_target",
+            "display_name": "Home Team Shots on Target",
+            "aliases": [
+                "home_SOT",
+                "HT_shots_on_target"
+            ],
+            "type": "categorical",
+            "states": [
+                "x0_",
+                "xto1",
+                "xto3",
+                "xto6",
+                "xto9"
+            ],
+            "role": "endogenous",
+            "category": "match_event",
+            "short_description": "Number of home team shots that were on target.",
+            "extended_description": "Shots on target is modeled as a Binomial distribution B(n, p), where n is the number of total shots (HTshots) and p is the probability of a shot being on target. This variable has a direct influence on goals scored and is a stronger predictor than total shots.",
+            "measurement_notes": "Count of shots requiring goalkeeper intervention or scoring. Excludes blocked shots and shots wide of goal.",
+            "sensitivity_hints": "Direct causal influence on goals. Shot accuracy varies by team quality and is influenced by rating difference.",
+            "related_domain_knowledge": [
+                "Shots on target have direct influence on goals scored.",
+                "Temporal assumption: total shots → shots on target → goals.",
+                "Probability of being on target is learned from historical data per rating level.",
+                "Higher quality teams typically have better shot accuracy."
+            ],
+            "references": [
+                "Constantinou2021AsianHandicap"
+            ]
+        },
+        {
+            "name": "ATshotsOnTarget",
+            "llm_name": "away_shots_on_target",
+            "display_name": "Away Team Shots on Target",
+            "aliases": [
+                "away_SOT",
+                "AT_shots_on_target"
+            ],
+            "type": "categorical",
+            "states": [
+                "x0_",
+                "xto1",
+                "xto3",
+                "xto6",
+                "xto9"
+            ],
+            "role": "endogenous",
+            "category": "match_event",
+            "short_description": "Number of away team shots that were on target.",
+            "extended_description": "The away team's shots on target, modeled as a Binomial distribution with total shots as trials and accuracy probability as the success rate. This is a key determinant of away team goals.",
+            "measurement_notes": "Count of away team shots on target. Recording methodology consistent with home team.",
+            "sensitivity_hints": "Away shot accuracy may differ from home. Strong predictor of away goals scored.",
+            "related_domain_knowledge": [
+                "Direct influence on away team goals.",
+                "Away teams may have lower shot-to-goal conversion.",
+                "Beta-Binomial process links shots to shots on target.",
+                "Symmetric structure to HTshotsOnTarget."
+            ],
+            "references": [
+                "Constantinou2021AsianHandicap"
+            ]
+        },
+        {
+            "name": "HTgoals",
+            "llm_name": "home_goals",
+            "display_name": "Home Team Goals",
+            "aliases": [
+                "home_goals",
+                "HT_goals_scored"
+            ],
+            "type": "categorical",
+            "states": [
+                "x",
+                "x2",
+                "x3",
+                "x4",
+                "x_"
+            ],
+            "role": "endogenous",
+            "category": "match_outcome",
+            "short_description": "Number of goals scored by the home team.",
+            "extended_description": "Home team goals are modeled as a Binomial distribution B(n, p), where n is the number of shots on target (HTshotsOnTarget) and p is the probability of scoring from a shot on target. This is the final step before match outcome determination. Goal probability is conditioned on rating difference level.",
+            "measurement_notes": "Official match goals. Includes penalties, own goals credited appropriately.",
+            "sensitivity_hints": "Direct determinant of match outcome (HDA). Home teams typically have higher goal conversion rates due to home advantage.",
+            "related_domain_knowledge": [
+                "Goals determine match outcome: Home > Away = H, Home < Away = A, Home = Away = D.",
+                "Goal scoring probability varies with rating difference.",
+                "The model captures home advantage through separate home/away ratings.",
+                "Goals are the penultimate node before HDA outcome."
+            ],
+            "references": [
+                "Constantinou2021AsianHandicap"
+            ]
+        },
+        {
+            "name": "ATgoals",
+            "llm_name": "away_goals",
+            "display_name": "Away Team Goals",
+            "aliases": [
+                "away_goals",
+                "AT_goals_scored"
+            ],
+            "type": "categorical",
+            "states": [
+                "x",
+                "x2",
+                "x3",
+                "x4",
+                "x_"
+            ],
+            "role": "endogenous",
+            "category": "match_outcome",
+            "short_description": "Number of goals scored by the away team.",
+            "extended_description": "Away team goals follow a Binomial distribution with shots on target as trials and goal probability as success rate. Combined with home team goals, this determines the match outcome and goal difference used for Asian Handicap betting.",
+            "measurement_notes": "Official match goals for away team. Same recording standards as home goals.",
+            "sensitivity_hints": "Away goal scoring typically lower due to away disadvantage. Goal difference (HT - AT) determines Asian Handicap outcomes.",
+            "related_domain_knowledge": [
+                "Away teams face disadvantage reflected in lower expected goals.",
+                "Goal difference is key for AH betting market.",
+                "Linear relationship exists between rating difference and expected goal difference.",
+                "Symmetric structure to HTgoals."
+            ],
+            "references": [
+                "Constantinou2021AsianHandicap"
+            ]
+        },
+        {
+            "name": "HDA",
+            "llm_name": "match_outcome",
+            "display_name": "Match Outcome (1X2)",
+            "aliases": [
+                "match_result",
+                "1X2_outcome",
+                "final_result"
+            ],
+            "type": "categorical",
+            "states": [
+                "A",
+                "D",
+                "H"
+            ],
+            "role": "endogenous",
+            "category": "match_outcome",
+            "short_description": "Match outcome: Home win (H), Draw (D), or Away win (A).",
+            "extended_description": "The traditional 1X2 match outcome determined by comparing home and away goals. If home goals > away goals, outcome is H; if home goals < away goals, outcome is A; if equal, outcome is D. This is the terminal node in the causal network and represents the final prediction target for traditional betting.",
+            "measurement_notes": "Deterministic function of goal counts. No ambiguity in determination.",
+            "sensitivity_hints": "Outcome is fully determined by HTgoals and ATgoals. This is a deterministic collider node.",
+            "related_domain_knowledge": [
+                "1X2 distribution is determined by comparing goal counts.",
+                "H: HTgoals > ATgoals, A: ATgoals > HTgoals, D: HTgoals = ATgoals.",
+                "Asian Handicap betting reduces this to a binary outcome by applying goal handicaps.",
+                "This is the leaf node (no children) in the network."
+            ],
+            "references": [
+                "Constantinou2021AsianHandicap"
+            ]
+        }
+    ],
+    "constraints": {
+        "forbidden_edges": [
+            [
+                "HDA",
+                "HTgoals"
+            ],
+            [
+                "HDA",
+                "ATgoals"
+            ],
+            [
+                "HDA",
+                "HTshotsOnTarget"
+            ],
+            [
+                "HDA",
+                "ATshotsOnTarget"
+            ],
+            [
+                "HDA",
+                "HTshots"
+            ],
+            [
+                "HDA",
+                "ATshots"
+            ],
+            [
+                "HDA",
+                "possession"
+            ],
+            [
+                "HDA",
+                "RDlevel"
+            ],
+            [
+                "HTgoals",
+                "HTshotsOnTarget"
+            ],
+            [
+                "ATgoals",
+                "ATshotsOnTarget"
+            ],
+            [
+                "HTshotsOnTarget",
+                "HTshots"
+            ],
+            [
+                "ATshotsOnTarget",
+                "ATshots"
+            ],
+            [
+                "HTshots",
+                "possession"
+            ],
+            [
+                "ATshots",
+                "possession"
+            ],
+            [
+                "possession",
+                "RDlevel"
+            ],
+            [
+                "HTshots",
+                "RDlevel"
+            ],
+            [
+                "ATshots",
+                "RDlevel"
+            ]
+        ],
+        "partial_order": [
+            [
+                "RDlevel",
+                "possession"
+            ],
+            [
+                "RDlevel",
+                "HTshots"
+            ],
+            [
+                "RDlevel",
+                "ATshots"
+            ],
+            [
+                "RDlevel",
+                "HTshotsOnTarget"
+            ],
+            [
+                "RDlevel",
+                "ATshotsOnTarget"
+            ],
+            [
+                "RDlevel",
+                "HTgoals"
+            ],
+            [
+                "RDlevel",
+                "ATgoals"
+            ],
+            [
+                "possession",
+                "HTshots"
+            ],
+            [
+                "possession",
+                "ATshots"
+            ],
+            [
+                "HTshots",
+                "HTshotsOnTarget"
+            ],
+            [
+                "ATshots",
+                "ATshotsOnTarget"
+            ],
+            [
+                "HTshotsOnTarget",
+                "HTgoals"
+            ],
+            [
+                "ATshotsOnTarget",
+                "ATgoals"
+            ],
+            [
+                "HTgoals",
+                "HDA"
+            ],
+            [
+                "ATgoals",
+                "HDA"
+            ]
+        ],
+        "tiers": {
+            "team_rating": [
+                "RDlevel"
+            ],
+            "possession": [
+                "possession"
+            ],
+            "shots": [
+                "HTshots",
+                "ATshots"
+            ],
+            "shots_on_target": [
+                "HTshotsOnTarget",
+                "ATshotsOnTarget"
+            ],
+            "goals": [
+                "HTgoals",
+                "ATgoals"
+            ],
+            "outcome": [
+                "HDA"
+            ]
+        },
+        "notes": "Constraints reflect temporal causality in football match progression: ratings → possession → shots → shots on target → goals → outcome."
+    },
+    "causal_principles": [
+        {
+            "id": "temporal_progression",
+            "statement": "Match events follow a natural temporal order: team ratings determine relative strength, which influences possession, which affects shot creation, shot accuracy, goal scoring, and ultimately match outcome.",
+            "references": [
+                "Constantinou2021AsianHandicap"
+            ]
+        },
+        {
+            "id": "beta_binomial_hierarchy",
+            "statement": "The model implements a Beta-Binomial Hybrid BN process where possession and shot probabilities follow Beta distributions (hyperparameters) that inform Binomial distributions for count variables (shots, shots on target, goals).",
+            "references": [
+                "Constantinou2021AsianHandicap"
+            ]
+        },
+        {
+            "id": "home_advantage",
+            "statement": "Home advantage is captured through separate home and away ratings per team. The rating difference at match time reflects historical performance differentials.",
+            "references": [
+                "ConstantinouFenton2013PiRating",
+                "Constantinou2021AsianHandicap"
+            ]
+        },
+        {
+            "id": "rating_goal_linearity",
+            "statement": "A strong linear relationship exists between team rating difference and expected goal difference, enabling prediction of match outcomes and handicap betting efficiency.",
+            "references": [
+                "Constantinou2021AsianHandicap"
+            ]
+        },
+        {
+            "id": "symmetric_team_structure",
+            "statement": "Home and away team variables have symmetric causal structure (shots → shots on target → goals) but different learned parameters reflecting home/away asymmetry.",
+            "references": [
+                "Constantinou2021AsianHandicap"
+            ]
+        }
+    ],
+    "ground_truth": {
+        "edges": [
+            [
+                "RDlevel",
+                "possession"
+            ],
+            [
+                "RDlevel",
+                "HTshots"
+            ],
+            [
+                "RDlevel",
+                "ATshots"
+            ],
+            [
+                "RDlevel",
+                "HTshotsOnTarget"
+            ],
+            [
+                "RDlevel",
+                "ATshotsOnTarget"
+            ],
+            [
+                "RDlevel",
+                "HTgoals"
+            ],
+            [
+                "RDlevel",
+                "ATgoals"
+            ],
+            [
+                "possession",
+                "HTshots"
+            ],
+            [
+                "possession",
+                "ATshots"
+            ],
+            [
+                "HTshots",
+                "HTshotsOnTarget"
+            ],
+            [
+                "ATshots",
+                "ATshotsOnTarget"
+            ],
+            [
+                "HTshotsOnTarget",
+                "HTgoals"
+            ],
+            [
+                "ATshotsOnTarget",
+                "ATgoals"
+            ],
+            [
+                "HTgoals",
+                "HDA"
+            ],
+            [
+                "ATgoals",
+                "HDA"
+            ]
+        ],
+        "v_structures": [
+            {
+                "nodes": [
+                    "HTgoals",
+                    "HDA",
+                    "ATgoals"
+                ],
+                "description": "Home and away goals are independent causes of match outcome (collider at HDA)"
+            },
+            {
+                "nodes": [
+                    "RDlevel",
+                    "HTshots",
+                    "possession"
+                ],
+                "description": "Rating difference and possession both influence home team shots"
+            },
+            {
+                "nodes": [
+                    "RDlevel",
+                    "ATshots",
+                    "possession"
+                ],
+                "description": "Rating difference and possession both influence away team shots"
+            }
+        ],
+        "conditional_independencies": [
+            {
+                "statement": "HTgoals ⊥ ATgoals | HTshotsOnTarget, ATshotsOnTarget, RDlevel",
+                "description": "Home and away goals are conditionally independent given their respective shots on target and rating"
+            },
+            {
+                "statement": "HTshots ⊥ ATshots | possession, RDlevel",
+                "description": "Home and away shots are conditionally independent given possession and rating"
+            },
+            {
+                "statement": "HTshotsOnTarget ⊥ ATshotsOnTarget | HTshots, ATshots, RDlevel",
+                "description": "Shots on target for each team are conditionally independent given total shots"
+            },
+            {
+                "statement": "possession ⊥ HDA | HTgoals, ATgoals",
+                "description": "Possession is independent of outcome given goal counts"
+            }
+        ],
+        "markov_blanket": {
+            "RDlevel": [
+                "possession",
+                "HTshots",
+                "ATshots",
+                "HTshotsOnTarget",
+                "ATshotsOnTarget",
+                "HTgoals",
+                "ATgoals"
+            ],
+            "possession": [
+                "RDlevel",
+                "HTshots",
+                "ATshots"
+            ],
+            "HTshots": [
+                "RDlevel",
+                "possession",
+                "ATshots",
+                "HTshotsOnTarget"
+            ],
+            "ATshots": [
+                "RDlevel",
+                "possession",
+                "HTshots",
+                "ATshotsOnTarget"
+            ],
+            "HTshotsOnTarget": [
+                "RDlevel",
+                "HTshots",
+                "HTgoals"
+            ],
+            "ATshotsOnTarget": [
+                "RDlevel",
+                "ATshots",
+                "ATgoals"
+            ],
+            "HTgoals": [
+                "RDlevel",
+                "HTshotsOnTarget",
+                "ATgoals",
+                "HDA"
+            ],
+            "ATgoals": [
+                "RDlevel",
+                "ATshotsOnTarget",
+                "HTgoals",
+                "HDA"
+            ],
+            "HDA": [
+                "HTgoals",
+                "ATgoals"
+            ]
+        },
+        "num_nodes": 9,
+        "num_edges": 15,
+        "max_parents": 2,
+        "max_children": 7
+    },
+    "conditional_probability_tables": {
+        "notes": "CPTs extracted from sports.xdsl. These should NOT be provided to LLMs during structure learning. Tables are large due to discrete states; only structure shown here.",
+        "source_file": "sports.xdsl",
+        "summary": {
+            "RDlevel": {
+                "type": "marginal",
+                "states": 8,
+                "parents": []
+            },
+            "possession": {
+                "type": "conditional",
+                "states": 5,
+                "parents": [
+                    "RDlevel"
+                ],
+                "table_size": 40
+            },
+            "HTshots": {
+                "type": "conditional",
+                "states": 5,
+                "parents": [
+                    "RDlevel",
+                    "possession"
+                ],
+                "table_size": 200
+            },
+            "ATshots": {
+                "type": "conditional",
+                "states": 5,
+                "parents": [
+                    "RDlevel",
+                    "possession"
+                ],
+                "table_size": 200
+            },
+            "HTshotsOnTarget": {
+                "type": "conditional",
+                "states": 5,
+                "parents": [
+                    "HTshots",
+                    "RDlevel"
+                ],
+                "table_size": 200
+            },
+            "ATshotsOnTarget": {
+                "type": "conditional",
+                "states": 5,
+                "parents": [
+                    "ATshots",
+                    "RDlevel"
+                ],
+                "table_size": 200
+            },
+            "HTgoals": {
+                "type": "conditional",
+                "states": 5,
+                "parents": [
+                    "HTshotsOnTarget",
+                    "RDlevel"
+                ],
+                "table_size": 200
+            },
+            "ATgoals": {
+                "type": "conditional",
+                "states": 5,
+                "parents": [
+                    "ATshotsOnTarget",
+                    "RDlevel"
+                ],
+                "table_size": 200
+            },
+            "HDA": {
+                "type": "conditional",
+                "states": 3,
+                "parents": [
+                    "ATgoals",
+                    "HTgoals"
+                ],
+                "table_size": 75,
+                "deterministic": true,
+                "logic": "H if HTgoals > ATgoals, A if ATgoals > HTgoals, D if equal"
+            }
+        }
+    },
+    "references": [
+        {
+            "id": "Constantinou2021AsianHandicap",
+            "citation": "Constantinou, A. C. (2021). Investigating the efficiency of the Asian handicap football betting market with ratings and Bayesian networks. Journal of Sports Analytics, 8(3), 171-193.",
+            "why_relevant": "Primary source for the BN model structure. Combines pi-ratings with hybrid BN to model possession → shots → shots on target → goals → outcome chain for EPL match prediction."
+        },
+        {
+            "id": "ConstantinouFenton2013PiRating",
+            "citation": "Constantinou, A. C., & Fenton, N. (2013). Determining the level of ability of football teams by dynamic ratings based on the relative discrepancies in scores between adversaries. Journal of Quantitative Analysis in Sports, 9(1), 37-50.",
+            "why_relevant": "Introduces the pi-rating system used to compute team ratings and RDlevel variable."
+        },
+        {
+            "id": "ConstantinouFenton2017SmartData",
+            "citation": "Constantinou, A. C., & Fenton, N. (2017). Towards smart-data: Improving predictive accuracy in long-term football team performance. Knowledge-Based Systems, 124, 93-104.",
+            "why_relevant": "Demonstrates that promoted teams outperform replaced teams, relevant for rating initialization."
+        },
+        {
+            "id": "Constantinou2018Dolores",
+            "citation": "Constantinou, A. C. (2018). Dolores: A model that predicts football match outcomes from all over the world. Machine Learning, 108(1), 49-75.",
+            "why_relevant": "Demonstrates pi-rating approach ranked 2nd in Machine Learning for Soccer competition."
+        }
+    ],
+    "data_context": {
+        "source": "English Premier League (EPL)",
+        "seasons": "1992/93 to 2018/19 (ratings), 2009/10 to 2018/19 (BN model with possession data)",
+        "sample_size": "9,073 match instances for rating optimization (teams with 38+ prior matches)",
+        "notes": [
+            "Ball possession data available from season 2009/10 onwards.",
+            "Asian Handicap odds data available from season 2006/07 onwards.",
+            "Model validated using leave-one-out cross validation on BN parameters.",
+            "RDlevel discretized into 8 states ensuring sufficient data points per level."
+        ]
+    }
+}

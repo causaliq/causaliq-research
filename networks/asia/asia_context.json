@@ -1,0 +1,819 @@
+{
+    "schema_version": "2.0",
+    "network": "asia",
+    "domain": "respiratory_diagnosis",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a respiratory disease diagnostic model, with disguised variable names to prevent benchmark memorization.",
+    "provenance": {
+        "source_network": "asia",
+        "source_reference": "Lauritzen1988",
+        "source_url": "https://www.bnlearn.com/bnrepository/discrete-small.html#asia",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "high",
+        "notes": "The Asia network is a classic BN benchmark. LLMs may have memorized it. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a diagnostic reasoning network for respiratory conditions.",
+            "Consider temporal ordering: exposures → diseases → observable symptoms/tests.",
+            "Risk factors (travel, smoking) precede disease states.",
+            "Diseases cause observable manifestations (imaging, symptoms).",
+            "Some variables may have multiple causes (colliders)."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge & naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, conditional rates, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "base_rate",
+                "conditional_rates",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "asia",
+            "display_name": "Travel to TB-Endemic Region",
+            "aliases": [
+                "asia",
+                "visit_to_asia"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "exogenous",
+            "category": "exposure",
+            "short_description": "Whether patient has recently traveled to a tuberculosis-endemic region.",
+            "extended_description": "Binary indicator of recent travel to regions with high tuberculosis prevalence (e.g., parts of Asia, Africa, Eastern Europe). This is a risk factor for TB exposure but does not guarantee infection. Approximately 1% of the general population has such travel history.",
+            "plausible_range": [
+                0,
+                1
+            ],
+            "base_rate": {
+                "no": 0.99,
+                "yes": 0.01
+            },
+            "sensitivity_hints": "Travel is a risk factor for TB exposure, not a direct cause of disease. Many travelers do not contract TB.",
+            "related_domain_knowledge": [
+                "TB is endemic in certain geographic regions.",
+                "Travel history is a standard screening question in respiratory clinics.",
+                "Exposure does not equal infection—most exposures do not result in active disease."
+            ],
+            "references": [
+                "WHO_TB_Report_2023"
+            ],
+            "llm_name": "endemic_travel"
+        },
+        {
+            "name": "smoke",
+            "display_name": "Tobacco Smoking History",
+            "aliases": [
+                "smoke",
+                "smoker",
+                "smoking"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "exogenous",
+            "category": "exposure",
+            "short_description": "Whether patient has a history of tobacco smoking.",
+            "extended_description": "Binary indicator of tobacco smoking history. Smoking is a major risk factor for multiple respiratory conditions including lung cancer and chronic bronchitis. Approximately 50% of adult patients in respiratory clinics have smoking history (higher than general population due to selection).",
+            "plausible_range": [
+                0,
+                1
+            ],
+            "base_rate": {
+                "no": 0.5,
+                "yes": 0.5
+            },
+            "sensitivity_hints": "Smoking is a common cause of multiple respiratory conditions. Consider it as a potential confounder or common cause.",
+            "related_domain_knowledge": [
+                "Smoking causes both malignant (cancer) and inflammatory (bronchitis) lung diseases.",
+                "Dose-response relationship exists but simplified to binary here.",
+                "Smoking does NOT cause tuberculosis (different etiology)."
+            ],
+            "references": [
+                "CDC_Smoking_Health_Consequences"
+            ],
+            "llm_name": "tobacco_use"
+        },
+        {
+            "name": "tub",
+            "display_name": "Tuberculosis Infection",
+            "aliases": [
+                "tub",
+                "tuberculosis",
+                "tb"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "disease",
+            "short_description": "Whether patient has active tuberculosis infection.",
+            "extended_description": "Binary indicator of active pulmonary tuberculosis. TB is caused by Mycobacterium tuberculosis, typically acquired through airborne transmission. Travel to endemic regions increases exposure risk. Even with exposure, only about 5% of infected individuals develop active disease.",
+            "plausible_range": [
+                0,
+                1
+            ],
+            "conditional_rates": {
+                "given_no_travel": 0.01,
+                "given_travel": 0.05
+            },
+            "sensitivity_hints": "TB is caused by bacterial exposure, not by smoking. Travel history is the relevant risk factor.",
+            "related_domain_knowledge": [
+                "TB is an infectious disease, not caused by lifestyle factors like smoking.",
+                "Travel to endemic areas increases risk but most travelers don't get TB.",
+                "TB can cause abnormal chest imaging and respiratory symptoms."
+            ],
+            "references": [
+                "WHO_TB_Report_2023"
+            ],
+            "llm_name": "mycobacterial_infection"
+        },
+        {
+            "name": "lung",
+            "display_name": "Lung Cancer",
+            "aliases": [
+                "lung",
+                "lung_cancer",
+                "malignancy"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "disease",
+            "short_description": "Whether patient has lung cancer.",
+            "extended_description": "Binary indicator of primary lung malignancy. Smoking is the dominant risk factor, increasing risk approximately 10-fold. Non-smokers can also develop lung cancer but at much lower rates. Lung cancer causes abnormal chest imaging and can cause respiratory symptoms.",
+            "plausible_range": [
+                0,
+                1
+            ],
+            "conditional_rates": {
+                "given_nonsmoker": 0.01,
+                "given_smoker": 0.1
+            },
+            "sensitivity_hints": "Lung cancer is strongly associated with smoking. Travel history is NOT a risk factor for lung cancer.",
+            "related_domain_knowledge": [
+                "Smoking is the primary cause of lung cancer.",
+                "Lung cancer and TB can present similarly on imaging.",
+                "Both diseases can cause respiratory distress."
+            ],
+            "references": [
+                "ACS_Lung_Cancer_Facts"
+            ],
+            "llm_name": "pulmonary_malignancy"
+        },
+        {
+            "name": "bronc",
+            "display_name": "Chronic Bronchitis",
+            "aliases": [
+                "bronc",
+                "bronchitis",
+                "chronic_bronchitis"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "disease",
+            "short_description": "Whether patient has chronic bronchitis.",
+            "extended_description": "Binary indicator of chronic bronchitis, characterized by persistent airway inflammation. Smoking is a major cause, but bronchitis can occur in non-smokers. Bronchitis causes respiratory symptoms (dyspnea, cough) but typically does NOT cause focal abnormalities on chest X-ray.",
+            "plausible_range": [
+                0,
+                1
+            ],
+            "conditional_rates": {
+                "given_nonsmoker": 0.3,
+                "given_smoker": 0.6
+            },
+            "sensitivity_hints": "Bronchitis causes respiratory symptoms but does not typically show on chest X-ray. Consider its pathway to symptoms separate from imaging findings.",
+            "related_domain_knowledge": [
+                "Bronchitis is inflammatory, not malignant or infectious (in the TB sense).",
+                "Smoking causes bronchitis through chronic irritation.",
+                "Bronchitis causes dyspnea through airway obstruction, not lung parenchymal disease."
+            ],
+            "references": [
+                "GOLD_COPD_Guidelines"
+            ],
+            "llm_name": "airway_inflammation"
+        },
+        {
+            "name": "either",
+            "display_name": "Parenchymal Lung Disease",
+            "aliases": [
+                "either",
+                "lung_disease",
+                "parenchymal"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "pathophysiology",
+            "short_description": "Whether patient has parenchymal lung disease (TB or cancer).",
+            "extended_description": "Binary indicator representing the presence of parenchymal lung pathology—either tuberculosis OR lung cancer. This is a logical OR of the two conditions. Both TB and lung cancer affect lung tissue (parenchyma) and cause similar radiographic appearances. This node represents the common pathophysiological state that leads to abnormal chest imaging.",
+            "plausible_range": [
+                0,
+                1
+            ],
+            "deterministic_logic": "TRUE if mycobacterial_infection=yes OR pulmonary_malignancy=yes",
+            "sensitivity_hints": "This is a DETERMINISTIC node—it's true if either TB or cancer is present. It's a collider with two parents. Consider v-structure implications.",
+            "related_domain_knowledge": [
+                "Both TB and lung cancer cause parenchymal abnormalities.",
+                "Radiologists may not distinguish TB from cancer on initial imaging.",
+                "This represents 'something wrong in the lung tissue' regardless of specific cause."
+            ],
+            "references": [
+                "RadioGraphics_Lung_Masses"
+            ],
+            "llm_name": "lung_pathology"
+        },
+        {
+            "name": "xray",
+            "display_name": "Abnormal Chest X-Ray",
+            "aliases": [
+                "xray",
+                "chest_xray",
+                "cxr"
+            ],
+            "type": "binary",
+            "states": [
+                "normal",
+                "abnormal"
+            ],
+            "role": "endogenous",
+            "category": "diagnostic_test",
+            "short_description": "Whether chest X-ray shows abnormality.",
+            "extended_description": "Binary indicator of chest radiograph findings. Parenchymal lung disease (TB or cancer) typically causes visible abnormalities on X-ray. However, X-rays have imperfect sensitivity—some disease is missed, and some normal variation appears abnormal. Bronchitis typically does NOT cause focal X-ray abnormalities.",
+            "plausible_range": [
+                0,
+                1
+            ],
+            "conditional_rates": {
+                "given_no_lung_pathology": 0.05,
+                "given_lung_pathology": 0.98
+            },
+            "sensitivity_hints": "X-ray detects parenchymal disease but not bronchitis. The imaging finding depends on whether there's lung tissue pathology, not on the specific cause.",
+            "related_domain_knowledge": [
+                "Chest X-ray is a standard screening tool for lung disease.",
+                "Sensitivity ~98% for significant parenchymal disease.",
+                "Bronchitis does not typically show on X-ray.",
+                "X-ray cannot distinguish TB from cancer—it shows 'something abnormal'."
+            ],
+            "references": [
+                "ACR_Chest_Imaging_Guidelines"
+            ],
+            "llm_name": "chest_imaging_abnormal"
+        },
+        {
+            "name": "dysp",
+            "display_name": "Dyspnea (Shortness of Breath)",
+            "aliases": [
+                "dysp",
+                "dyspnea",
+                "breathlessness"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether patient reports shortness of breath.",
+            "extended_description": "Binary indicator of dyspnea (difficulty breathing). This symptom can arise from multiple causes: parenchymal lung disease (TB or cancer) reduces gas exchange capacity; bronchitis causes airway obstruction. Both pathways lead to the same symptom through different mechanisms. This is a common effect (collider) of two independent causal pathways.",
+            "plausible_range": [
+                0,
+                1
+            ],
+            "conditional_rates": {
+                "given_no_disease": 0.1,
+                "given_bronchitis_only": 0.8,
+                "given_lung_pathology_only": 0.7,
+                "given_both": 0.9
+            },
+            "sensitivity_hints": "Dyspnea has MULTIPLE causes in this model. Both bronchitis and parenchymal disease (TB/cancer) can cause it. Consider this as a collider with two parent pathways.",
+            "related_domain_knowledge": [
+                "Dyspnea is a non-specific symptom with many causes.",
+                "Bronchitis causes dyspnea through airway obstruction.",
+                "Parenchymal disease causes dyspnea through reduced lung capacity.",
+                "The two mechanisms are largely independent."
+            ],
+            "references": [
+                "ATS_Dyspnea_Guidelines"
+            ],
+            "llm_name": "respiratory_symptoms"
+        }
+    ],
+    "constraints": {
+        "forbidden_edges": [
+            [
+                "chest_imaging_abnormal",
+                "lung_pathology"
+            ],
+            [
+                "chest_imaging_abnormal",
+                "mycobacterial_infection"
+            ],
+            [
+                "chest_imaging_abnormal",
+                "pulmonary_malignancy"
+            ],
+            [
+                "respiratory_symptoms",
+                "lung_pathology"
+            ],
+            [
+                "respiratory_symptoms",
+                "airway_inflammation"
+            ],
+            [
+                "respiratory_symptoms",
+                "mycobacterial_infection"
+            ],
+            [
+                "respiratory_symptoms",
+                "pulmonary_malignancy"
+            ]
+        ],
+        "partial_order": [
+            [
+                "endemic_travel",
+                "mycobacterial_infection"
+            ],
+            [
+                "tobacco_use",
+                "pulmonary_malignancy"
+            ],
+            [
+                "tobacco_use",
+                "airway_inflammation"
+            ],
+            [
+                "mycobacterial_infection",
+                "lung_pathology"
+            ],
+            [
+                "pulmonary_malignancy",
+                "lung_pathology"
+            ],
+            [
+                "lung_pathology",
+                "chest_imaging_abnormal"
+            ],
+            [
+                "lung_pathology",
+                "respiratory_symptoms"
+            ],
+            [
+                "airway_inflammation",
+                "respiratory_symptoms"
+            ]
+        ],
+        "tiers": {
+            "exposure": [
+                "endemic_travel",
+                "tobacco_use"
+            ],
+            "disease": [
+                "mycobacterial_infection",
+                "pulmonary_malignancy",
+                "airway_inflammation"
+            ],
+            "pathophysiology": [
+                "lung_pathology"
+            ],
+            "observable": [
+                "chest_imaging_abnormal",
+                "respiratory_symptoms"
+            ]
+        },
+        "notes": "Constraints reflect diagnostic reasoning: exposures → diseases → pathophysiology → observable findings."
+    },
+    "causal_principles": [
+        {
+            "id": "exposure_precedes_disease",
+            "statement": "Risk factor exposures (travel, smoking) temporally and causally precede disease states.",
+            "references": [
+                "Epidemiology_Rothman"
+            ]
+        },
+        {
+            "id": "disease_causes_manifestations",
+            "statement": "Diseases cause observable manifestations (symptoms, test results), not vice versa.",
+            "references": [
+                "Clinical_Reasoning_Kassirer"
+            ]
+        },
+        {
+            "id": "different_etiologies",
+            "statement": "TB (infectious) and lung cancer (neoplastic) have different etiologies—smoking causes cancer, travel/exposure causes TB.",
+            "references": [
+                "Harrisons_Principles"
+            ]
+        },
+        {
+            "id": "common_effects",
+            "statement": "Different diseases can cause the same symptoms (dyspnea) or test findings (abnormal X-ray) through different mechanisms.",
+            "references": [
+                "Pathophysiology_Porth"
+            ]
+        }
+    ],
+    "ground_truth": {
+        "v_structures": [
+            {
+                "canonical": [
+                    "tub",
+                    "either",
+                    "lung"
+                ],
+                "experiment": [
+                    "mycobacterial_infection",
+                    "lung_pathology",
+                    "pulmonary_malignancy"
+                ],
+                "description": "TB and lung cancer are independent causes of parenchymal lung disease"
+            },
+            {
+                "canonical": [
+                    "either",
+                    "dysp",
+                    "bronc"
+                ],
+                "experiment": [
+                    "lung_pathology",
+                    "respiratory_symptoms",
+                    "airway_inflammation"
+                ],
+                "description": "Parenchymal disease and bronchitis are independent causes of dyspnea"
+            }
+        ],
+        "conditional_independencies": [
+            {
+                "statement": "tub ⊥ lung",
+                "experiment_names": "mycobacterial_infection ⊥ pulmonary_malignancy",
+                "description": "TB and lung cancer are marginally independent (different etiologies)"
+            },
+            {
+                "statement": "tub ⊥ bronc",
+                "experiment_names": "mycobacterial_infection ⊥ airway_inflammation",
+                "description": "TB and bronchitis are marginally independent"
+            },
+            {
+                "statement": "asia ⊥ smoke",
+                "experiment_names": "endemic_travel ⊥ tobacco_use",
+                "description": "Travel history and smoking are marginally independent exposures"
+            },
+            {
+                "statement": "xray ⊥ dysp | either",
+                "experiment_names": "chest_imaging_abnormal ⊥ respiratory_symptoms | lung_pathology, airway_inflammation",
+                "description": "X-ray and dyspnea are conditionally independent given parenchymal disease and bronchitis status"
+            },
+            {
+                "statement": "asia ⊥ lung | smoke",
+                "experiment_names": "endemic_travel ⊥ pulmonary_malignancy | tobacco_use",
+                "description": "Travel and lung cancer are independent (travel doesn't cause cancer)"
+            }
+        ],
+        "markov_blanket": {
+            "canonical": {
+                "asia": [
+                    "tub"
+                ],
+                "smoke": [
+                    "lung",
+                    "bronc"
+                ],
+                "tub": [
+                    "asia",
+                    "lung",
+                    "either"
+                ],
+                "lung": [
+                    "smoke",
+                    "tub",
+                    "either"
+                ],
+                "bronc": [
+                    "smoke",
+                    "either",
+                    "dysp"
+                ],
+                "either": [
+                    "tub",
+                    "lung",
+                    "xray",
+                    "dysp",
+                    "bronc"
+                ],
+                "xray": [
+                    "either"
+                ],
+                "dysp": [
+                    "either",
+                    "bronc"
+                ]
+            },
+            "experiment": {
+                "endemic_travel": [
+                    "mycobacterial_infection"
+                ],
+                "tobacco_use": [
+                    "pulmonary_malignancy",
+                    "airway_inflammation"
+                ],
+                "mycobacterial_infection": [
+                    "endemic_travel",
+                    "pulmonary_malignancy",
+                    "lung_pathology"
+                ],
+                "pulmonary_malignancy": [
+                    "tobacco_use",
+                    "mycobacterial_infection",
+                    "lung_pathology"
+                ],
+                "airway_inflammation": [
+                    "tobacco_use",
+                    "lung_pathology",
+                    "respiratory_symptoms"
+                ],
+                "lung_pathology": [
+                    "mycobacterial_infection",
+                    "pulmonary_malignancy",
+                    "chest_imaging_abnormal",
+                    "respiratory_symptoms",
+                    "airway_inflammation"
+                ],
+                "chest_imaging_abnormal": [
+                    "lung_pathology"
+                ],
+                "respiratory_symptoms": [
+                    "lung_pathology",
+                    "airway_inflammation"
+                ]
+            }
+        },
+        "num_nodes": 8,
+        "num_edges": 8,
+        "max_parents": 2,
+        "max_children": 2,
+        "edges": [
+            [
+                "asia",
+                "tub"
+            ],
+            [
+                "smoke",
+                "lung"
+            ],
+            [
+                "smoke",
+                "bronc"
+            ],
+            [
+                "tub",
+                "either"
+            ],
+            [
+                "lung",
+                "either"
+            ],
+            [
+                "either",
+                "xray"
+            ],
+            [
+                "either",
+                "dysp"
+            ],
+            [
+                "bronc",
+                "dysp"
+            ]
+        ]
+    },
+    "conditional_probability_tables": {
+        "notes": "CPTs extracted from asia.xdsl. These should NOT be provided to LLMs during structure learning.",
+        "source_file": "asia.xdsl",
+        "tables": {
+            "asia": {
+                "states": [
+                    "no",
+                    "yes"
+                ],
+                "probabilities": {
+                    "no": 0.99,
+                    "yes": 0.01
+                }
+            },
+            "smoke": {
+                "states": [
+                    "no",
+                    "yes"
+                ],
+                "probabilities": {
+                    "no": 0.5,
+                    "yes": 0.5
+                }
+            },
+            "tub": {
+                "states": [
+                    "no",
+                    "yes"
+                ],
+                "parents": [
+                    "asia"
+                ],
+                "table": {
+                    "asia=no": {
+                        "no": 0.99,
+                        "yes": 0.01
+                    },
+                    "asia=yes": {
+                        "no": 0.95,
+                        "yes": 0.05
+                    }
+                }
+            },
+            "lung": {
+                "states": [
+                    "no",
+                    "yes"
+                ],
+                "parents": [
+                    "smoke"
+                ],
+                "table": {
+                    "smoke=no": {
+                        "no": 0.99,
+                        "yes": 0.01
+                    },
+                    "smoke=yes": {
+                        "no": 0.9,
+                        "yes": 0.1
+                    }
+                }
+            },
+            "bronc": {
+                "states": [
+                    "no",
+                    "yes"
+                ],
+                "parents": [
+                    "smoke"
+                ],
+                "table": {
+                    "smoke=no": {
+                        "no": 0.7,
+                        "yes": 0.3
+                    },
+                    "smoke=yes": {
+                        "no": 0.4,
+                        "yes": 0.6
+                    }
+                }
+            },
+            "either": {
+                "states": [
+                    "no",
+                    "yes"
+                ],
+                "parents": [
+                    "lung",
+                    "tub"
+                ],
+                "deterministic": true,
+                "logic": "OR(lung, tub)",
+                "table": {
+                    "lung=no,tub=no": {
+                        "no": 1.0,
+                        "yes": 0.0
+                    },
+                    "lung=no,tub=yes": {
+                        "no": 0.0,
+                        "yes": 1.0
+                    },
+                    "lung=yes,tub=no": {
+                        "no": 0.0,
+                        "yes": 1.0
+                    },
+                    "lung=yes,tub=yes": {
+                        "no": 0.0,
+                        "yes": 1.0
+                    }
+                }
+            },
+            "xray": {
+                "states": [
+                    "no",
+                    "yes"
+                ],
+                "parents": [
+                    "either"
+                ],
+                "table": {
+                    "either=no": {
+                        "no": 0.95,
+                        "yes": 0.05
+                    },
+                    "either=yes": {
+                        "no": 0.02,
+                        "yes": 0.98
+                    }
+                }
+            },
+            "dysp": {
+                "states": [
+                    "no",
+                    "yes"
+                ],
+                "parents": [
+                    "bronc",
+                    "either"
+                ],
+                "table": {
+                    "bronc=no,either=no": {
+                        "no": 0.9,
+                        "yes": 0.1
+                    },
+                    "bronc=no,either=yes": {
+                        "no": 0.3,
+                        "yes": 0.7
+                    },
+                    "bronc=yes,either=no": {
+                        "no": 0.2,
+                        "yes": 0.8
+                    },
+                    "bronc=yes,either=yes": {
+                        "no": 0.1,
+                        "yes": 0.9
+                    }
+                }
+            }
+        }
+    },
+    "references": [
+        {
+            "id": "Lauritzen1988",
+            "citation": "Lauritzen, S. L., & Spiegelhalter, D. J. (1988). Local computations with probabilities on graphical structures and their application to expert systems. Journal of the Royal Statistical Society: Series B, 50(2), 157-224.",
+            "why_relevant": "Original paper introducing the Asia network as a simplified medical diagnostic example."
+        },
+        {
+            "id": "WHO_TB_Report_2023",
+            "citation": "World Health Organization. (2023). Global Tuberculosis Report 2023.",
+            "why_relevant": "TB epidemiology and geographic distribution."
+        },
+        {
+            "id": "CDC_Smoking_Health_Consequences",
+            "citation": "U.S. Department of Health and Human Services. (2014). The Health Consequences of Smoking—50 Years of Progress.",
+            "why_relevant": "Smoking as cause of lung cancer and bronchitis."
+        }
+    ]
+}
