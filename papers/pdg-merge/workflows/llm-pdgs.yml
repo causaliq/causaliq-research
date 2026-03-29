@@ -5,34 +5,35 @@ matrix:
   network:
   - asia
   - sports
+  sample_size:
+  - null
   llm_model:
-  - groq/llama-3.3-70b-versatile # free tier, reliable
+  # - groq/llama-3.3-70b-versatile # free tier, reliable
   # groq/llama-3.1-8b-instant # budget (truncation issues on sports)
   # groq/mixtral-8x7b-32768 # deprecated
   - gemini/gemini-2.0-flash # budget (2.5-flash has truncation issues)
   # gemini/gemini-2.5-pro # premium
-  - openai/gpt-4.1-mini # budget
+  # - openai/gpt-4.1-mini # budget
   # openai/o3-mini # premium
   - anthropic/claude-haiku-4-5-20251001 # budget
   # anthropic/claude-sonnet-4-6 # premium
-  - mistral/mistral-small-2603 # budget
+  # - mistral/mistral-small-2603 # budget
   # mistral/mistral-large-2512 # premium
-  - deepseek/deepseek-chat # budget
+  # - deepseek/deepseek-chat # budget
   # deepseek/deepseek-reasoner # premium
   # ollama/llama3.2:1b # poor - too small for JSON generation
-  - ollama/qwen3:1.7b # OK @ 6GB (needs beefy GPU)
+  # - ollama/qwen3:1.7b # OK @ 6GB (needs beefy GPU)
   # ollama/qwen3.4b # should be OK on desktop with RTX2060
   # ollama/phi4-mini # should be OK on desktop with RTX2060
-  use_benchmark_names:
-  - false
-  - true
+  # use_benchmark_names:
+  # - false
+  # - true
   prompt_detail:
   - minimal
   - standard
-  - rich
+  # - rich
   # llm_temperature:
   # - 0.1
-
 
 
 steps:
@@ -43,7 +44,32 @@ steps:
      network_context: networks/{{network}}/{{network}}_context.json
      llm_cache: networks/{{network}}/{{network}}_llm.db
      llm_model: "{{llm_model}}"
-     use_benchmark_names: "{{use_benchmark_names}}"
+     use_benchmark_names: false
      prompt_detail: "{{prompt_detail}}"
-     output: papers/pdg-merge/results/llm.db
-     
+     output: papers/pdg-merge/results/pdgs.db
+
+
+ - name: "generate LLM optimal DAG"
+   uses: "causaliq-analysis"
+   with:
+     action: "best_graph"
+     threshold: 0.5
+     input: papers/pdg-merge/results/pdgs.db
+
+
+ - name: "evaluate optimal DAG"
+   uses: "causaliq-analysis"
+   with:
+     action: "evaluate_graph"
+     reference: networks/{{network}}/{{network}}.xdsl
+     input: papers/pdg-merge/results/pdgs.db
+     metric: [f1, shd, equiv.f1, equiv.shd]
+
+
+ - name: "summarise LLM DAGs"
+   uses: "causaliq-analysis"
+   with:
+     action: "summarise"
+     input: papers/pdg-merge/results/pdgs.db
+     metric: [f1.mean, shd.mean, equiv.f1.mean, equiv.shd.mean]
+     output: papers/pdg-merge/results/llm-dags.csv

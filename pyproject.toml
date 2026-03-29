@@ -34,8 +34,8 @@ dependencies = [
     "click>=8.0.0",
     "causaliq-knowledge>=0.6.0.dev1",
     "causaliq-analysis>=0.4.0.dev1",
-    "causaliq-workflow>=0.4.0.dev14",
-    "causaliq-core>=0.6.0.dev5"
+    "causaliq-workflow>=0.5.0.dev1",
+    "causaliq-core>=0.6.0"
 ]
 
 [project.optional-dependencies]

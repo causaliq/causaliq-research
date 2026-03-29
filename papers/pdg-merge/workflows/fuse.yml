@@ -1,0 +1,51 @@
+
+# Fuse LLM and FGES PDGs across model and sample size combinations
+
+matrix:
+  network:
+  - asia
+  - sports
+  llm_model:
+  - anthropic/claude-haiku-4-5-20251001
+  - gemini/gemini-2.0-flash
+  sample_size:
+  - 100
+  - 1K
+  - 10K
+
+steps:
+ - name: "Merge LLM and FGES PDGs"
+   uses: "causaliq-analysis"
+   with:
+     action: "merge_graphs"
+     object_type: pdg
+     strategy: average
+     filter: (llm_model == '{{llm_model}}' and prompt_detail == 'standard') or str(sample_size) == str('{{sample_size}}')
+     input: papers/pdg-merge/results/pdgs.db
+     output: papers/pdg-merge/results/fuse.db
+
+
+ - name: "generate optimal fused DAG"
+   uses: "causaliq-analysis"
+   with:
+     action: "best_graph"
+     threshold: 0.3
+     input: papers/pdg-merge/results/fuse.db
+
+
+ - name: "evaluate optimal fused DAG"
+   uses: "causaliq-analysis"
+   with:
+     action: "evaluate_graph"
+     reference: networks/{{network}}/{{network}}.xdsl
+     input: papers/pdg-merge/results/fuse.db
+     metric: [f1, shd, equiv.f1, equiv.shd]
+
+
+ - name: "summarise fused DAGs"
+   uses: "causaliq-analysis"
+   with:
+     action: "summarise"
+     input: papers/pdg-merge/results/fuse.db
+     metric: [f1.mean, shd.mean, equiv.f1.mean, equiv.shd.mean, f1.count]
+     output: papers/pdg-merge/results/fuse.csv
