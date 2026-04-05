@@ -1,0 +1,819 @@
+{
+    "schema_version": "2.0",
+    "network": "water",
+    "domain": "water_treatment_monitoring",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a dynamic water treatment monitoring network, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "water",
+        "source_reference": "Jensen1989",
+        "source_url": "https://www.bnlearn.com/bnrepository/discrete-large.html#water",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "moderate",
+        "notes": "The WATER network from Jensen et al. (1989) models water purification plant monitoring. It has 32 variables and 66 edges arranged as a dynamic Bayesian network with 8 water quality parameters measured at 4 time slices (15-minute intervals). LLMs may have encountered this network in literature."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a dynamic water quality monitoring network for a treatment plant.",
+            "There are 8 distinct water quality parameters measured at 4 consecutive time points (t0, t1, t2, t3) at 15-minute intervals.",
+            "Each time slice has the same 8 variables; temporal dependencies link slices.",
+            "The suffixes _t0, _t1, _t2, _t3 indicate the measurement time.",
+            "Variables at t0 are exogenous (initial conditions); variables at t1-t3 depend on the previous time slice.",
+            "The 8 parameters are: nitrogen input concentration, Kjeldahl nitrogen input, BOD at discharge, Kjeldahl nitrogen at discharge, nitrate/nitrite at discharge, BOD after nitrification, Kjeldahl nitrogen after nitrification, and nitrate/nitrite after nitrification.",
+            "Biochemical oxygen demand (BOD) measures organic pollution load.",
+            "Kjeldahl nitrogen measures organic nitrogen plus ammonia.",
+            "Nitrogen compounds transform through biological nitrification: organic N → ammonia → nitrite → nitrate.",
+            "Discharge variables reflect treated water leaving the plant; nitrification variables reflect the biological treatment stage.",
+            "Input concentrations (nitrogen input, Kjeldahl nitrogen input) influence both discharge and nitrification outcomes.",
+            "Within each time slice, nitrification and discharge stages interact: BOD and nitrogen at discharge affect nitrification, and vice versa.",
+            "Temporal dependencies are autoregressive: each variable depends on its own and related variables at the previous time step."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, sensitivity hints, domain knowledge, and references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "C_NI_12_00",
+            "display_name": "Nitrogen Input Concentration (t0)",
+            "type": "ordinal",
+            "states": [
+                "3",
+                "4",
+                "5",
+                "6"
+            ],
+            "role": "exogenous",
+            "category": "input_quality",
+            "short_description": "Influent nitrogen concentration index at the initial measurement.",
+            "extended_description": "A measure of the total nitrogen concentration entering the treatment works at the first time point. Higher values indicate greater nitrogen loading from upstream sources. As an exogenous variable in the first time slice, it has no parents.",
+            "sensitivity_hints": "Root cause at t0. Influences downstream BOD and nitrogen levels at discharge and nitrification stages.",
+            "related_domain_knowledge": [
+                "Influent nitrogen varies with upstream agricultural runoff and sewage load.",
+                "Higher nitrogen input requires more intensive biological treatment.",
+                "Nitrogen input drives the overall nitrification demand."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "influent_nitrogen_t0"
+        },
+        {
+            "name": "CKNI_12_00",
+            "display_name": "Kjeldahl Nitrogen Input (t0)",
+            "type": "ordinal",
+            "states": [
+                "20_MG_L",
+                "30_MG_L",
+                "40_MG_L"
+            ],
+            "role": "exogenous",
+            "category": "input_quality",
+            "short_description": "Kjeldahl nitrogen in the influent at the initial measurement.",
+            "extended_description": "Kjeldahl nitrogen (organic N + ammonia) in the incoming water at the first time point. Indicates the biodegradable nitrogen load requiring treatment. Exogenous at t0.",
+            "sensitivity_hints": "Root cause at t0. Influences Kjeldahl nitrogen at discharge and nitrification stages.",
+            "related_domain_knowledge": [
+                "Kjeldahl nitrogen includes organic nitrogen and ammonium but excludes nitrate/nitrite.",
+                "High Kjeldahl N indicates substantial organic nitrogen load.",
+                "Biological nitrification converts Kjeldahl N to nitrate."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "kjeldahl_n_input_t0"
+        },
+        {
+            "name": "CBODD_12_00",
+            "display_name": "BOD at Discharge (t0)",
+            "type": "ordinal",
+            "states": [
+                "15_MG_L",
+                "20_MG_L",
+                "25_MG_L",
+                "30_MG_L"
+            ],
+            "role": "exogenous",
+            "category": "discharge_quality",
+            "short_description": "Biochemical oxygen demand at the discharge point at the initial measurement.",
+            "extended_description": "BOD measured at the treatment plant discharge at t0. Reflects the organic pollution load in the treated effluent leaving the plant. Exogenous at the first time slice.",
+            "sensitivity_hints": "Root cause at t0. Influences nitrate at discharge and BOD after nitrification at subsequent time steps.",
+            "related_domain_knowledge": [
+                "BOD measures the oxygen consumed by microorganisms decomposing organic matter.",
+                "High BOD at discharge indicates incomplete treatment.",
+                "Regulatory limits typically require BOD below 20 mg/L."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "bod_discharge_t0"
+        },
+        {
+            "name": "CKND_12_00",
+            "display_name": "Kjeldahl Nitrogen at Discharge (t0)",
+            "type": "ordinal",
+            "states": [
+                "2_MG_L",
+                "4_MG_L",
+                "6_MG_L"
+            ],
+            "role": "exogenous",
+            "category": "discharge_quality",
+            "short_description": "Kjeldahl nitrogen at the discharge point at the initial measurement.",
+            "extended_description": "Kjeldahl nitrogen measured at the plant discharge at t0. Indicates residual organic nitrogen and ammonia in the effluent. Exogenous at the first time slice.",
+            "sensitivity_hints": "Root cause at t0. Influences Kjeldahl nitrogen after nitrification at later time steps.",
+            "related_domain_knowledge": [
+                "Low Kjeldahl N at discharge indicates effective ammonification and nitrification.",
+                "Residual Kjeldahl N can cause oxygen depletion in receiving waters."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "kjeldahl_n_discharge_t0"
+        },
+        {
+            "name": "CNOD_12_00",
+            "display_name": "Nitrate at Discharge (t0)",
+            "type": "ordinal",
+            "states": [
+                "0_5_MG_L",
+                "1_MG_L",
+                "2_MG_L",
+                "4_MG_L"
+            ],
+            "role": "exogenous",
+            "category": "discharge_quality",
+            "short_description": "Nitrate/nitrite concentration at the discharge point at the initial measurement.",
+            "extended_description": "Combined nitrate and nitrite measured at the plant discharge at t0. Indicates the degree of nitrification in the treatment process. Exogenous at the first time slice.",
+            "sensitivity_hints": "Root cause at t0. Influenced by BOD at discharge at subsequent time steps.",
+            "related_domain_knowledge": [
+                "Nitrate is the end product of nitrification (NH4 → NO2 → NO3).",
+                "High nitrate indicates active nitrification but may cause eutrophication downstream.",
+                "Denitrification can subsequently remove nitrate as nitrogen gas."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "nitrate_discharge_t0"
+        },
+        {
+            "name": "CBODN_12_00",
+            "display_name": "BOD after Nitrification (t0)",
+            "type": "ordinal",
+            "states": [
+                "5_MG_L",
+                "10_MG_L",
+                "15_MG_L",
+                "20_MG_L"
+            ],
+            "role": "exogenous",
+            "category": "nitrification_quality",
+            "short_description": "Biochemical oxygen demand after the nitrification stage at the initial measurement.",
+            "extended_description": "BOD measured after the biological nitrification stage at t0. Reflects residual organic load following nitrogen treatment. Exogenous at the first time slice.",
+            "sensitivity_hints": "Root cause at t0. Influences nitrate after nitrification at subsequent time steps.",
+            "related_domain_knowledge": [
+                "BOD after nitrification should be lower than at discharge due to further biological treatment.",
+                "Residual BOD competes with nitrifying bacteria for oxygen."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "bod_nitrification_t0"
+        },
+        {
+            "name": "CKNN_12_00",
+            "display_name": "Kjeldahl Nitrogen after Nitrification (t0)",
+            "type": "ordinal",
+            "states": [
+                "0_5_MG_L",
+                "1_MG_L",
+                "2_MG_L"
+            ],
+            "role": "exogenous",
+            "category": "nitrification_quality",
+            "short_description": "Kjeldahl nitrogen after the nitrification stage at the initial measurement.",
+            "extended_description": "Kjeldahl nitrogen measured after the nitrification stage at t0. Indicates residual ammonia and organic nitrogen following biological treatment. Exogenous at the first time slice.",
+            "sensitivity_hints": "Root cause at t0. Influences nitrate after nitrification at subsequent time steps.",
+            "related_domain_knowledge": [
+                "Low values indicate effective nitrification (ammonia successfully converted to nitrate).",
+                "High values suggest nitrification inhibition or overloading."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "kjeldahl_n_nitrification_t0"
+        },
+        {
+            "name": "CNON_12_00",
+            "display_name": "Nitrate after Nitrification (t0)",
+            "type": "ordinal",
+            "states": [
+                "2_MG_L",
+                "4_MG_L",
+                "6_MG_L",
+                "10_MG_L"
+            ],
+            "role": "exogenous",
+            "category": "nitrification_quality",
+            "short_description": "Nitrate/nitrite after the nitrification stage at the initial measurement.",
+            "extended_description": "Combined nitrate and nitrite measured after the nitrification stage at t0. The final nitrogen metric reflecting treatment effectiveness. Exogenous at the first time slice.",
+            "sensitivity_hints": "Root cause at t0. Influenced by discharge and nitrification variables at subsequent time steps.",
+            "related_domain_knowledge": [
+                "High nitrate after nitrification indicates effective N conversion.",
+                "This is the end-of-process nitrogen measurement.",
+                "Regulatory targets vary but typically require total N below 10-15 mg/L."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "nitrate_nitrification_t0"
+        },
+        {
+            "name": "C_NI_12_15",
+            "display_name": "Nitrogen Input Concentration (t1)",
+            "type": "ordinal",
+            "states": [
+                "3",
+                "4",
+                "5",
+                "6"
+            ],
+            "role": "endogenous",
+            "category": "input_quality",
+            "short_description": "Influent nitrogen concentration index at the second measurement (t+15 min).",
+            "extended_description": "Nitrogen concentration entering the treatment works at the second time point. Depends on the previous influent measurement, reflecting temporal autocorrelation in influent quality.",
+            "sensitivity_hints": "Depends on its own t0 value. Influences downstream discharge and nitrification variables at t1.",
+            "related_domain_knowledge": [
+                "Influent quality shows temporal autocorrelation over short intervals.",
+                "Sudden changes indicate storm events or industrial discharge."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "influent_nitrogen_t1"
+        },
+        {
+            "name": "CKNI_12_15",
+            "display_name": "Kjeldahl Nitrogen Input (t1)",
+            "type": "ordinal",
+            "states": [
+                "20_MG_L",
+                "30_MG_L",
+                "40_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "input_quality",
+            "short_description": "Kjeldahl nitrogen in the influent at the second measurement (t+15 min).",
+            "extended_description": "Kjeldahl nitrogen in the incoming water at the second time point. Depends on its t0 value due to temporal persistence of influent quality.",
+            "sensitivity_hints": "Depends on its own t0 value. Influences Kjeldahl nitrogen at discharge and nitrification at t1.",
+            "related_domain_knowledge": [
+                "Kjeldahl N input correlates strongly across short time intervals.",
+                "Diurnal patterns in sewage flow cause predictable variation."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "kjeldahl_n_input_t1"
+        },
+        {
+            "name": "CBODD_12_15",
+            "display_name": "BOD at Discharge (t1)",
+            "type": "ordinal",
+            "states": [
+                "15_MG_L",
+                "20_MG_L",
+                "25_MG_L",
+                "30_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "discharge_quality",
+            "short_description": "Biochemical oxygen demand at discharge at the second measurement (t+15 min).",
+            "extended_description": "BOD at the plant discharge at t1. Depends on multiple t0 variables: nitrogen input, Kjeldahl N input, BOD at discharge, nitrate at discharge, and BOD after nitrification from the previous time step.",
+            "sensitivity_hints": "Depends on input concentrations and discharge/nitrification quality from t0. Central hub variable at each time step.",
+            "related_domain_knowledge": [
+                "BOD at discharge integrates the effects of influent load and treatment efficiency.",
+                "Multiple upstream factors contribute to discharge quality.",
+                "This is a key regulatory compliance parameter."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "bod_discharge_t1"
+        },
+        {
+            "name": "CKND_12_15",
+            "display_name": "Kjeldahl Nitrogen at Discharge (t1)",
+            "type": "ordinal",
+            "states": [
+                "2_MG_L",
+                "4_MG_L",
+                "6_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "discharge_quality",
+            "short_description": "Kjeldahl nitrogen at discharge at the second measurement (t+15 min).",
+            "extended_description": "Kjeldahl nitrogen at the plant discharge at t1. Depends on Kjeldahl N input, Kjeldahl N at discharge, and Kjeldahl N after nitrification from the previous time step.",
+            "sensitivity_hints": "Depends on Kjeldahl N input and nitrogen processing from t0.",
+            "related_domain_knowledge": [
+                "Kjeldahl N at discharge reflects both influent load and nitrification efficiency.",
+                "High values indicate nitrification failure or overloading."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "kjeldahl_n_discharge_t1"
+        },
+        {
+            "name": "CNOD_12_15",
+            "display_name": "Nitrate at Discharge (t1)",
+            "type": "ordinal",
+            "states": [
+                "0_5_MG_L",
+                "1_MG_L",
+                "2_MG_L",
+                "4_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "discharge_quality",
+            "short_description": "Nitrate/nitrite at discharge at the second measurement (t+15 min).",
+            "extended_description": "Nitrate at the plant discharge at t1. Depends on BOD at discharge, nitrate at discharge, and nitrate after nitrification from the previous time step.",
+            "sensitivity_hints": "Depends on organic load and nitrogen processing from t0.",
+            "related_domain_knowledge": [
+                "Nitrate at discharge reflects successful nitrification upstream.",
+                "BOD at discharge competes for oxygen needed by nitrifying bacteria."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "nitrate_discharge_t1"
+        },
+        {
+            "name": "CBODN_12_15",
+            "display_name": "BOD after Nitrification (t1)",
+            "type": "ordinal",
+            "states": [
+                "5_MG_L",
+                "10_MG_L",
+                "15_MG_L",
+                "20_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "nitrification_quality",
+            "short_description": "Biochemical oxygen demand after nitrification at the second measurement (t+15 min).",
+            "extended_description": "BOD after the nitrification stage at t1. Depends on BOD at discharge, BOD after nitrification, and nitrate after nitrification from the previous time step.",
+            "sensitivity_hints": "Depends on organic load at discharge and nitrification performance from t0.",
+            "related_domain_knowledge": [
+                "Further biological treatment reduces BOD beyond the primary discharge stage.",
+                "Nitrification consumes oxygen, competing with BOD removal."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "bod_nitrification_t1"
+        },
+        {
+            "name": "CKNN_12_15",
+            "display_name": "Kjeldahl Nitrogen after Nitrification (t1)",
+            "type": "ordinal",
+            "states": [
+                "0_5_MG_L",
+                "1_MG_L",
+                "2_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "nitrification_quality",
+            "short_description": "Kjeldahl nitrogen after nitrification at the second measurement (t+15 min).",
+            "extended_description": "Kjeldahl nitrogen after the nitrification stage at t1. Depends on Kjeldahl N at discharge and Kjeldahl N after nitrification from the previous time step.",
+            "sensitivity_hints": "Depends on nitrogen load at discharge and prior nitrification from t0.",
+            "related_domain_knowledge": [
+                "Should decrease as nitrification converts ammonia to nitrate.",
+                "Persistent high values indicate nitrification inhibition."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "kjeldahl_n_nitrification_t1"
+        },
+        {
+            "name": "CNON_12_15",
+            "display_name": "Nitrate after Nitrification (t1)",
+            "type": "ordinal",
+            "states": [
+                "2_MG_L",
+                "4_MG_L",
+                "6_MG_L",
+                "10_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "nitrification_quality",
+            "short_description": "Nitrate/nitrite after nitrification at the second measurement (t+15 min).",
+            "extended_description": "Nitrate after the nitrification stage at t1. Depends on nitrate at discharge, BOD after nitrification, Kjeldahl N after nitrification, and nitrate after nitrification from the previous time step.",
+            "sensitivity_hints": "Depends on multiple discharge and nitrification variables from t0. Terminal output variable.",
+            "related_domain_knowledge": [
+                "This is the final nitrogen measurement in the treatment chain.",
+                "High values indicate effective nitrification but potential eutrophication risk."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "nitrate_nitrification_t1"
+        },
+        {
+            "name": "C_NI_12_30",
+            "display_name": "Nitrogen Input Concentration (t2)",
+            "type": "ordinal",
+            "states": [
+                "3",
+                "4",
+                "5",
+                "6"
+            ],
+            "role": "endogenous",
+            "category": "input_quality",
+            "short_description": "Influent nitrogen concentration index at the third measurement (t+30 min).",
+            "extended_description": "Nitrogen concentration entering the treatment works at the third time point. Depends on its t1 value.",
+            "sensitivity_hints": "Depends on its own t1 value. Autocorrelated input.",
+            "related_domain_knowledge": [
+                "Continued temporal persistence of influent quality."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "influent_nitrogen_t2"
+        },
+        {
+            "name": "CKNI_12_30",
+            "display_name": "Kjeldahl Nitrogen Input (t2)",
+            "type": "ordinal",
+            "states": [
+                "20_MG_L",
+                "30_MG_L",
+                "40_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "input_quality",
+            "short_description": "Kjeldahl nitrogen in the influent at the third measurement (t+30 min).",
+            "extended_description": "Kjeldahl nitrogen in the incoming water at the third time point. Depends on its t1 value.",
+            "sensitivity_hints": "Depends on its own t1 value.",
+            "related_domain_knowledge": [
+                "Temporal persistence continues across time slices."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "kjeldahl_n_input_t2"
+        },
+        {
+            "name": "CBODD_12_30",
+            "display_name": "BOD at Discharge (t2)",
+            "type": "ordinal",
+            "states": [
+                "15_MG_L",
+                "20_MG_L",
+                "25_MG_L",
+                "30_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "discharge_quality",
+            "short_description": "Biochemical oxygen demand at discharge at the third measurement (t+30 min).",
+            "extended_description": "BOD at the plant discharge at t2. Depends on nitrogen input, Kjeldahl N input, BOD at discharge, nitrate at discharge, and BOD after nitrification from t1.",
+            "sensitivity_hints": "Central hub variable at t2.",
+            "related_domain_knowledge": [
+                "Same dependency structure as t1, shifted forward in time."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "bod_discharge_t2"
+        },
+        {
+            "name": "CKND_12_30",
+            "display_name": "Kjeldahl Nitrogen at Discharge (t2)",
+            "type": "ordinal",
+            "states": [
+                "2_MG_L",
+                "4_MG_L",
+                "6_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "discharge_quality",
+            "short_description": "Kjeldahl nitrogen at discharge at the third measurement (t+30 min).",
+            "extended_description": "Kjeldahl nitrogen at the plant discharge at t2. Depends on Kjeldahl N input, Kjeldahl N at discharge, and Kjeldahl N after nitrification from t1.",
+            "sensitivity_hints": "Depends on nitrogen load and processing from t1.",
+            "related_domain_knowledge": [
+                "Same dependency structure as t1."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "kjeldahl_n_discharge_t2"
+        },
+        {
+            "name": "CNOD_12_30",
+            "display_name": "Nitrate at Discharge (t2)",
+            "type": "ordinal",
+            "states": [
+                "0_5_MG_L",
+                "1_MG_L",
+                "2_MG_L",
+                "4_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "discharge_quality",
+            "short_description": "Nitrate/nitrite at discharge at the third measurement (t+30 min).",
+            "extended_description": "Nitrate at the plant discharge at t2. Depends on BOD at discharge, nitrate at discharge, and nitrate after nitrification from t1.",
+            "sensitivity_hints": "Depends on organic load and nitrogen from t1.",
+            "related_domain_knowledge": [
+                "Same dependency structure as t1."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "nitrate_discharge_t2"
+        },
+        {
+            "name": "CBODN_12_30",
+            "display_name": "BOD after Nitrification (t2)",
+            "type": "ordinal",
+            "states": [
+                "5_MG_L",
+                "10_MG_L",
+                "15_MG_L",
+                "20_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "nitrification_quality",
+            "short_description": "Biochemical oxygen demand after nitrification at the third measurement (t+30 min).",
+            "extended_description": "BOD after the nitrification stage at t2. Depends on BOD at discharge, BOD after nitrification, and nitrate after nitrification from t1.",
+            "sensitivity_hints": "Depends on organic load at discharge and nitrification from t1.",
+            "related_domain_knowledge": [
+                "Same dependency structure as t1."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "bod_nitrification_t2"
+        },
+        {
+            "name": "CKNN_12_30",
+            "display_name": "Kjeldahl Nitrogen after Nitrification (t2)",
+            "type": "ordinal",
+            "states": [
+                "0_5_MG_L",
+                "1_MG_L",
+                "2_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "nitrification_quality",
+            "short_description": "Kjeldahl nitrogen after nitrification at the third measurement (t+30 min).",
+            "extended_description": "Kjeldahl nitrogen after the nitrification stage at t2. Depends on Kjeldahl N at discharge and Kjeldahl N after nitrification from t1.",
+            "sensitivity_hints": "Depends on nitrogen at discharge and prior nitrification from t1.",
+            "related_domain_knowledge": [
+                "Same dependency structure as t1."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "kjeldahl_n_nitrification_t2"
+        },
+        {
+            "name": "CNON_12_30",
+            "display_name": "Nitrate after Nitrification (t2)",
+            "type": "ordinal",
+            "states": [
+                "2_MG_L",
+                "4_MG_L",
+                "6_MG_L",
+                "10_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "nitrification_quality",
+            "short_description": "Nitrate/nitrite after nitrification at the third measurement (t+30 min).",
+            "extended_description": "Nitrate after the nitrification stage at t2. Depends on nitrate at discharge, BOD after nitrification, Kjeldahl N after nitrification, and nitrate after nitrification from t1.",
+            "sensitivity_hints": "Terminal output variable at t2.",
+            "related_domain_knowledge": [
+                "Same dependency structure as t1."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "nitrate_nitrification_t2"
+        },
+        {
+            "name": "C_NI_12_45",
+            "display_name": "Nitrogen Input Concentration (t3)",
+            "type": "ordinal",
+            "states": [
+                "3",
+                "4",
+                "5",
+                "6"
+            ],
+            "role": "endogenous",
+            "category": "input_quality",
+            "short_description": "Influent nitrogen concentration index at the fourth measurement (t+45 min).",
+            "extended_description": "Nitrogen concentration entering the treatment works at the fourth time point. Depends on its t2 value.",
+            "sensitivity_hints": "Depends on its own t2 value.",
+            "related_domain_knowledge": [
+                "Final time slice input measurement."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "influent_nitrogen_t3"
+        },
+        {
+            "name": "CKNI_12_45",
+            "display_name": "Kjeldahl Nitrogen Input (t3)",
+            "type": "ordinal",
+            "states": [
+                "20_MG_L",
+                "30_MG_L",
+                "40_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "input_quality",
+            "short_description": "Kjeldahl nitrogen in the influent at the fourth measurement (t+45 min).",
+            "extended_description": "Kjeldahl nitrogen in the incoming water at the fourth time point. Depends on its t2 value.",
+            "sensitivity_hints": "Depends on its own t2 value.",
+            "related_domain_knowledge": [
+                "Final time slice Kjeldahl N input."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "kjeldahl_n_input_t3"
+        },
+        {
+            "name": "CBODD_12_45",
+            "display_name": "BOD at Discharge (t3)",
+            "type": "ordinal",
+            "states": [
+                "15_MG_L",
+                "20_MG_L",
+                "25_MG_L",
+                "30_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "discharge_quality",
+            "short_description": "Biochemical oxygen demand at discharge at the fourth measurement (t+45 min).",
+            "extended_description": "BOD at the plant discharge at t3. Depends on nitrogen input, Kjeldahl N input, BOD at discharge, nitrate at discharge, and BOD after nitrification from t2.",
+            "sensitivity_hints": "Central hub variable at t3.",
+            "related_domain_knowledge": [
+                "Final time slice discharge BOD."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "bod_discharge_t3"
+        },
+        {
+            "name": "CKND_12_45",
+            "display_name": "Kjeldahl Nitrogen at Discharge (t3)",
+            "type": "ordinal",
+            "states": [
+                "2_MG_L",
+                "4_MG_L",
+                "6_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "discharge_quality",
+            "short_description": "Kjeldahl nitrogen at discharge at the fourth measurement (t+45 min).",
+            "extended_description": "Kjeldahl nitrogen at the plant discharge at t3. Depends on Kjeldahl N input, Kjeldahl N at discharge, and Kjeldahl N after nitrification from t2.",
+            "sensitivity_hints": "Depends on nitrogen load and processing from t2.",
+            "related_domain_knowledge": [
+                "Final time slice discharge Kjeldahl N."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "kjeldahl_n_discharge_t3"
+        },
+        {
+            "name": "CNOD_12_45",
+            "display_name": "Nitrate at Discharge (t3)",
+            "type": "ordinal",
+            "states": [
+                "0_5_MG_L",
+                "1_MG_L",
+                "2_MG_L",
+                "4_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "discharge_quality",
+            "short_description": "Nitrate/nitrite at discharge at the fourth measurement (t+45 min).",
+            "extended_description": "Nitrate at the plant discharge at t3. Depends on BOD at discharge, nitrate at discharge, and nitrate after nitrification from t2.",
+            "sensitivity_hints": "Depends on organic load and nitrogen from t2.",
+            "related_domain_knowledge": [
+                "Final time slice discharge nitrate."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "nitrate_discharge_t3"
+        },
+        {
+            "name": "CBODN_12_45",
+            "display_name": "BOD after Nitrification (t3)",
+            "type": "ordinal",
+            "states": [
+                "5_MG_L",
+                "10_MG_L",
+                "15_MG_L",
+                "20_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "nitrification_quality",
+            "short_description": "Biochemical oxygen demand after nitrification at the fourth measurement (t+45 min).",
+            "extended_description": "BOD after the nitrification stage at t3. Depends on BOD at discharge, BOD after nitrification, and nitrate after nitrification from t2.",
+            "sensitivity_hints": "Depends on organic load and nitrification from t2.",
+            "related_domain_knowledge": [
+                "Final time slice nitrification BOD."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "bod_nitrification_t3"
+        },
+        {
+            "name": "CKNN_12_45",
+            "display_name": "Kjeldahl Nitrogen after Nitrification (t3)",
+            "type": "ordinal",
+            "states": [
+                "0_5_MG_L",
+                "1_MG_L",
+                "2_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "nitrification_quality",
+            "short_description": "Kjeldahl nitrogen after nitrification at the fourth measurement (t+45 min).",
+            "extended_description": "Kjeldahl nitrogen after the nitrification stage at t3. Depends on Kjeldahl N at discharge and Kjeldahl N after nitrification from t2.",
+            "sensitivity_hints": "Depends on nitrogen at discharge and prior nitrification from t2.",
+            "related_domain_knowledge": [
+                "Final time slice nitrification Kjeldahl N."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "kjeldahl_n_nitrification_t3"
+        },
+        {
+            "name": "CNON_12_45",
+            "display_name": "Nitrate after Nitrification (t3)",
+            "type": "ordinal",
+            "states": [
+                "2_MG_L",
+                "4_MG_L",
+                "6_MG_L",
+                "10_MG_L"
+            ],
+            "role": "endogenous",
+            "category": "nitrification_quality",
+            "short_description": "Nitrate/nitrite after nitrification at the fourth measurement (t+45 min).",
+            "extended_description": "Nitrate after the nitrification stage at t3. Depends on nitrate at discharge, BOD after nitrification, Kjeldahl N after nitrification, and nitrate after nitrification from t2.",
+            "sensitivity_hints": "Terminal output variable at t3. Final measurement in the network.",
+            "related_domain_knowledge": [
+                "Final measurement of the entire monitoring period.",
+                "Represents the cumulative outcome of all treatment processes."
+            ],
+            "references": [
+                "Jensen1989"
+            ],
+            "llm_name": "nitrate_nitrification_t3"
+        }
+    ]
+}

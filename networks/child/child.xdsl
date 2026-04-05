@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This network was created in BNBENCH -->
+<smile version="1.0" id="bnbench" numsamples="100000" discsamples="100000">
+    <nodes>
+        <cpt id="BirthAsphyxia">
+            <state id="no" />
+            <state id="yes" />
+            <probabilities>0.9 0.1</probabilities>
+        </cpt>
+        <cpt id="Disease">
+            <state id="Fallot" />
+            <state id="Lung" />
+            <state id="PAIVS" />
+            <state id="PFC" />
+            <state id="TAPVD" />
+            <state id="TGA" />
+            <parents>BirthAsphyxia</parents>
+            <probabilities>0.29591837 0.05102041 0.23469388 0.03061224 0.05102041 0.33673469 0.25 0.05 0.15 0.2 0.05 0.3</probabilities>
+        </cpt>
+        <cpt id="CardiacMixing">
+            <state id="Complete" />
+            <state id="Mild" />
+            <state id="None" />
+            <state id="Transp_" />
+            <parents>Disease</parents>
+            <probabilities>0.8 0.16 0.02 0.02 0.05 0.53 0.4 0.02 0.95 0.02 0.01 0.02 0.15 0.43 0.4 0.02 0.95 0.03 0.01 0.01 0.09 0.09 0.02 0.8</probabilities>
+        </cpt>
+        <cpt id="LungParench">
+            <state id="Abnormal" />
+            <state id="Congested" />
+            <state id="Normal" />
+            <parents>Disease</parents>
+            <probabilities>0.15 0.05 0.8 0.72 0.25 0.03 0.15 0.05 0.8 0.3 0.1 0.6 0.3 0.6 0.1 0.15 0.05 0.8</probabilities>
+        </cpt>
+        <cpt id="DuctFlow">
+            <state id="Lt_to_Rt" />
+            <state id="None" />
+            <state id="Rt_to_Lt" />
+            <parents>Disease</parents>
+            <probabilities>0.8 0.2 0.0 0.2 0.4 0.4 1.0 0.0 0.0 0.15 0.05 0.8 0.33 0.33 0.34 0.1 0.8 0.1</probabilities>
+        </cpt>
+        <cpt id="LungFlow">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Normal" />
+            <parents>Disease</parents>
+            <probabilities>0.05 0.8 0.15 0.2 0.1 0.7 0.05 0.85 0.1 0.05 0.65 0.3 0.6 0.1 0.3 0.75 0.05 0.2</probabilities>
+        </cpt>
+        <cpt id="LVH">
+            <state id="no" />
+            <state id="yes" />
+            <parents>Disease</parents>
+            <probabilities>0.9 0.1 0.9 0.1 0.1 0.9 0.9 0.1 0.95 0.05 0.9 0.1</probabilities>
+        </cpt>
+        <cpt id="Sick">
+            <state id="no" />
+            <state id="yes" />
+            <parents>Disease</parents>
+            <probabilities>0.8 0.2 0.3 0.7 0.7 0.3 0.6 0.4 0.3 0.7 0.7 0.3</probabilities>
+        </cpt>
+        <cpt id="LVHreport">
+            <state id="no" />
+            <state id="yes" />
+            <parents>LVH</parents>
+            <probabilities>0.95 0.05 0.1 0.9</probabilities>
+        </cpt>
+        <cpt id="Grunting">
+            <state id="no" />
+            <state id="yes" />
+            <parents>LungParench Sick</parents>
+            <probabilities>0.4 0.6 0.2 0.8 0.8 0.2 0.6 0.4 0.95 0.05 0.8 0.2</probabilities>
+        </cpt>
+        <cpt id="CO2">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Normal" />
+            <parents>LungParench</parents>
+            <probabilities>0.5 0.05 0.45 0.3 0.05 0.65 0.1 0.1 0.8</probabilities>
+        </cpt>
+        <cpt id="ChestXray">
+            <state id="Asy_Patch" />
+            <state id="Grd_Glass" />
+            <state id="Normal" />
+            <state id="Oligaemic" />
+            <state id="Plethoric" />
+            <parents>LungFlow LungParench</parents>
+            <probabilities>0.06 0.34 0.24 0.33 0.03 0.13 0.4 0.05 0.02 0.4 0.01 0.04 0.15 0.01 0.79 0.7 0.05 0.05 0.15 0.05 0.15 0.5 0.05 0.22 0.08 0.02 0.02 0.14 0.8 0.02 0.8 0.05 0.05 0.05 0.05 0.08 0.7 0.05 0.02 0.15 0.03 0.01 0.9 0.03 0.03</probabilities>
+        </cpt>
+        <cpt id="HypDistrib">
+            <state id="Equal" />
+            <state id="Unequal" />
+            <parents>CardiacMixing DuctFlow</parents>
+            <probabilities>0.95 0.05 0.95 0.05 0.95 0.05 0.95 0.05 0.95 0.05 0.5 0.5 0.95 0.05 0.95 0.05 0.05 0.95 0.95 0.05 0.95 0.05 0.5 0.5</probabilities>
+        </cpt>
+        <cpt id="Age">
+            <state id="S0_3_days" />
+            <state id="S11_30_days" />
+            <state id="S4_10_days" />
+            <parents>Disease Sick</parents>
+            <probabilities>0.25 0.5 0.25 0.7 0.15 0.15 0.8 0.05 0.15 0.9 0.02 0.08 0.8 0.05 0.15 0.8 0.05 0.15 0.85 0.05 0.1 0.95 0.02 0.03 0.7 0.1 0.2 0.8 0.05 0.15 0.7 0.1 0.2 0.8 0.05 0.15</probabilities>
+        </cpt>
+        <cpt id="HypoxiaInO2">
+            <state id="Mild" />
+            <state id="Moderate" />
+            <state id="Severe" />
+            <parents>CardiacMixing LungParench</parents>
+            <probabilities>0.1 0.5 0.4 0.05 0.65 0.3 0.1 0.7 0.2 0.1 0.65 0.25 0.1 0.75 0.15 0.1 0.8 0.1 0.7 0.2 0.1 0.15 0.8 0.05 0.93 0.05 0.02 0.02 0.18 0.8 0.1 0.3 0.6 0.02 0.18 0.8</probabilities>
+        </cpt>
+        <cpt id="CO2Report">
+            <state id="Lt_7_5" />
+            <state id="Gte_7_5" />
+            <parents>CO2</parents>
+            <probabilities>0.1 0.9 0.9 0.1 0.9 0.1</probabilities>
+        </cpt>
+        <cpt id="RUQO2">
+            <state id="S12_" />
+            <state id="S5_12" />
+            <state id="S_5" />
+            <parents>HypoxiaInO2</parents>
+            <probabilities>0.6 0.3 0.1 0.1 0.6 0.3 0.1 0.4 0.5</probabilities>
+        </cpt>
+        <cpt id="LowerBodyO2">
+            <state id="S12_" />
+            <state id="S5_12" />
+            <state id="S_5" />
+            <parents>HypDistrib HypoxiaInO2</parents>
+            <probabilities>0.6 0.3 0.1 0.1 0.6 0.3 0.1 0.4 0.5 0.1 0.5 0.4 0.05 0.45 0.5 0.05 0.35 0.6</probabilities>
+        </cpt>
+        <cpt id="XrayReport">
+            <state id="Asy_Patchy" />
+            <state id="Grd_Glass" />
+            <state id="Normal" />
+            <state id="Oligaemic" />
+            <state id="Plethoric" />
+            <parents>ChestXray</parents>
+            <probabilities>0.7 0.1 0.08 0.02 0.1 0.2 0.6 0.08 0.02 0.1 0.06 0.02 0.8 0.06 0.06 0.06 0.02 0.1 0.8 0.02 0.06 0.02 0.1 0.02 0.8</probabilities>
+        </cpt>
+        <cpt id="GruntingReport">
+            <state id="no" />
+            <state id="yes" />
+            <parents>Grunting</parents>
+            <probabilities>0.9 0.1 0.2 0.8</probabilities>
+        </cpt>
+    </nodes>
+    <extensions>
+        <genie version="1.0" app="GeNIe 4.0.1922.0 ACADEMIC" name="Network1">
+            <node id="BirthAsphyxia">
+                <name>BirthAsphyxia</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 100 100 140</position>
+            </node>
+            <node id="Disease">
+                <name>Disease</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 200 100 240</position>
+            </node>
+            <node id="CardiacMixing">
+                <name>CardiacMixing</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 300 100 340</position>
+            </node>
+            <node id="LungParench">
+                <name>LungParench</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 300 200 340</position>
+            </node>
+            <node id="DuctFlow">
+                <name>DuctFlow</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 300 300 340</position>
+            </node>
+            <node id="LungFlow">
+                <name>LungFlow</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 300 400 340</position>
+            </node>
+            <node id="LVH">
+                <name>LVH</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 300 500 340</position>
+            </node>
+            <node id="Sick">
+                <name>Sick</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>520 300 600 340</position>
+            </node>
+            <node id="LVHreport">
+                <name>LVHreport</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 400 100 440</position>
+            </node>
+            <node id="Grunting">
+                <name>Grunting</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 400 200 440</position>
+            </node>
+            <node id="CO2">
+                <name>CO2</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 400 300 440</position>
+            </node>
+            <node id="ChestXray">
+                <name>ChestXray</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 400 400 440</position>
+            </node>
+            <node id="HypDistrib">
+                <name>HypDistrib</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 400 500 440</position>
+            </node>
+            <node id="Age">
+                <name>Age</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>520 400 600 440</position>
+            </node>
+            <node id="HypoxiaInO2">
+                <name>HypoxiaInO2</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>620 400 700 440</position>
+            </node>
+            <node id="CO2Report">
+                <name>CO2Report</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 500 100 540</position>
+            </node>
+            <node id="RUQO2">
+                <name>RUQO2</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 500 200 540</position>
+            </node>
+            <node id="LowerBodyO2">
+                <name>LowerBodyO2</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 500 300 540</position>
+            </node>
+            <node id="XrayReport">
+                <name>XrayReport</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 500 400 540</position>
+            </node>
+            <node id="GruntingReport">
+                <name>GruntingReport</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 500 500 540</position>
+            </node>
+        </genie>
+    </extensions>
+</smile>

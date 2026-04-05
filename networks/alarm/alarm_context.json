@@ -1,0 +1,1165 @@
+{
+    "schema_version": "2.0",
+    "network": "alarm",
+    "domain": "patient_monitoring",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for an ICU patient monitoring system that reasons about ventilation, haemodynamics, and measurement artefacts.",
+    "provenance": {
+        "source_network": "alarm",
+        "source_reference": "Beinlich1989",
+        "source_url": "https://link.springer.com/chapter/10.1007/978-3-642-93437-7_28",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "high",
+        "notes": "The ALARM (A Logical Alarm Reduction Mechanism) network from Beinlich et al. (1989) is a widely-used causal discovery benchmark with 37 variables and 46 edges. It models an ICU monitoring system. Published in Proceedings of the 2nd European Conference on AI in Medicine, pp. 247-256, Springer-Verlag. LLMs may have memorised this network."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is an intensive care patient monitoring system for ventilated patients.",
+            "Consider the causal chain: disease states -> physiological changes -> sensor readings.",
+            "Root causes include conditions (low blood volume, cardiac failure, blood clot, allergic reaction) and equipment faults (tube problems, sensor errors).",
+            "Ventilation follows: machine settings -> machine output -> tube delivery -> lung ventilation -> alveolar ventilation -> blood gases.",
+            "Haemodynamics follows: cardiac function -> stroke volume -> cardiac output -> blood pressure.",
+            "Catecholamine release is a stress response driven by low oxygen, high CO2, low blood pressure, and insufficient anaesthesia.",
+            "Heart rate is driven by catecholamines and affects cardiac output.",
+            "Several sensor readings can be corrupted by measurement artefacts (electrocautery interference, output transducer error).",
+            "Tube placement status (correct, oesophageal, one-sided) affects both ventilation and airway pressure."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, sensitivity hints, domain knowledge, and references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "HYPOVOLEMIA",
+            "display_name": "Hypovolaemia",
+            "type": "binary",
+            "states": [
+                "TRUE",
+                "FALSE"
+            ],
+            "role": "exogenous",
+            "category": "disease_state",
+            "short_description": "Whether the patient has abnormally low circulating blood volume.",
+            "extended_description": "Hypovolaemia is a decrease in effective circulating blood volume due to haemorrhage, dehydration, or third-space fluid loss. It reduces venous return and cardiac preload, leading to decreased stroke volume and cardiac output. A major root cause of haemodynamic instability in critically ill patients.",
+            "sensitivity_hints": "Directly affects cardiac filling and stroke volume. Consider as an upstream cause of low cardiac output.",
+            "related_domain_knowledge": [
+                "Low blood volume reduces venous return (preload).",
+                "Reduced preload decreases left ventricular end-diastolic volume.",
+                "Compensatory tachycardia and vasoconstriction may partially mask hypovolaemia.",
+                "Common causes: haemorrhage, burns, severe dehydration."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "low_blood_volume"
+        },
+        {
+            "name": "LVFAILURE",
+            "display_name": "Left Ventricular Failure",
+            "type": "binary",
+            "states": [
+                "TRUE",
+                "FALSE"
+            ],
+            "role": "exogenous",
+            "category": "disease_state",
+            "short_description": "Whether the patient has left ventricular cardiac failure.",
+            "extended_description": "Left ventricular failure occurs when the left ventricle cannot pump blood effectively, leading to reduced cardiac output and pulmonary congestion. It increases left ventricular end-diastolic volume (due to incomplete emptying) while decreasing stroke volume.",
+            "sensitivity_hints": "Affects both LVEDV (increases it) and stroke volume (decreases it). Also produces a history of cardiac problems.",
+            "related_domain_knowledge": [
+                "LV failure increases end-diastolic volume due to incomplete ejection.",
+                "Stroke volume falls because the ventricle cannot contract effectively.",
+                "Pulmonary congestion results from elevated left-sided pressures.",
+                "History of cardiac events is a diagnostic clue."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "cardiac_pump_failure"
+        },
+        {
+            "name": "ANAPHYLAXIS",
+            "display_name": "Anaphylaxis",
+            "type": "binary",
+            "states": [
+                "TRUE",
+                "FALSE"
+            ],
+            "role": "exogenous",
+            "category": "disease_state",
+            "short_description": "Whether the patient is experiencing an acute anaphylactic reaction.",
+            "extended_description": "Anaphylaxis is a severe, life-threatening allergic reaction causing massive histamine release. This produces profound vasodilation (low total peripheral resistance) and potentially bronchospasm. In the ICU context, it may be triggered by drug administration or blood products.",
+            "sensitivity_hints": "Primary effect is on vascular resistance. Consider it as an upstream cause of low peripheral resistance.",
+            "related_domain_knowledge": [
+                "Anaphylaxis causes massive vasodilation via histamine release.",
+                "Low vascular resistance leads to hypotension despite normal cardiac output.",
+                "May also cause bronchospasm affecting ventilation.",
+                "Triggers include drugs, blood products, latex."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "acute_allergic_reaction"
+        },
+        {
+            "name": "PULMEMBOLUS",
+            "display_name": "Pulmonary Embolus",
+            "type": "binary",
+            "states": [
+                "TRUE",
+                "FALSE"
+            ],
+            "role": "exogenous",
+            "category": "disease_state",
+            "short_description": "Whether the patient has a pulmonary embolism.",
+            "extended_description": "A pulmonary embolus is a blood clot lodged in the pulmonary vasculature, obstructing blood flow through the lungs. This increases pulmonary artery pressure and creates a right-to-left shunt effect, impairing gas exchange. A serious cause of acute hypoxaemia in ventilated patients.",
+            "sensitivity_hints": "Affects pulmonary artery pressure (increases it) and intrapulmonary shunting (increases it).",
+            "related_domain_knowledge": [
+                "PE increases pulmonary vascular resistance and pulmonary artery pressure.",
+                "Blood bypasses ventilated alveoli, creating a shunt.",
+                "Shunt causes hypoxaemia that does not respond well to increased FiO2.",
+                "Risk factors: immobility, surgery, hypercoagulable states."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "lung_blood_clot"
+        },
+        {
+            "name": "INSUFFANESTH",
+            "display_name": "Insufficient Anaesthesia",
+            "type": "binary",
+            "states": [
+                "TRUE",
+                "FALSE"
+            ],
+            "role": "exogenous",
+            "category": "clinical_state",
+            "short_description": "Whether the patient is receiving insufficient anaesthetic depth.",
+            "extended_description": "Insufficient anaesthesia occurs when the depth of sedation is inadequate, leading to a sympathetic stress response. This triggers catecholamine release, increasing heart rate and blood pressure. An important consideration in mechanically ventilated patients.",
+            "sensitivity_hints": "Triggers catecholamine release as a stress response. Consider as an upstream cause of elevated stress hormones.",
+            "related_domain_knowledge": [
+                "Light anaesthesia triggers sympathetic nervous system activation.",
+                "Catecholamine surge raises heart rate and blood pressure.",
+                "Patient may show signs of awareness or movement.",
+                "Requires adjustment of anaesthetic agents."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "inadequate_sedation"
+        },
+        {
+            "name": "INTUBATION",
+            "display_name": "Intubation Status",
+            "type": "categorical",
+            "states": [
+                "NORMAL",
+                "ESOPHAGEAL",
+                "ONESIDED"
+            ],
+            "role": "exogenous",
+            "category": "equipment_state",
+            "short_description": "Placement status of the endotracheal tube.",
+            "extended_description": "The endotracheal tube can be correctly placed in the trachea (normal), accidentally placed in the oesophagus (oesophageal intubation), or advanced too far into one main bronchus (one-sided intubation). Incorrect placement profoundly affects ventilation delivery, gas exchange, and airway pressures.",
+            "sensitivity_hints": "Affects ventilation to lungs, alveolar ventilation, airway pressure, intrapulmonary shunt, and minute volume. A major determinant of multiple downstream readings.",
+            "related_domain_knowledge": [
+                "Oesophageal intubation delivers no gas to lungs — rapidly fatal if undetected.",
+                "One-sided intubation ventilates only one lung, halving effective ventilation.",
+                "Correct placement is verified by capnography and auscultation.",
+                "Tube position affects airway pressure readings."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "airway_tube_position"
+        },
+        {
+            "name": "DISCONNECT",
+            "display_name": "Ventilator Disconnection",
+            "type": "binary",
+            "states": [
+                "TRUE",
+                "FALSE"
+            ],
+            "role": "exogenous",
+            "category": "equipment_fault",
+            "short_description": "Whether the ventilator circuit is disconnected from the patient.",
+            "extended_description": "A disconnection in the breathing circuit between the ventilator and the endotracheal tube. This means the ventilator is cycling but no gas reaches the patient. One of the most dangerous equipment faults as it rapidly leads to hypoxia and hypercapnia.",
+            "sensitivity_hints": "Affects gas delivery through the tube. The ventilator machine still runs but gas does not reach the patient.",
+            "related_domain_knowledge": [
+                "Disconnect means zero gas delivery despite ventilator cycling.",
+                "Low airway pressure alarm is the primary safety alert.",
+                "Rapid desaturation and CO2 rise follow.",
+                "Common cause: patient movement, suctioning, transport."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "circuit_disconnection"
+        },
+        {
+            "name": "KINKEDTUBE",
+            "display_name": "Kinked Tube",
+            "type": "binary",
+            "states": [
+                "TRUE",
+                "FALSE"
+            ],
+            "role": "exogenous",
+            "category": "equipment_fault",
+            "short_description": "Whether the endotracheal tube is kinked or obstructed.",
+            "extended_description": "A kink or obstruction in the endotracheal tube restricts gas flow, reducing ventilation delivery to the lungs while increasing airway pressure upstream of the obstruction. Unlike a disconnection, the circuit remains intact but flow is impeded.",
+            "sensitivity_hints": "Affects both gas delivery to the lungs (reduced) and airway pressure (increased). Opposite pressure effect compared to a disconnection.",
+            "related_domain_knowledge": [
+                "Kinking raises proximal airway pressure but reduces distal ventilation.",
+                "High pressure alarm triggered, unlike disconnection (low pressure).",
+                "Partial obstruction may still allow some ventilation.",
+                "Causes: patient biting, tube malposition, secretions."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "tube_obstruction"
+        },
+        {
+            "name": "ERRLOWOUTPUT",
+            "display_name": "Blood Pressure Transducer Error",
+            "type": "binary",
+            "states": [
+                "TRUE",
+                "FALSE"
+            ],
+            "role": "exogenous",
+            "category": "measurement_artefact",
+            "short_description": "Whether the blood pressure transducer has an error producing falsely low readings.",
+            "extended_description": "A malfunction or calibration error in the arterial blood pressure transducer that causes it to report falsely low values. This is a measurement artefact — the patient's actual blood pressure is unaffected. Can trigger false alarms and inappropriate treatment if not recognised.",
+            "sensitivity_hints": "Only affects the blood pressure sensor reading, not the actual blood pressure. Consider as a source of measurement error.",
+            "related_domain_knowledge": [
+                "Transducer errors cause discrepancy between displayed and actual BP.",
+                "Can be caused by air bubbles, damping, or zero drift.",
+                "Cross-checking with non-invasive BP can reveal the artefact.",
+                "Does not affect heart rate or other haemodynamic variables."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "pressure_sensor_error"
+        },
+        {
+            "name": "ERRCAUTER",
+            "display_name": "Electrocautery Interference",
+            "type": "binary",
+            "states": [
+                "TRUE",
+                "FALSE"
+            ],
+            "role": "exogenous",
+            "category": "measurement_artefact",
+            "short_description": "Whether electrocautery use is causing electrical interference with monitoring equipment.",
+            "extended_description": "Electrocautery (diathermy) generates high-frequency electrical signals that interfere with cardiac monitoring sensors. This corrupts the ECG signal and pulse oximetry readings, producing artefactual values. The patient's actual heart rate and rhythm are unaffected.",
+            "sensitivity_hints": "Corrupts ECG-based and oximetry-based heart rate readings but not the actual heart rate. A pure measurement artefact.",
+            "related_domain_knowledge": [
+                "Electrocautery interference affects ECG trace and pulse oximetry.",
+                "May show as false high or erratic heart rate on ECG monitor.",
+                "Pulse oximetry waveform becomes unreliable.",
+                "Interference is intermittent — coincides with surgical cautery use."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "electrical_interference"
+        },
+        {
+            "name": "FIO2",
+            "display_name": "Fraction of Inspired Oxygen",
+            "type": "binary",
+            "states": [
+                "LOW",
+                "NORMAL"
+            ],
+            "role": "exogenous",
+            "category": "ventilator_setting",
+            "short_description": "The oxygen concentration being delivered by the ventilator.",
+            "extended_description": "The fraction of inspired oxygen (FiO2) is a clinician-set parameter determining the oxygen concentration in the delivered gas mixture. Low FiO2 means less oxygen is available for gas exchange in the alveoli, directly affecting blood oxygen saturation. Normally set between 0.21 (room air) and 1.0 (pure oxygen).",
+            "sensitivity_hints": "Directly affects blood oxygen levels in the pulmonary vasculature. Combined with alveolar ventilation to determine oxygenation.",
+            "related_domain_knowledge": [
+                "FiO2 is the primary control for oxygenation in ventilated patients.",
+                "Higher FiO2 compensates for shunt and V/Q mismatch.",
+                "Prolonged high FiO2 (>0.6) can cause oxygen toxicity.",
+                "Low FiO2 may indicate gas supply failure or incorrect setting."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "oxygen_delivery_fraction"
+        },
+        {
+            "name": "MINVOLSET",
+            "display_name": "Minute Volume Setting",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "exogenous",
+            "category": "ventilator_setting",
+            "short_description": "The target minute volume set on the ventilator.",
+            "extended_description": "The minute volume setting is a clinician-set parameter on the ventilator that determines the total volume of gas delivered per minute (tidal volume x respiratory rate). This drives the ventilator machine output. Higher settings deliver more gas, aiding CO2 removal.",
+            "sensitivity_hints": "Directly determines ventilator machine output. The first link in the ventilation chain from machine to patient.",
+            "related_domain_knowledge": [
+                "Minute volume = tidal volume x respiratory rate.",
+                "Typical adult range: 5-10 litres per minute.",
+                "Setting determines ventilator machine output, not what reaches the patient.",
+                "Actual delivered volume depends on circuit integrity and tube patency."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "target_ventilation_rate"
+        },
+        {
+            "name": "TPR",
+            "display_name": "Total Peripheral Resistance",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "haemodynamic",
+            "short_description": "The total resistance of the systemic vascular bed.",
+            "extended_description": "Total peripheral resistance is the aggregate resistance of all systemic blood vessels. It is a major determinant of blood pressure (BP = CO x TPR). Low TPR occurs in vasodilatory states (anaphylaxis, sepsis); high TPR in vasoconstriction (catecholamine response, hypothermia).",
+            "sensitivity_hints": "Affected by anaphylaxis (reduces it). Combines with cardiac output to determine blood pressure. Also triggers catecholamine release when abnormal.",
+            "related_domain_knowledge": [
+                "TPR is primarily determined by arteriolar smooth muscle tone.",
+                "Anaphylaxis causes profound vasodilation (low TPR).",
+                "Catecholamine release causes vasoconstriction (high TPR).",
+                "Blood pressure = cardiac output x peripheral resistance."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "vascular_resistance"
+        },
+        {
+            "name": "SHUNT",
+            "display_name": "Intrapulmonary Shunt",
+            "type": "binary",
+            "states": [
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "respiratory",
+            "short_description": "The fraction of blood bypassing ventilated alveoli.",
+            "extended_description": "Intrapulmonary shunt represents blood that passes through the lungs without participating in gas exchange. High shunt occurs when blood flows past collapsed or unventilated alveoli. Caused by tube malposition (oesophageal or one-sided intubation) or pulmonary embolism. Produces hypoxaemia resistant to increased FiO2.",
+            "sensitivity_hints": "Affected by tube placement and pulmonary embolism. Combines with pulmonary venous oxygen to determine arterial oxygen saturation.",
+            "related_domain_knowledge": [
+                "Shunt = blood flow without gas exchange.",
+                "Oesophageal intubation creates 100% shunt (no ventilation at all).",
+                "One-sided intubation shunts blood from the unventilated lung.",
+                "Shunt-related hypoxia responds poorly to increased FiO2."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "pulmonary_bypass_fraction"
+        },
+        {
+            "name": "HISTORY",
+            "display_name": "History of LVF",
+            "type": "binary",
+            "states": [
+                "TRUE",
+                "FALSE"
+            ],
+            "role": "endogenous",
+            "category": "clinical_observation",
+            "short_description": "Whether the patient has a documented history of cardiac failure.",
+            "extended_description": "A clinical history variable indicating prior episodes of left ventricular dysfunction. This is a diagnostic indicator rather than a physiological measurement. Patients with true LV failure are very likely to have a positive history.",
+            "sensitivity_hints": "Caused by cardiac pump failure. A diagnostic clue, not a direct physiological measurement.",
+            "related_domain_knowledge": [
+                "History is an observational variable derived from medical records.",
+                "Strong indicator of underlying cardiac pump failure.",
+                "Does not directly affect any physiological parameters.",
+                "Used in clinical reasoning to assess pre-test probability."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "prior_cardiac_history"
+        },
+        {
+            "name": "STROKEVOLUME",
+            "display_name": "Stroke Volume",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "haemodynamic",
+            "short_description": "The volume of blood ejected by the left ventricle per heartbeat.",
+            "extended_description": "Stroke volume is the amount of blood pumped by the left ventricle with each contraction. Determined by preload (filling volume), afterload, and contractility. Reduced by both hypovolaemia (low preload) and LV failure (poor contractility). A key component of cardiac output (CO = HR x SV).",
+            "sensitivity_hints": "Affected by both low blood volume and cardiac pump failure. Combines with heart rate to determine cardiac output.",
+            "related_domain_knowledge": [
+                "Stroke volume = end-diastolic volume - end-systolic volume.",
+                "Hypovolaemia reduces it via decreased preload.",
+                "LV failure reduces it via decreased contractility.",
+                "Normal range: 60-100 ml per beat."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "ventricular_ejection_volume"
+        },
+        {
+            "name": "LVEDVOLUME",
+            "display_name": "LV End-Diastolic Volume",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "haemodynamic",
+            "short_description": "The volume of blood in the left ventricle at the end of filling.",
+            "extended_description": "Left ventricular end-diastolic volume represents cardiac preload — how full the ventricle is before contraction. Reduced by hypovolaemia (less blood returning) and increased by LV failure (incomplete emptying from the previous beat). A key indicator measured indirectly via pulmonary capillary wedge pressure and central venous pressure.",
+            "sensitivity_hints": "Affected by both low blood volume (decreases it) and cardiac pump failure (increases it). Determines wedge pressure and central venous pressure readings.",
+            "related_domain_knowledge": [
+                "LVEDV reflects cardiac preload (Frank-Starling mechanism).",
+                "Hypovolaemia: low LVEDV due to reduced venous return.",
+                "LV failure: high LVEDV due to incomplete ejection.",
+                "Measured indirectly via PCWP (pulmonary catheter) and CVP."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "cardiac_filling_volume"
+        },
+        {
+            "name": "PAP",
+            "display_name": "Pulmonary Artery Pressure",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "haemodynamic",
+            "short_description": "The blood pressure in the pulmonary artery.",
+            "extended_description": "Pulmonary artery pressure reflects the pressure in the pulmonary vasculature. Elevated by pulmonary embolism (increased resistance to flow) or left heart failure (back-pressure). Measured via a pulmonary artery catheter (Swan-Ganz). A key indicator for diagnosing PE.",
+            "sensitivity_hints": "Primarily affected by pulmonary embolism. High PAP is a diagnostic clue for lung blood clots.",
+            "related_domain_knowledge": [
+                "PE increases PAP by obstructing pulmonary blood flow.",
+                "Normal systolic PAP: 15-30 mmHg.",
+                "Measured via pulmonary artery catheter.",
+                "Also elevated in left heart failure (back-pressure from left atrium)."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "lung_artery_pressure"
+        },
+        {
+            "name": "PCWP",
+            "display_name": "Pulmonary Capillary Wedge Pressure",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "haemodynamic_measurement",
+            "short_description": "Wedge pressure reflecting left atrial and left ventricular filling pressure.",
+            "extended_description": "Pulmonary capillary wedge pressure is measured by inflating a balloon in a branch of the pulmonary artery, reflecting back-pressure from the left heart. It is a clinical surrogate for left ventricular end-diastolic pressure. Low in hypovolaemia, high in LV failure.",
+            "sensitivity_hints": "Determined by left ventricular filling volume. An indirect measurement of cardiac preload.",
+            "related_domain_knowledge": [
+                "PCWP approximates left atrial pressure.",
+                "Low PCWP suggests hypovolaemia (low preload).",
+                "High PCWP suggests LV failure or fluid overload.",
+                "Normal range: 6-12 mmHg."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "wedge_pressure"
+        },
+        {
+            "name": "CVP",
+            "display_name": "Central Venous Pressure",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "haemodynamic_measurement",
+            "short_description": "The blood pressure in the central veins near the heart.",
+            "extended_description": "Central venous pressure reflects right atrial pressure and venous return. Low CVP suggests hypovolaemia; high CVP suggests right heart failure or fluid overload. Measured via a central venous catheter in the superior vena cava or right atrium.",
+            "sensitivity_hints": "Determined by left ventricular filling volume. Low values suggest low blood volume, high values suggest cardiac failure.",
+            "related_domain_knowledge": [
+                "CVP reflects right atrial pressure and venous return.",
+                "Normal range: 2-8 mmHg.",
+                "Low in hypovolaemia, high in heart failure.",
+                "Measured via central venous catheter."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "central_venous_pressure"
+        },
+        {
+            "name": "VENTMACH",
+            "display_name": "Ventilator Machine Output",
+            "type": "categorical",
+            "states": [
+                "ZERO",
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "ventilation",
+            "short_description": "The gas volume actually output by the ventilator machine.",
+            "extended_description": "The volume of gas produced by the ventilator machine per unit time. Directly determined by the minute volume setting. This is the first stage of the ventilation delivery chain. The output may not reach the patient if there is a circuit disconnection.",
+            "sensitivity_hints": "Determined by the ventilator minute volume setting. Feeds into the tube delivery stage.",
+            "related_domain_knowledge": [
+                "Machine output is directly determined by its settings.",
+                "Gas travels: machine -> circuit -> tube -> lungs.",
+                "Machine still generates output even if circuit is disconnected.",
+                "Output measured at the machine's expiratory port."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "machine_gas_output"
+        },
+        {
+            "name": "VENTTUBE",
+            "display_name": "Gas Delivery at Tube",
+            "type": "categorical",
+            "states": [
+                "ZERO",
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "ventilation",
+            "short_description": "The gas volume reaching the endotracheal tube end.",
+            "extended_description": "The volume of gas that reaches the distal end of the endotracheal tube. Determined by the ventilator machine output minus any losses from circuit disconnection. If the circuit is disconnected, tube delivery drops to zero regardless of machine output.",
+            "sensitivity_hints": "Affected by ventilator machine output and circuit disconnection. Feeds into lung ventilation.",
+            "related_domain_knowledge": [
+                "Zero tube delivery if circuit disconnected, regardless of machine output.",
+                "Normal tube delivery mirrors machine output in an intact circuit.",
+                "Circuit leaks can partially reduce delivery.",
+                "Measured clinically by expired tidal volume at the tube."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "tube_gas_delivery"
+        },
+        {
+            "name": "VENTLUNG",
+            "display_name": "Lung Ventilation",
+            "type": "categorical",
+            "states": [
+                "ZERO",
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "ventilation",
+            "short_description": "The gas volume reaching the lungs.",
+            "extended_description": "The volume of gas that actually enters the lungs per unit time. Depends on gas delivery at the tube, tube placement (intubation status), and tube patency (kinking). Oesophageal intubation means zero lung ventilation; one-sided intubation halves it; a kinked tube restricts it.",
+            "sensitivity_hints": "Affected by tube gas delivery, airway tube position, and tube obstruction. Determines alveolar ventilation and exhaled CO2.",
+            "related_domain_knowledge": [
+                "Zero if tube is in oesophagus — no gas reaches lungs.",
+                "Halved if tube is in one bronchus (one-sided intubation).",
+                "Reduced if tube is kinked or obstructed.",
+                "Feeds into alveolar ventilation and expired CO2."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "effective_lung_ventilation"
+        },
+        {
+            "name": "VENTALV",
+            "display_name": "Alveolar Ventilation",
+            "type": "categorical",
+            "states": [
+                "ZERO",
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "ventilation",
+            "short_description": "The gas volume participating in gas exchange in the alveoli.",
+            "extended_description": "Alveolar ventilation is the portion of lung ventilation that reaches the alveoli and participates in gas exchange. Depends on total lung ventilation and tube position (intubation status). Dead space ventilation is subtracted. This is the key determinant of CO2 elimination and, combined with FiO2, of oxygenation.",
+            "sensitivity_hints": "Affected by lung ventilation and tube position. Determines arterial CO2 and pulmonary venous oxygen. The critical link between ventilation and blood gases.",
+            "related_domain_knowledge": [
+                "Alveolar ventilation = total ventilation - dead space ventilation.",
+                "Primary determinant of arterial CO2 (inverse relationship).",
+                "Combined with FiO2 determines pulmonary venous oxygen saturation.",
+                "Zero alveolar ventilation is rapidly fatal."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "gas_exchange_ventilation"
+        },
+        {
+            "name": "PRESS",
+            "display_name": "Airway Pressure",
+            "type": "categorical",
+            "states": [
+                "ZERO",
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "ventilation_measurement",
+            "short_description": "The pressure measured in the breathing circuit.",
+            "extended_description": "Airway pressure is measured in the breathing circuit and reflects the resistance to gas flow. Low or zero pressure suggests disconnection; high pressure suggests obstruction (kinked tube, bronchospasm). Normal pressure with the expected flow indicates a patent circuit. A key alarm parameter.",
+            "sensitivity_hints": "Affected by tube position, tube obstruction, and tube gas delivery. Low pressure = disconnection, high pressure = obstruction.",
+            "related_domain_knowledge": [
+                "Pressure = flow x resistance.",
+                "Zero/low: circuit disconnection or massive leak.",
+                "High: tube kink, bronchospasm, or endobronchial intubation.",
+                "Primary ventilator alarm parameter for circuit integrity."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "airway_circuit_pressure"
+        },
+        {
+            "name": "MINVOL",
+            "display_name": "Measured Minute Volume",
+            "type": "categorical",
+            "states": [
+                "ZERO",
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "ventilation_measurement",
+            "short_description": "The total volume of gas measured at the patient's airway per minute.",
+            "extended_description": "The measured minute volume is the total gas flow detected at the airway, reflecting what is actually being ventilated. Depends on lung ventilation and tube intubation status. Discrepancy between set and measured minute volume indicates a problem in the delivery chain.",
+            "sensitivity_hints": "Affected by effective lung ventilation and tube position. A key monitored parameter for detecting ventilation failure.",
+            "related_domain_knowledge": [
+                "Measured at the expiratory limb of the breathing circuit.",
+                "Discrepancy with set minute volume signals a problem.",
+                "Zero measured volume: disconnection or complete obstruction.",
+                "Normal range mirrors the ventilator setting when circuit is intact."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "measured_ventilation_volume"
+        },
+        {
+            "name": "PVSAT",
+            "display_name": "Pulmonary Venous O2 Saturation",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "blood_gas",
+            "short_description": "Oxygen saturation of blood leaving the pulmonary capillaries.",
+            "extended_description": "Pulmonary venous oxygen saturation represents how well-oxygenated the blood is after passing through ventilated alveoli. Determined by the fraction of inspired oxygen (FiO2) and alveolar ventilation. This is the 'ideal' oxygen level before shunting dilutes it.",
+            "sensitivity_hints": "Determined by oxygen delivery fraction and alveolar ventilation. Combined with shunt fraction to determine arterial oxygen saturation.",
+            "related_domain_knowledge": [
+                "High FiO2 + good alveolar ventilation = high PvSAT.",
+                "Low FiO2 or poor ventilation = low PvSAT.",
+                "This is the oxygen level before shunt mixing occurs.",
+                "Clinical equivalent: ideal alveolar oxygen tension."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "pulmonary_blood_oxygen"
+        },
+        {
+            "name": "ARTCO2",
+            "display_name": "Arterial CO2",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "blood_gas",
+            "short_description": "The arterial blood carbon dioxide level.",
+            "extended_description": "Arterial CO2 (PaCO2) is inversely proportional to alveolar ventilation. High CO2 (hypercapnia) results from inadequate ventilation; low CO2 (hypocapnia) from excessive ventilation. A primary indicator of ventilation adequacy and a trigger for catecholamine release when elevated.",
+            "sensitivity_hints": "Determined by alveolar ventilation (inverse relationship). High CO2 triggers stress hormone release.",
+            "related_domain_knowledge": [
+                "PaCO2 is inversely proportional to alveolar ventilation.",
+                "Normal range: 35-45 mmHg (4.7-6.0 kPa).",
+                "Hypercapnia (high CO2) stimulates sympathetic response.",
+                "Measured by arterial blood gas analysis."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "arterial_carbon_dioxide"
+        },
+        {
+            "name": "EXPCO2",
+            "display_name": "End-Tidal CO2",
+            "type": "categorical",
+            "states": [
+                "ZERO",
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "ventilation_measurement",
+            "short_description": "The CO2 concentration in exhaled gas at end expiration.",
+            "extended_description": "End-tidal CO2 (EtCO2) is the carbon dioxide concentration measured in the exhaled gas at the end of expiration. It reflects both arterial CO2 and lung ventilation. Zero EtCO2 with intubation suggests oesophageal placement. A key non-invasive monitoring parameter.",
+            "sensitivity_hints": "Determined by arterial CO2 and lung ventilation. Zero reading is a critical sign of oesophageal intubation.",
+            "related_domain_knowledge": [
+                "EtCO2 approximates arterial CO2 in normal conditions.",
+                "Zero EtCO2: oesophageal intubation or cardiac arrest.",
+                "Low EtCO2: hyperventilation or low cardiac output.",
+                "Measured continuously by capnography."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "exhaled_carbon_dioxide"
+        },
+        {
+            "name": "SAO2",
+            "display_name": "Arterial O2 Saturation",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "blood_gas",
+            "short_description": "The oxygen saturation of arterial blood.",
+            "extended_description": "Arterial oxygen saturation represents the final oxygen level in systemic arterial blood after mixing of oxygenated pulmonary venous blood with shunted (deoxygenated) blood. Determined by pulmonary venous oxygen saturation and the degree of intrapulmonary shunt. Low SaO2 (hypoxaemia) is an immediate life threat.",
+            "sensitivity_hints": "Determined by pulmonary venous oxygen and shunt fraction. A key trigger for stress hormone release when low.",
+            "related_domain_knowledge": [
+                "SaO2 = f(PvSAT, shunt fraction).",
+                "Normal >95%. Below 90% is critically low.",
+                "Shunt-related hypoxia responds poorly to increased FiO2.",
+                "Measured by pulse oximetry (SpO2) or arterial blood gas."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "arterial_oxygen_saturation"
+        },
+        {
+            "name": "CATECHOL",
+            "display_name": "Catecholamine Level",
+            "type": "binary",
+            "states": [
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "neuroendocrine",
+            "short_description": "The level of circulating catecholamines (adrenaline/noradrenaline).",
+            "extended_description": "Catecholamines (adrenaline and noradrenaline) are stress hormones released by the adrenal medulla and sympathetic nerve endings. Elevated in response to hypoxia (low SaO2), hypercapnia (high arterial CO2), hypotension (low TPR), and insufficient anaesthesia. Drive tachycardia and vasoconstriction as compensatory responses.",
+            "sensitivity_hints": "Triggered by low oxygen, high CO2, low vascular resistance, and inadequate sedation. Primary driver of heart rate changes.",
+            "related_domain_knowledge": [
+                "Catecholamines are the body's 'fight or flight' hormones.",
+                "Multiple triggers: hypoxia, hypercapnia, pain, hypotension.",
+                "Cause tachycardia and peripheral vasoconstriction.",
+                "High catecholamines increase myocardial oxygen demand."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "stress_hormone_level"
+        },
+        {
+            "name": "HR",
+            "display_name": "True Heart Rate",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "haemodynamic",
+            "short_description": "The patient's actual heart rate.",
+            "extended_description": "The true heart rate is the actual frequency of cardiac contractions. Primarily driven by catecholamine levels — high catecholamines cause tachycardia. This is the actual physiological value, distinct from the potentially artefactual readings on monitoring devices (ECG, pulse oximetry, BP waveform).",
+            "sensitivity_hints": "Driven by stress hormones. A key input to cardiac output and all heart rate sensor readings. Distinguish from sensor readings that may be corrupted by artefacts.",
+            "related_domain_knowledge": [
+                "HR is primarily modulated by sympathetic (catecholamine) tone.",
+                "Tachycardia is a compensatory response to low cardiac output or hypoxia.",
+                "True HR may differ from displayed HR if sensors are corrupted.",
+                "Normal resting range: 60-100 bpm."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "true_heart_rate"
+        },
+        {
+            "name": "HREKG",
+            "display_name": "ECG Heart Rate Reading",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "sensor_reading",
+            "short_description": "The heart rate as measured by the ECG monitor.",
+            "extended_description": "The heart rate displayed by the electrocardiogram monitor. Usually reflects the true heart rate but can be corrupted by electrocautery interference, which introduces electrical artefacts into the ECG signal. When corrupted, the displayed rate may be falsely high or erratic.",
+            "sensitivity_hints": "Determined by true heart rate and electrical interference. May not reflect actual heart rate during electrocautery.",
+            "related_domain_knowledge": [
+                "ECG measures electrical activity of the heart.",
+                "Electrocautery creates high-frequency interference on ECG.",
+                "Corrupted ECG may show false tachycardia or irregular rhythm.",
+                "Cross-check with pulse oximetry or arterial waveform HR."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "ecg_heart_rate"
+        },
+        {
+            "name": "HRSAT",
+            "display_name": "Pulse Oximetry Heart Rate",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "sensor_reading",
+            "short_description": "The heart rate as measured by the pulse oximeter.",
+            "extended_description": "The heart rate derived from the pulse oximetry waveform. Usually reflects the true heart rate but can be corrupted by electrocautery interference, which degrades the optical signal. When corrupted, the reading becomes unreliable.",
+            "sensitivity_hints": "Determined by true heart rate and electrical interference. An alternative HR measurement that may also be corrupted.",
+            "related_domain_knowledge": [
+                "Pulse oximeter derives HR from pulsatile optical signal.",
+                "Electrocautery corrupts the optical waveform.",
+                "Poor perfusion (low CO) can also degrade the signal.",
+                "Cross-check with ECG and arterial waveform HR."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "oximetry_heart_rate"
+        },
+        {
+            "name": "HRBP",
+            "display_name": "Arterial Waveform Heart Rate",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "sensor_reading",
+            "short_description": "The heart rate derived from the arterial blood pressure waveform.",
+            "extended_description": "The heart rate calculated from the arterial blood pressure waveform pulse frequency. Usually reflects the true heart rate but can be falsely low if the BP transducer has an error that dampens or distorts the pressure waveform.",
+            "sensitivity_hints": "Determined by true heart rate and pressure sensor error. A third independent HR measurement.",
+            "related_domain_knowledge": [
+                "Derived from counting pressure pulsations per minute.",
+                "BP transducer error (damping, air bubbles) can distort the waveform.",
+                "May show falsely low rate if signal is dampened.",
+                "Unaffected by electrocautery (unlike ECG and pulse ox)."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "arterial_waveform_heart_rate"
+        },
+        {
+            "name": "CO",
+            "display_name": "Cardiac Output",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "haemodynamic",
+            "short_description": "The volume of blood pumped by the heart per minute.",
+            "extended_description": "Cardiac output is the product of heart rate and stroke volume (CO = HR x SV). It represents the total blood flow to the systemic circulation. Low cardiac output leads to tissue hypoperfusion and is a critical finding. Determined by the interaction of heart rate (catecholamine-driven) and stroke volume (preload/contractility-driven).",
+            "sensitivity_hints": "Determined by true heart rate and ventricular ejection volume. Combines with vascular resistance to determine blood pressure.",
+            "related_domain_knowledge": [
+                "CO = heart rate x stroke volume.",
+                "Normal range: 4-8 litres per minute.",
+                "Low CO: hypoperfusion, organ failure risk.",
+                "Measured by thermodilution or Fick method."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "cardiac_output"
+        },
+        {
+            "name": "BP",
+            "display_name": "Blood Pressure",
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "NORMAL",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "haemodynamic_measurement",
+            "short_description": "The systemic arterial blood pressure.",
+            "extended_description": "Arterial blood pressure is the product of cardiac output and total peripheral resistance (BP = CO x TPR). It is the final common pathway of the haemodynamic system. Low BP (hypotension) can result from low cardiac output, low vascular resistance, or both. A critical vital sign.",
+            "sensitivity_hints": "Determined by cardiac output and vascular resistance. The final haemodynamic variable in the causal chain.",
+            "related_domain_knowledge": [
+                "BP = cardiac output x total peripheral resistance.",
+                "Hypotension: low CO (hypovolaemia, LV failure) or low TPR (anaphylaxis).",
+                "Compensatory mechanisms: tachycardia, vasoconstriction.",
+                "Measured invasively (arterial line) and non-invasively (cuff)."
+            ],
+            "references": [
+                "Beinlich1989"
+            ],
+            "llm_name": "blood_pressure"
+        }
+    ],
+    "network_metadata": {
+        "num_variables": 37,
+        "num_edges": 46,
+        "max_in_degree": 4,
+        "max_out_degree": 7,
+        "topological_layers": {
+            "layer_0_root_causes": [
+                "HYPOVOLEMIA",
+                "LVFAILURE",
+                "ANAPHYLAXIS",
+                "PULMEMBOLUS",
+                "INSUFFANESTH",
+                "INTUBATION",
+                "DISCONNECT",
+                "KINKEDTUBE",
+                "ERRLOWOUTPUT",
+                "ERRCAUTER",
+                "FIO2",
+                "MINVOLSET"
+            ],
+            "layer_1_immediate_effects": [
+                "TPR",
+                "SHUNT",
+                "HISTORY",
+                "STROKEVOLUME",
+                "LVEDVOLUME",
+                "PAP",
+                "VENTMACH"
+            ],
+            "layer_2_derived": [
+                "PCWP",
+                "CVP",
+                "VENTTUBE",
+                "VENTLUNG",
+                "PRESS"
+            ],
+            "layer_3_gas_exchange": [
+                "MINVOL",
+                "VENTALV"
+            ],
+            "layer_4_blood_gases": [
+                "PVSAT",
+                "ARTCO2",
+                "EXPCO2"
+            ],
+            "layer_5_integration": [
+                "SAO2",
+                "CATECHOL"
+            ],
+            "layer_6_heart": [
+                "HR"
+            ],
+            "layer_7_outputs": [
+                "HREKG",
+                "HRSAT",
+                "HRBP",
+                "CO"
+            ],
+            "layer_8_final": [
+                "BP"
+            ]
+        },
+        "variable_types": {
+            "binary_true_false": [
+                "HYPOVOLEMIA",
+                "LVFAILURE",
+                "ANAPHYLAXIS",
+                "PULMEMBOLUS",
+                "INSUFFANESTH",
+                "DISCONNECT",
+                "KINKEDTUBE",
+                "ERRLOWOUTPUT",
+                "ERRCAUTER"
+            ],
+            "binary_normal_high": [
+                "SHUNT",
+                "CATECHOL"
+            ],
+            "binary_low_normal": [
+                "FIO2"
+            ],
+            "binary_true_false_history": [
+                "HISTORY"
+            ],
+            "three_state_low_normal_high": [
+                "TPR",
+                "STROKEVOLUME",
+                "LVEDVOLUME",
+                "PAP",
+                "PCWP",
+                "CVP",
+                "PVSAT",
+                "ARTCO2",
+                "SAO2",
+                "HR",
+                "HREKG",
+                "HRSAT",
+                "HRBP",
+                "CO",
+                "BP",
+                "MINVOLSET"
+            ],
+            "four_state_zero_low_normal_high": [
+                "VENTMACH",
+                "VENTTUBE",
+                "VENTLUNG",
+                "VENTALV",
+                "PRESS",
+                "MINVOL",
+                "EXPCO2"
+            ],
+            "three_state_intubation": [
+                "INTUBATION"
+            ]
+        },
+        "functional_modules": {
+            "disease_states": [
+                "HYPOVOLEMIA",
+                "LVFAILURE",
+                "ANAPHYLAXIS",
+                "PULMEMBOLUS",
+                "INSUFFANESTH"
+            ],
+            "equipment_state": [
+                "INTUBATION",
+                "DISCONNECT",
+                "KINKEDTUBE"
+            ],
+            "measurement_artefacts": [
+                "ERRLOWOUTPUT",
+                "ERRCAUTER"
+            ],
+            "ventilator_settings": [
+                "FIO2",
+                "MINVOLSET"
+            ],
+            "ventilation_chain": [
+                "VENTMACH",
+                "VENTTUBE",
+                "VENTLUNG",
+                "VENTALV"
+            ],
+            "blood_gases": [
+                "PVSAT",
+                "ARTCO2",
+                "SAO2"
+            ],
+            "haemodynamics": [
+                "STROKEVOLUME",
+                "LVEDVOLUME",
+                "HR",
+                "CO",
+                "TPR",
+                "BP"
+            ],
+            "haemodynamic_measurements": [
+                "PAP",
+                "PCWP",
+                "CVP"
+            ],
+            "sensor_readings": [
+                "HREKG",
+                "HRSAT",
+                "HRBP"
+            ],
+            "ventilation_measurements": [
+                "PRESS",
+                "MINVOL",
+                "EXPCO2"
+            ],
+            "neuroendocrine": [
+                "CATECHOL"
+            ],
+            "clinical_observation": [
+                "HISTORY"
+            ]
+        }
+    }
+}

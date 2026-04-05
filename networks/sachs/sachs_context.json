@@ -1,0 +1,1181 @@
+{
+    "schema_version": "2.0",
+    "network": "sachs",
+    "domain": "protein_signaling",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a protein signaling network, with disguised variable names to prevent benchmark memorization.",
+    "provenance": {
+        "source_network": "sachs",
+        "source_reference": "Sachs2005",
+        "source_url": "https://www.bnlearn.com/bnrepository/discrete-small.html#sachs",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "high",
+        "notes": "The Sachs network is a classic benchmark for causal discovery from interventional data. Published in Science (2005), it models protein signaling in human T-cells. LLMs may have memorized it. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a protein signaling network modeling phosphorylation cascades in human immune cells.",
+            "Consider signal transduction flow: receptors → kinases → downstream effectors.",
+            "Kinases (PKC, PKA) are central regulatory hubs that phosphorylate multiple targets.",
+            "Phospholipid metabolism (PIP2, PIP3, Plcg) represents membrane signaling.",
+            "MAPK cascade follows: Raf → Mek → Erk pathway.",
+            "Some proteins have multiple upstream regulators (colliders)."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge & naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "base_rate",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "Plcg",
+            "display_name": "Phospholipase C-gamma",
+            "aliases": [
+                "Plcg",
+                "PLC-gamma",
+                "PLCγ"
+            ],
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "AVG",
+                "HIGH"
+            ],
+            "role": "exogenous",
+            "category": "enzyme",
+            "short_description": "Phospholipase enzyme that cleaves membrane phospholipids.",
+            "extended_description": "Phospholipase C-gamma (PLCγ) is a key enzyme in signal transduction that hydrolyzes phosphatidylinositol 4,5-bisphosphate (PIP2) into inositol trisphosphate (IP3) and diacylglycerol (DAG). It is activated by receptor tyrosine kinases and plays a crucial role in calcium signaling and PKC activation. In this network, it acts as an upstream regulator of phospholipid metabolism.",
+            "base_rate": {
+                "LOW": 0.812,
+                "AVG": 0.083,
+                "HIGH": 0.104
+            },
+            "sensitivity_hints": "PLCγ is activated by growth factor receptors. Its activity directly affects PIP2/PIP3 balance through hydrolysis.",
+            "related_domain_knowledge": [
+                "PLCγ cleaves PIP2 to produce IP3 and DAG.",
+                "IP3 triggers calcium release from ER.",
+                "DAG activates protein kinase C (PKC).",
+                "PLCγ is activated by receptor tyrosine kinases."
+            ],
+            "references": [
+                "Sachs2005",
+                "Alberts_MolBio"
+            ],
+            "llm_name": "phospholipase_gamma"
+        },
+        {
+            "name": "PKC",
+            "display_name": "Protein Kinase C",
+            "aliases": [
+                "PKC",
+                "PKC-alpha"
+            ],
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "AVG",
+                "HIGH"
+            ],
+            "role": "exogenous",
+            "category": "kinase",
+            "short_description": "Serine/threonine kinase activated by calcium and diacylglycerol.",
+            "extended_description": "Protein Kinase C (PKC) is a family of serine/threonine kinases that play central roles in signal transduction. PKC is activated by diacylglycerol (DAG) and calcium ions. Once activated, PKC phosphorylates numerous substrate proteins, affecting cell growth, differentiation, and apoptosis. In T-cell signaling, PKC is a major hub that regulates multiple downstream pathways.",
+            "base_rate": {
+                "LOW": 0.423,
+                "AVG": 0.482,
+                "HIGH": 0.095
+            },
+            "sensitivity_hints": "PKC is a central signaling hub. Its activation state affects multiple downstream targets including Raf, p38, Jnk, and Mek. Consider it as a potential common cause.",
+            "related_domain_knowledge": [
+                "PKC is activated by DAG (from PLC activity) and calcium.",
+                "PKC phosphorylates Raf to initiate MAPK cascade.",
+                "PKC also activates stress kinases (p38, Jnk).",
+                "Multiple PKC isoforms exist with different substrates."
+            ],
+            "references": [
+                "Sachs2005",
+                "Newton2010PKC"
+            ],
+            "llm_name": "protein_kinase_c"
+        },
+        {
+            "name": "PIP3",
+            "display_name": "Phosphatidylinositol-3,4,5-trisphosphate",
+            "aliases": [
+                "PIP3",
+                "PI(3,4,5)P3"
+            ],
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "AVG",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "lipid_second_messenger",
+            "short_description": "Membrane phospholipid that recruits signaling proteins.",
+            "extended_description": "PIP3 is a phospholipid second messenger generated by PI3-kinase phosphorylation of PIP2. PIP3 recruits proteins containing pleckstrin homology (PH) domains to the plasma membrane, including Akt/PKB. The balance between PIP2 and PIP3 is regulated by PI3K (generates PIP3) and PTEN (degrades PIP3). PLCγ activity affects this balance indirectly.",
+            "sensitivity_hints": "PIP3 levels depend on PLCγ activity. PIP3 is a key regulator of Akt recruitment and activation.",
+            "related_domain_knowledge": [
+                "PIP3 is generated from PIP2 by PI3-kinase.",
+                "PIP3 recruits Akt to the membrane for activation.",
+                "PTEN phosphatase degrades PIP3 back to PIP2.",
+                "PIP3 accumulation drives cell survival signals."
+            ],
+            "references": [
+                "Sachs2005",
+                "Cantley2002PI3K"
+            ],
+            "llm_name": "pip3_lipid"
+        },
+        {
+            "name": "PKA",
+            "display_name": "Protein Kinase A",
+            "aliases": [
+                "PKA",
+                "cAMP-dependent protein kinase"
+            ],
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "AVG",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "kinase",
+            "short_description": "cAMP-dependent kinase that regulates metabolism and gene expression.",
+            "extended_description": "Protein Kinase A (PKA) is activated by cyclic AMP (cAMP), which is produced when G-protein coupled receptors activate adenylyl cyclase. PKA phosphorylates many substrates involved in metabolism, gene transcription, and cell cycle regulation. In this signaling network, PKA acts downstream of PKC and regulates multiple effectors including Raf, Mek, Erk, and Akt.",
+            "sensitivity_hints": "PKA is influenced by PKC. It affects multiple downstream targets, making it another signaling hub in this network.",
+            "related_domain_knowledge": [
+                "PKA is activated by cAMP binding to regulatory subunits.",
+                "PKA can both activate and inhibit Raf depending on context.",
+                "PKA phosphorylates CREB transcription factor.",
+                "Cross-talk exists between PKA and PKC pathways."
+            ],
+            "references": [
+                "Sachs2005",
+                "Taylor2012PKA"
+            ],
+            "llm_name": "protein_kinase_a"
+        },
+        {
+            "name": "Raf",
+            "display_name": "Raf Kinase",
+            "aliases": [
+                "Raf",
+                "Raf-1",
+                "c-Raf"
+            ],
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "AVG",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "kinase",
+            "short_description": "MAP kinase kinase kinase that initiates the MAPK cascade.",
+            "extended_description": "Raf is a serine/threonine kinase at the top of the classical MAPK cascade. When activated (typically by Ras-GTP binding), Raf phosphorylates and activates MEK, which then activates ERK. Raf activity is regulated by both PKA and PKC through phosphorylation at different sites. This makes Raf a convergence point for multiple signaling inputs.",
+            "sensitivity_hints": "Raf is regulated by both PKA and PKC. It is the initiator of the Raf→Mek→Erk cascade. Consider it as a collider with two parent kinases.",
+            "related_domain_knowledge": [
+                "Raf is activated by Ras-GTP at the membrane.",
+                "PKC can activate Raf through phosphorylation.",
+                "PKA can inhibit Raf at different phosphorylation sites.",
+                "Raf→Mek→Erk is the classical MAPK pathway."
+            ],
+            "references": [
+                "Sachs2005",
+                "Wellbrock2004Raf"
+            ],
+            "llm_name": "raf_kinase"
+        },
+        {
+            "name": "Jnk",
+            "display_name": "c-Jun N-terminal Kinase",
+            "aliases": [
+                "Jnk",
+                "JNK",
+                "SAPK"
+            ],
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "AVG",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "kinase",
+            "short_description": "Stress-activated protein kinase involved in apoptosis.",
+            "extended_description": "JNK (c-Jun N-terminal Kinase) is a stress-activated MAP kinase that phosphorylates the transcription factor c-Jun. JNK is activated by various cellular stresses including UV radiation, inflammatory cytokines, and osmotic shock. In this network, JNK is regulated by PKA and PKC, representing the stress response arm of T-cell signaling.",
+            "sensitivity_hints": "JNK is a stress response kinase downstream of PKA and PKC. Its activation leads to c-Jun phosphorylation and AP-1 transcriptional activity.",
+            "related_domain_knowledge": [
+                "JNK is part of the stress-activated MAPK family.",
+                "JNK phosphorylates c-Jun on Ser63/Ser73.",
+                "JNK activation can promote apoptosis.",
+                "JNK pathway is distinct from the Raf/Mek/Erk cascade."
+            ],
+            "references": [
+                "Sachs2005",
+                "Davis2000JNK"
+            ],
+            "llm_name": "jnk_kinase"
+        },
+        {
+            "name": "PIP2",
+            "display_name": "Phosphatidylinositol-4,5-bisphosphate",
+            "aliases": [
+                "PIP2",
+                "PI(4,5)P2"
+            ],
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "AVG",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "lipid_second_messenger",
+            "short_description": "Membrane phospholipid and precursor for second messengers.",
+            "extended_description": "PIP2 is a membrane phospholipid that serves as a precursor for multiple second messengers. PLCγ cleaves PIP2 to produce IP3 (releases calcium) and DAG (activates PKC). PI3K phosphorylates PIP2 to produce PIP3 (activates Akt). Thus, PIP2 is a critical node connecting receptor activation to downstream signaling cascades.",
+            "sensitivity_hints": "PIP2 levels are affected by both PLCγ (consumption) and PIP3 (interconversion). It is a shared precursor for multiple signaling pathways.",
+            "related_domain_knowledge": [
+                "PIP2 is cleaved by PLC to produce IP3 and DAG.",
+                "PIP2 is phosphorylated by PI3K to produce PIP3.",
+                "PIP2 also regulates ion channels and cytoskeleton.",
+                "PIP2 depletion affects multiple downstream pathways."
+            ],
+            "references": [
+                "Sachs2005",
+                "DiPaolo2006PIP2"
+            ],
+            "llm_name": "pip2_lipid"
+        },
+        {
+            "name": "P38",
+            "display_name": "p38 MAP Kinase",
+            "aliases": [
+                "P38",
+                "p38",
+                "MAPK14"
+            ],
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "AVG",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "kinase",
+            "short_description": "Stress-activated kinase involved in inflammation and apoptosis.",
+            "extended_description": "p38 MAPK is a stress-activated kinase that responds to inflammatory cytokines, osmotic stress, and other cellular stresses. It phosphorylates numerous substrates involved in inflammation, cell cycle, and apoptosis. In T-cell signaling, p38 is regulated by PKA and PKC, similar to JNK, and mediates stress responses.",
+            "sensitivity_hints": "p38 is a stress response kinase like JNK. Both are downstream of PKA and PKC but represent parallel stress pathways.",
+            "related_domain_knowledge": [
+                "p38 is activated by MKK3/MKK6 kinases.",
+                "p38 regulates inflammatory cytokine production.",
+                "p38 can induce cell cycle arrest and apoptosis.",
+                "p38 and JNK have overlapping but distinct substrates."
+            ],
+            "references": [
+                "Sachs2005",
+                "Cuadrado2010p38"
+            ],
+            "llm_name": "p38_kinase"
+        },
+        {
+            "name": "Mek",
+            "display_name": "MEK (MAPK/ERK Kinase)",
+            "aliases": [
+                "Mek",
+                "MEK1/2",
+                "MAP2K"
+            ],
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "AVG",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "kinase",
+            "short_description": "Dual-specificity kinase that activates ERK.",
+            "extended_description": "MEK (MAPK/ERK Kinase) is a dual-specificity kinase that phosphorylates ERK on both threonine and tyrosine residues. MEK is activated by Raf and is the obligate intermediate in the Raf→Mek→Erk cascade. MEK activity is also influenced by PKA and PKC through their effects on Raf.",
+            "sensitivity_hints": "MEK is downstream of Raf and upstream of ERK. It integrates signals from PKA, PKC, and Raf. Multiple parents make it a potential collider.",
+            "related_domain_knowledge": [
+                "MEK is a dual-specificity kinase (Thr and Tyr).",
+                "MEK is the only known activator of ERK.",
+                "MEK inhibitors (e.g., trametinib) are used in cancer therapy.",
+                "MEK activity reflects integrated upstream signaling."
+            ],
+            "references": [
+                "Sachs2005",
+                "Roskoski2012MEK"
+            ],
+            "llm_name": "mek_kinase"
+        },
+        {
+            "name": "Erk",
+            "display_name": "ERK (Extracellular signal-Regulated Kinase)",
+            "aliases": [
+                "Erk",
+                "ERK1/2",
+                "MAPK1/3"
+            ],
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "AVG",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "kinase",
+            "short_description": "MAP kinase that regulates proliferation and differentiation.",
+            "extended_description": "ERK (Extracellular signal-Regulated Kinase) is the terminal kinase in the classical MAPK cascade. Upon activation by MEK, ERK phosphorylates numerous cytoplasmic and nuclear substrates that regulate cell proliferation, differentiation, and survival. ERK can translocate to the nucleus to activate transcription factors.",
+            "sensitivity_hints": "ERK is downstream of MEK and PKA. It is a key effector of growth factor signaling and affects Akt through cross-talk.",
+            "related_domain_knowledge": [
+                "ERK is activated by dual phosphorylation by MEK.",
+                "ERK has hundreds of substrates in cytoplasm and nucleus.",
+                "ERK activation promotes cell proliferation.",
+                "ERK activity is a common readout of growth factor signaling."
+            ],
+            "references": [
+                "Sachs2005",
+                "Roskoski2012ERK"
+            ],
+            "llm_name": "erk_kinase"
+        },
+        {
+            "name": "Akt",
+            "display_name": "Akt/Protein Kinase B",
+            "aliases": [
+                "Akt",
+                "PKB",
+                "Akt1"
+            ],
+            "type": "categorical",
+            "states": [
+                "LOW",
+                "AVG",
+                "HIGH"
+            ],
+            "role": "endogenous",
+            "category": "kinase",
+            "short_description": "Serine/threonine kinase that promotes cell survival.",
+            "extended_description": "Akt (also called Protein Kinase B) is a key regulator of cell survival, growth, and metabolism. Akt is recruited to the membrane by PIP3 and is then phosphorylated by PDK1 and mTORC2. Active Akt phosphorylates many substrates that inhibit apoptosis and promote cell cycle progression. In this network, Akt is influenced by PKA and ERK.",
+            "sensitivity_hints": "Akt is a pro-survival kinase regulated by PKA and ERK. It represents the cell survival arm of the signaling network.",
+            "related_domain_knowledge": [
+                "Akt is recruited to membrane by PIP3 binding.",
+                "Akt inhibits pro-apoptotic proteins (Bad, FoxO).",
+                "Akt promotes glucose uptake and metabolism.",
+                "Akt pathway is frequently hyperactivated in cancer."
+            ],
+            "references": [
+                "Sachs2005",
+                "Manning2007Akt"
+            ],
+            "llm_name": "akt_kinase"
+        }
+    ],
+    "constraints": {
+        "forbidden_edges": [
+            [
+                "erk_kinase",
+                "mek_kinase"
+            ],
+            [
+                "akt_kinase",
+                "erk_kinase"
+            ],
+            [
+                "mek_kinase",
+                "raf_kinase"
+            ],
+            [
+                "pip2_lipid",
+                "pip3_lipid"
+            ],
+            [
+                "pip2_lipid",
+                "phospholipase_gamma"
+            ],
+            [
+                "pip3_lipid",
+                "phospholipase_gamma"
+            ],
+            [
+                "jnk_kinase",
+                "protein_kinase_a"
+            ],
+            [
+                "jnk_kinase",
+                "protein_kinase_c"
+            ],
+            [
+                "p38_kinase",
+                "protein_kinase_a"
+            ],
+            [
+                "p38_kinase",
+                "protein_kinase_c"
+            ],
+            [
+                "raf_kinase",
+                "protein_kinase_a"
+            ],
+            [
+                "raf_kinase",
+                "protein_kinase_c"
+            ]
+        ],
+        "partial_order": [
+            [
+                "phospholipase_gamma",
+                "pip3_lipid"
+            ],
+            [
+                "phospholipase_gamma",
+                "pip2_lipid"
+            ],
+            [
+                "pip3_lipid",
+                "pip2_lipid"
+            ],
+            [
+                "protein_kinase_c",
+                "protein_kinase_a"
+            ],
+            [
+                "protein_kinase_c",
+                "raf_kinase"
+            ],
+            [
+                "protein_kinase_c",
+                "jnk_kinase"
+            ],
+            [
+                "protein_kinase_c",
+                "p38_kinase"
+            ],
+            [
+                "protein_kinase_c",
+                "mek_kinase"
+            ],
+            [
+                "protein_kinase_a",
+                "raf_kinase"
+            ],
+            [
+                "protein_kinase_a",
+                "jnk_kinase"
+            ],
+            [
+                "protein_kinase_a",
+                "p38_kinase"
+            ],
+            [
+                "protein_kinase_a",
+                "mek_kinase"
+            ],
+            [
+                "protein_kinase_a",
+                "erk_kinase"
+            ],
+            [
+                "protein_kinase_a",
+                "akt_kinase"
+            ],
+            [
+                "raf_kinase",
+                "mek_kinase"
+            ],
+            [
+                "mek_kinase",
+                "erk_kinase"
+            ],
+            [
+                "erk_kinase",
+                "akt_kinase"
+            ]
+        ],
+        "tiers": {
+            "upstream_enzymes": [
+                "phospholipase_gamma",
+                "protein_kinase_c"
+            ],
+            "lipid_messengers": [
+                "pip3_lipid",
+                "pip2_lipid"
+            ],
+            "central_kinases": [
+                "protein_kinase_a",
+                "raf_kinase"
+            ],
+            "mapk_cascade": [
+                "mek_kinase",
+                "erk_kinase"
+            ],
+            "stress_kinases": [
+                "jnk_kinase",
+                "p38_kinase"
+            ],
+            "effector_kinases": [
+                "akt_kinase"
+            ]
+        },
+        "notes": "Constraints reflect signal transduction flow: membrane enzymes → lipid messengers → kinase cascades → effectors."
+    },
+    "causal_principles": [
+        {
+            "id": "signal_transduction_flow",
+            "statement": "Signals flow from membrane receptors through second messengers and kinase cascades to transcriptional effectors.",
+            "references": [
+                "Alberts_MolBio"
+            ]
+        },
+        {
+            "id": "kinase_phosphorylation",
+            "statement": "Kinases activate or inhibit substrates through phosphorylation. The phosphorylation event is the causal mechanism.",
+            "references": [
+                "Alberts_MolBio"
+            ]
+        },
+        {
+            "id": "mapk_cascade",
+            "statement": "The MAPK cascade (Raf→Mek→Erk) is a linear signaling module where each kinase activates the next.",
+            "references": [
+                "Roskoski2012ERK"
+            ]
+        },
+        {
+            "id": "convergent_regulation",
+            "statement": "Key signaling nodes (Raf, Mek) receive inputs from multiple upstream regulators (PKA, PKC), creating convergence points.",
+            "references": [
+                "Sachs2005"
+            ]
+        },
+        {
+            "id": "lipid_messenger_balance",
+            "statement": "PIP2 and PIP3 levels are inversely related through PI3K and PTEN activity, and PLCγ consumes PIP2.",
+            "references": [
+                "Cantley2002PI3K"
+            ]
+        }
+    ],
+    "ground_truth": {
+        "v_structures": [
+            {
+                "canonical": [
+                    "PKA",
+                    "Raf",
+                    "PKC"
+                ],
+                "experiment": [
+                    "protein_kinase_a",
+                    "raf_kinase",
+                    "protein_kinase_c"
+                ],
+                "description": "PKA and PKC both regulate Raf kinase"
+            },
+            {
+                "canonical": [
+                    "PKA",
+                    "Mek",
+                    "PKC"
+                ],
+                "experiment": [
+                    "protein_kinase_a",
+                    "mek_kinase",
+                    "protein_kinase_c"
+                ],
+                "description": "PKA and PKC both regulate Mek through multiple paths"
+            },
+            {
+                "canonical": [
+                    "PKA",
+                    "Jnk",
+                    "PKC"
+                ],
+                "experiment": [
+                    "protein_kinase_a",
+                    "jnk_kinase",
+                    "protein_kinase_c"
+                ],
+                "description": "PKA and PKC both regulate JNK stress kinase"
+            },
+            {
+                "canonical": [
+                    "PKA",
+                    "P38",
+                    "PKC"
+                ],
+                "experiment": [
+                    "protein_kinase_a",
+                    "p38_kinase",
+                    "protein_kinase_c"
+                ],
+                "description": "PKA and PKC both regulate p38 stress kinase"
+            },
+            {
+                "canonical": [
+                    "PIP3",
+                    "PIP2",
+                    "Plcg"
+                ],
+                "experiment": [
+                    "pip3_lipid",
+                    "pip2_lipid",
+                    "phospholipase_gamma"
+                ],
+                "description": "PIP3 and PLCγ both affect PIP2 levels"
+            },
+            {
+                "canonical": [
+                    "Mek",
+                    "Erk",
+                    "PKA"
+                ],
+                "experiment": [
+                    "mek_kinase",
+                    "erk_kinase",
+                    "protein_kinase_a"
+                ],
+                "description": "Mek and PKA both regulate Erk"
+            },
+            {
+                "canonical": [
+                    "Erk",
+                    "Akt",
+                    "PKA"
+                ],
+                "experiment": [
+                    "erk_kinase",
+                    "akt_kinase",
+                    "protein_kinase_a"
+                ],
+                "description": "Erk and PKA both regulate Akt"
+            }
+        ],
+        "conditional_independencies": [
+            {
+                "statement": "Plcg ⊥ PKC",
+                "experiment_names": "phospholipase_gamma ⊥ protein_kinase_c",
+                "description": "PLCγ and PKC are marginally independent root nodes"
+            },
+            {
+                "statement": "PIP3 ⊥ PKC | Plcg",
+                "experiment_names": "pip3_lipid ⊥ protein_kinase_c | phospholipase_gamma",
+                "description": "PIP3 and PKC are independent given PLCγ"
+            },
+            {
+                "statement": "Jnk ⊥ P38 | PKA, PKC",
+                "experiment_names": "jnk_kinase ⊥ p38_kinase | protein_kinase_a, protein_kinase_c",
+                "description": "JNK and p38 are conditionally independent given their common parents"
+            },
+            {
+                "statement": "Jnk ⊥ Raf | PKA, PKC",
+                "experiment_names": "jnk_kinase ⊥ raf_kinase | protein_kinase_a, protein_kinase_c",
+                "description": "JNK and Raf are conditionally independent given PKA and PKC"
+            },
+            {
+                "statement": "PIP2 ⊥ PKA | Plcg, PIP3",
+                "experiment_names": "pip2_lipid ⊥ protein_kinase_a | phospholipase_gamma, pip3_lipid",
+                "description": "PIP2 and PKA are independent given lipid pathway variables"
+            }
+        ],
+        "markov_blanket": {
+            "canonical": {
+                "Plcg": [
+                    "PIP3",
+                    "PIP2"
+                ],
+                "PKC": [
+                    "PKA",
+                    "Raf",
+                    "Jnk",
+                    "P38",
+                    "Mek"
+                ],
+                "PIP3": [
+                    "Plcg",
+                    "PIP2"
+                ],
+                "PKA": [
+                    "PKC",
+                    "Raf",
+                    "Jnk",
+                    "P38",
+                    "Mek",
+                    "Erk",
+                    "Akt"
+                ],
+                "Raf": [
+                    "PKA",
+                    "PKC",
+                    "Mek"
+                ],
+                "Jnk": [
+                    "PKA",
+                    "PKC"
+                ],
+                "PIP2": [
+                    "Plcg",
+                    "PIP3"
+                ],
+                "P38": [
+                    "PKA",
+                    "PKC"
+                ],
+                "Mek": [
+                    "PKA",
+                    "PKC",
+                    "Raf",
+                    "Erk"
+                ],
+                "Erk": [
+                    "PKA",
+                    "Mek",
+                    "Akt"
+                ],
+                "Akt": [
+                    "PKA",
+                    "Erk"
+                ]
+            },
+            "experiment": {
+                "phospholipase_gamma": [
+                    "pip3_lipid",
+                    "pip2_lipid"
+                ],
+                "protein_kinase_c": [
+                    "protein_kinase_a",
+                    "raf_kinase",
+                    "jnk_kinase",
+                    "p38_kinase",
+                    "mek_kinase"
+                ],
+                "pip3_lipid": [
+                    "phospholipase_gamma",
+                    "pip2_lipid"
+                ],
+                "protein_kinase_a": [
+                    "protein_kinase_c",
+                    "raf_kinase",
+                    "jnk_kinase",
+                    "p38_kinase",
+                    "mek_kinase",
+                    "erk_kinase",
+                    "akt_kinase"
+                ],
+                "raf_kinase": [
+                    "protein_kinase_a",
+                    "protein_kinase_c",
+                    "mek_kinase"
+                ],
+                "jnk_kinase": [
+                    "protein_kinase_a",
+                    "protein_kinase_c"
+                ],
+                "pip2_lipid": [
+                    "phospholipase_gamma",
+                    "pip3_lipid"
+                ],
+                "p38_kinase": [
+                    "protein_kinase_a",
+                    "protein_kinase_c"
+                ],
+                "mek_kinase": [
+                    "protein_kinase_a",
+                    "protein_kinase_c",
+                    "raf_kinase",
+                    "erk_kinase"
+                ],
+                "erk_kinase": [
+                    "protein_kinase_a",
+                    "mek_kinase",
+                    "akt_kinase"
+                ],
+                "akt_kinase": [
+                    "protein_kinase_a",
+                    "erk_kinase"
+                ]
+            }
+        },
+        "num_nodes": 11,
+        "num_edges": 17,
+        "max_parents": 3,
+        "max_children": 6,
+        "edges": [
+            [
+                "Plcg",
+                "PIP3"
+            ],
+            [
+                "Plcg",
+                "PIP2"
+            ],
+            [
+                "PIP3",
+                "PIP2"
+            ],
+            [
+                "PKC",
+                "PKA"
+            ],
+            [
+                "PKC",
+                "Raf"
+            ],
+            [
+                "PKC",
+                "Jnk"
+            ],
+            [
+                "PKC",
+                "P38"
+            ],
+            [
+                "PKC",
+                "Mek"
+            ],
+            [
+                "PKA",
+                "Raf"
+            ],
+            [
+                "PKA",
+                "Jnk"
+            ],
+            [
+                "PKA",
+                "P38"
+            ],
+            [
+                "PKA",
+                "Mek"
+            ],
+            [
+                "PKA",
+                "Erk"
+            ],
+            [
+                "PKA",
+                "Akt"
+            ],
+            [
+                "Raf",
+                "Mek"
+            ],
+            [
+                "Mek",
+                "Erk"
+            ],
+            [
+                "Erk",
+                "Akt"
+            ]
+        ]
+    },
+    "conditional_probability_tables": {
+        "notes": "CPTs extracted from sachs.xdsl. These should NOT be provided to LLMs during structure learning.",
+        "source_file": "sachs.xdsl",
+        "tables": {
+            "Plcg": {
+                "states": [
+                    "AVG",
+                    "HIGH",
+                    "LOW"
+                ],
+                "parents": [],
+                "probabilities": {
+                    "AVG": 0.083,
+                    "HIGH": 0.104,
+                    "LOW": 0.812
+                }
+            },
+            "PKC": {
+                "states": [
+                    "AVG",
+                    "HIGH",
+                    "LOW"
+                ],
+                "parents": [],
+                "probabilities": {
+                    "AVG": 0.482,
+                    "HIGH": 0.095,
+                    "LOW": 0.423
+                }
+            },
+            "PIP3": {
+                "states": [
+                    "AVG",
+                    "HIGH",
+                    "LOW"
+                ],
+                "parents": [
+                    "Plcg"
+                ],
+                "note": "CPT has 9 entries (3 states × 3 parent states)"
+            },
+            "PKA": {
+                "states": [
+                    "AVG",
+                    "HIGH",
+                    "LOW"
+                ],
+                "parents": [
+                    "PKC"
+                ],
+                "note": "CPT has 9 entries (3 states × 3 parent states)"
+            },
+            "Raf": {
+                "states": [
+                    "AVG",
+                    "HIGH",
+                    "LOW"
+                ],
+                "parents": [
+                    "PKA",
+                    "PKC"
+                ],
+                "note": "CPT has 27 entries (3 states × 9 parent combinations)"
+            },
+            "Jnk": {
+                "states": [
+                    "AVG",
+                    "HIGH",
+                    "LOW"
+                ],
+                "parents": [
+                    "PKA",
+                    "PKC"
+                ],
+                "note": "CPT has 27 entries"
+            },
+            "PIP2": {
+                "states": [
+                    "AVG",
+                    "HIGH",
+                    "LOW"
+                ],
+                "parents": [
+                    "PIP3",
+                    "Plcg"
+                ],
+                "note": "CPT has 27 entries"
+            },
+            "P38": {
+                "states": [
+                    "AVG",
+                    "HIGH",
+                    "LOW"
+                ],
+                "parents": [
+                    "PKA",
+                    "PKC"
+                ],
+                "note": "CPT has 27 entries"
+            },
+            "Mek": {
+                "states": [
+                    "AVG",
+                    "HIGH",
+                    "LOW"
+                ],
+                "parents": [
+                    "PKA",
+                    "PKC",
+                    "Raf"
+                ],
+                "note": "CPT has 81 entries (3 states × 27 parent combinations)"
+            },
+            "Erk": {
+                "states": [
+                    "AVG",
+                    "HIGH",
+                    "LOW"
+                ],
+                "parents": [
+                    "Mek",
+                    "PKA"
+                ],
+                "note": "CPT has 27 entries"
+            },
+            "Akt": {
+                "states": [
+                    "AVG",
+                    "HIGH",
+                    "LOW"
+                ],
+                "parents": [
+                    "Erk",
+                    "PKA"
+                ],
+                "note": "CPT has 27 entries"
+            }
+        }
+    },
+    "references": [
+        {
+            "id": "Sachs2005",
+            "title": "Causal Protein-Signaling Networks Derived from Multiparameter Single-Cell Data",
+            "authors": "Karen Sachs, Omar Perez, Dana Pe'er, Douglas A. Lauffenburger, Garry P. Nolan",
+            "type": "article",
+            "journal": "Science",
+            "volume": "308",
+            "issue": "5721",
+            "pages": "523-529",
+            "year": 2005,
+            "doi": "10.1126/science.1105809",
+            "url": "https://www.science.org/doi/10.1126/science.1105809",
+            "why_relevant": "Original publication of the Sachs network. Demonstrates causal discovery from flow cytometry data with interventions."
+        },
+        {
+            "id": "Alberts_MolBio",
+            "title": "Molecular Biology of the Cell",
+            "authors": "Bruce Alberts et al.",
+            "type": "book",
+            "year": 2022,
+            "edition": "7th",
+            "why_relevant": "Standard reference for cell signaling pathways and molecular mechanisms."
+        },
+        {
+            "id": "Cantley2002PI3K",
+            "title": "The Phosphoinositide 3-Kinase Pathway",
+            "authors": "Lewis C. Cantley",
+            "type": "article",
+            "journal": "Science",
+            "year": 2002,
+            "why_relevant": "Review of PI3K/PIP3/Akt pathway relevant to lipid signaling in the network."
+        },
+        {
+            "id": "Newton2010PKC",
+            "title": "Protein kinase C: poised to signal",
+            "authors": "Alexandra C. Newton",
+            "type": "article",
+            "journal": "American Journal of Physiology",
+            "year": 2010,
+            "why_relevant": "Review of PKC structure, activation, and substrates."
+        }
+    ],
+    "model_structure": {
+        "description": "Protein signaling network in human T-cells derived from flow cytometry with interventional data.",
+        "node_count": 11,
+        "edge_count": 17,
+        "hierarchy": {
+            "level_0_receptors": [
+                "Plcg",
+                "PKC"
+            ],
+            "level_1_lipid_messengers": [
+                "PIP3"
+            ],
+            "level_2_central_kinases": [
+                "PKA",
+                "PIP2"
+            ],
+            "level_3_mapk_initiators": [
+                "Raf",
+                "Jnk",
+                "P38"
+            ],
+            "level_4_mapk_cascade": [
+                "Mek"
+            ],
+            "level_5_effectors": [
+                "Erk",
+                "Akt"
+            ]
+        },
+        "variable_types": {
+            "discrete_3_state": [
+                "Plcg",
+                "PKC",
+                "PIP3",
+                "PKA",
+                "Raf",
+                "Jnk",
+                "PIP2",
+                "P38",
+                "Mek",
+                "Erk",
+                "Akt"
+            ]
+        },
+        "functional_modules": {
+            "lipid_signaling": [
+                "Plcg",
+                "PIP3",
+                "PIP2"
+            ],
+            "kinase_hub": [
+                "PKC",
+                "PKA"
+            ],
+            "mapk_cascade": [
+                "Raf",
+                "Mek",
+                "Erk"
+            ],
+            "stress_response": [
+                "Jnk",
+                "P38"
+            ],
+            "survival_signaling": [
+                "Akt"
+            ]
+        }
+    },
+    "data_context": {
+        "source": "Flow cytometry of human T-cells",
+        "cell_type": "Primary human CD4+ T lymphocytes",
+        "measurements": "Intracellular phospho-protein levels",
+        "interventions": [
+            "Anti-CD3/CD28 (T-cell receptor stimulation)",
+            "ICAM-2 (adhesion molecule)",
+            "PMA (PKC activator)",
+            "β2cAMP (PKA activator)",
+            "Various inhibitors"
+        ],
+        "sample_size": "~7,500 cells across 14 experimental conditions",
+        "notes": [
+            "Data includes both observational and interventional conditions.",
+            "Single-cell measurements allow detection of cell-to-cell variability.",
+            "Phosphorylation states discretized into LOW/AVG/HIGH based on expression levels.",
+            "Ground truth validated against literature knowledge of signaling pathways."
+        ]
+    }
+}

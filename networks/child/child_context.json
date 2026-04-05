@@ -1,0 +1,550 @@
+{
+    "schema_version": "2.0",
+    "network": "child",
+    "domain": "neonatal_cardiology",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a neonatal congenital heart disease diagnostic network, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "child",
+        "source_reference": "Spiegelhalter1992",
+        "source_url": "https://www.bnlearn.com/bnrepository/discrete-medium.html#child",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "high",
+        "notes": "The CHILD network from Spiegelhalter et al. (1992) models the diagnosis of congenital heart disease in newborns. It has 20 variables and 25 edges. Originally developed at Great Ormond Street Hospital, London. LLMs may have memorised this network."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a neonatal diagnostic network for congenital heart disease in newborns.",
+            "The central variable is the underlying disease, which causes multiple downstream physiological effects.",
+            "Diseases include cyanotic heart defects (transposition, Fallot's tetralogy, pulmonary atresia, TAPVD) and non-cardiac lung disease.",
+            "Consider the causal chain: birth history -> disease -> physiology -> measurements -> clinical reports.",
+            "Blood flow through the ductus arteriosus and cardiac mixing determine oxygen distribution.",
+            "Lung pathology and abnormal blood flow produce characteristic chest X-ray patterns.",
+            "Clinical observations (grunting, oxygen saturations) are downstream of physiological state.",
+            "Reports (X-ray report, CO2 report, grunting report, LVH report) are noisy observations of underlying measurements.",
+            "Oxygen saturation differs between upper and lower body depending on the mixing pattern and duct flow direction."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, sensitivity hints, domain knowledge, and references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "BirthAsphyxia",
+            "display_name": "Birth Asphyxia",
+            "type": "binary",
+            "states": [
+                "yes",
+                "no"
+            ],
+            "role": "exogenous",
+            "category": "birth_history",
+            "short_description": "Whether the newborn experienced oxygen deprivation during birth.",
+            "extended_description": "Birth asphyxia refers to insufficient oxygen supply to the infant during the perinatal period. It is a root cause that influences the likelihood of various cardiac and pulmonary conditions presenting in the neonatal period.",
+            "sensitivity_hints": "Upstream cause that influences disease presentation. Consider as a risk factor for certain diagnoses.",
+            "related_domain_knowledge": [
+                "Perinatal asphyxia can mimic or exacerbate congenital heart disease symptoms.",
+                "Asphyxia increases the probability of persistent foetal circulation (PFC).",
+                "It is assessed via Apgar score and cord blood gases."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "perinatal_oxygen_deprivation"
+        },
+        {
+            "name": "Disease",
+            "display_name": "Underlying Disease",
+            "type": "categorical",
+            "states": [
+                "PFC",
+                "TGA",
+                "Fallot",
+                "PAIVS",
+                "TAPVD",
+                "Lung"
+            ],
+            "role": "endogenous",
+            "category": "diagnosis",
+            "short_description": "The underlying congenital heart disease or lung condition.",
+            "extended_description": "The primary diagnosis, which may be persistent foetal circulation (PFC), transposition of the great arteries (TGA), tetralogy of Fallot, pulmonary atresia with intact ventricular septum (PAIVS), total anomalous pulmonary venous drainage (TAPVD), or primary lung disease. This is the central causal variable driving most downstream observations.",
+            "sensitivity_hints": "Central hub variable. Causes most physiological variables. Consider it as the main upstream cause of cardiac and pulmonary findings.",
+            "related_domain_knowledge": [
+                "Each disease has a characteristic pattern of blood flow and oxygenation.",
+                "TGA involves reversed great arteries, requiring mixing for survival.",
+                "Fallot's tetralogy causes right-to-left shunting and cyanosis.",
+                "TAPVD involves anomalous pulmonary venous return causing mixing.",
+                "PFC is a functional (not structural) cause of cyanosis."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "neonatal_cardiac_diagnosis"
+        },
+        {
+            "name": "Sick",
+            "display_name": "Clinical Illness Severity",
+            "type": "binary",
+            "states": [
+                "yes",
+                "no"
+            ],
+            "role": "endogenous",
+            "category": "clinical_status",
+            "short_description": "Whether the newborn appears clinically unwell.",
+            "extended_description": "A global clinical assessment of whether the infant appears sick. Determined by the underlying disease and influences other clinical observations such as grunting and age at presentation.",
+            "sensitivity_hints": "Caused by the disease. Influences clinical signs like grunting and age at presentation.",
+            "related_domain_knowledge": [
+                "Sicker infants tend to present earlier (younger age).",
+                "Clinical sickness influences respiratory signs like grunting.",
+                "Some diseases cause more acute illness than others."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "clinical_illness"
+        },
+        {
+            "name": "Age",
+            "display_name": "Age at Presentation",
+            "type": "ordinal",
+            "states": [
+                "0-3_days",
+                "4-10_days",
+                "11-30_days"
+            ],
+            "role": "endogenous",
+            "category": "clinical_status",
+            "short_description": "The age of the newborn when presenting for diagnosis.",
+            "extended_description": "The age at which the infant comes to clinical attention. More severe diseases and sicker infants tend to present earlier. Both the underlying disease and the degree of clinical illness influence presentation age.",
+            "sensitivity_hints": "Caused by both disease type and illness severity. Earlier presentation suggests more severe pathology.",
+            "related_domain_knowledge": [
+                "Critical heart defects typically present within the first few days of life.",
+                "Less severe defects may not be noticed until after the first week.",
+                "Duct-dependent lesions present when the ductus arteriosus begins to close."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "presentation_age"
+        },
+        {
+            "name": "DuctFlow",
+            "display_name": "Ductus Arteriosus Flow",
+            "type": "categorical",
+            "states": [
+                "Lt_to_Rt",
+                "None",
+                "Rt_to_Lt"
+            ],
+            "role": "endogenous",
+            "category": "haemodynamics",
+            "short_description": "Direction of blood flow through the ductus arteriosus.",
+            "extended_description": "The patent ductus arteriosus allows blood to flow between the aorta and pulmonary artery. Flow direction depends on the pressure gradient, which is determined by the underlying cardiac anatomy. Left-to-right flow occurs in normal or left-sided obstructive lesions; right-to-left flow occurs in right-sided obstructive or transposition physiology.",
+            "sensitivity_hints": "Determined by the disease. Influences the distribution of oxygenated blood to the body.",
+            "related_domain_knowledge": [
+                "In TGA, right-to-left ductal flow provides systemic oxygenated blood.",
+                "In Fallot's, right-to-left flow supplements pulmonary blood supply.",
+                "Duct closure in duct-dependent lesions causes acute deterioration."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "ductal_shunt_direction"
+        },
+        {
+            "name": "CardiacMixing",
+            "display_name": "Cardiac Mixing",
+            "type": "ordinal",
+            "states": [
+                "None",
+                "Mild",
+                "Complete",
+                "Transp."
+            ],
+            "role": "endogenous",
+            "category": "haemodynamics",
+            "short_description": "Degree of mixing between oxygenated and deoxygenated blood within the heart.",
+            "extended_description": "The extent to which oxygenated and deoxygenated blood mix at the cardiac level. Ranges from none (normal) to complete mixing or transposition physiology. Determined by the specific cardiac defect and critically affects downstream oxygenation and hypoxia distribution.",
+            "sensitivity_hints": "Caused by the disease. Influences hypoxia levels and oxygen distribution pattern.",
+            "related_domain_knowledge": [
+                "TGA involves transposition-type mixing where circulations are parallel.",
+                "ASD or VSD allow varying degrees of intracardiac mixing.",
+                "Complete mixing produces uniform but reduced oxygen saturation.",
+                "Transposition physiology means upper and lower body O2 may differ markedly."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "intracardiac_mixing"
+        },
+        {
+            "name": "LungParench",
+            "display_name": "Lung Parenchyma",
+            "type": "categorical",
+            "states": [
+                "Normal",
+                "Congested",
+                "Abnormal"
+            ],
+            "role": "endogenous",
+            "category": "pulmonary",
+            "short_description": "Condition of the lung tissue.",
+            "extended_description": "The state of the lung parenchyma, which may be normal, congested (from pulmonary overcirculation or left heart failure), or abnormal (from primary lung disease such as meconium aspiration or hyaline membrane disease). Caused by the underlying disease and affects gas exchange, chest X-ray appearance, and respiratory signs.",
+            "sensitivity_hints": "Caused by the disease. Influences CO2 levels, chest X-ray, grunting, and hypoxia.",
+            "related_domain_knowledge": [
+                "Congested lungs suggest high pulmonary blood flow or left heart failure.",
+                "Abnormal parenchyma suggests primary lung pathology.",
+                "Lung state is a key differentiator between cardiac and pulmonary causes of cyanosis."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "lung_tissue_condition"
+        },
+        {
+            "name": "LungFlow",
+            "display_name": "Pulmonary Blood Flow",
+            "type": "categorical",
+            "states": [
+                "Normal",
+                "Low",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "haemodynamics",
+            "short_description": "Amount of blood flowing through the pulmonary circulation.",
+            "extended_description": "The volume of blood passing through the lungs. Low pulmonary flow occurs in right-sided obstructive lesions (Fallot, PAIVS); high flow occurs in left-to-right shunts and TAPVD. Determined by the disease and affects chest X-ray appearance.",
+            "sensitivity_hints": "Caused by the disease. Influences chest X-ray pattern (oligaemic vs plethoric).",
+            "related_domain_knowledge": [
+                "Low lung flow produces oligaemic lung fields on X-ray.",
+                "High lung flow produces plethoric lung fields.",
+                "Fallot's and PAIVS cause reduced pulmonary blood flow.",
+                "TAPVD typically causes increased pulmonary flow."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "pulmonary_blood_flow"
+        },
+        {
+            "name": "LVH",
+            "display_name": "Left Ventricular Hypertrophy",
+            "type": "binary",
+            "states": [
+                "yes",
+                "no"
+            ],
+            "role": "endogenous",
+            "category": "cardiac_structure",
+            "short_description": "Whether the left ventricle shows hypertrophy.",
+            "extended_description": "Left ventricular hypertrophy indicates thickening of the left ventricular wall, typically resulting from chronic pressure or volume overload. Different congenital diseases produce different patterns of ventricular hypertrophy.",
+            "sensitivity_hints": "Caused by the disease. Observed via echocardiography and reported by the clinician.",
+            "related_domain_knowledge": [
+                "LVH can accompany conditions with increased left ventricular workload.",
+                "TGA may show LVH due to the LV supporting pulmonary circulation.",
+                "Diagnosed by echocardiography or ECG criteria."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "left_ventricular_thickening"
+        },
+        {
+            "name": "HypDistrib",
+            "display_name": "Hypoxia Distribution",
+            "type": "binary",
+            "states": [
+                "Equal",
+                "Unequal"
+            ],
+            "role": "endogenous",
+            "category": "oxygenation",
+            "short_description": "Whether hypoxia is equally distributed across the body.",
+            "extended_description": "Indicates whether blood oxygen levels are similar in the upper and lower body (equal) or differ (unequal). Determined by the direction of ductal flow and the degree of cardiac mixing. Unequal distribution is a key sign of certain congenital defects where pre-ductal and post-ductal saturations differ.",
+            "sensitivity_hints": "Caused by duct flow direction and cardiac mixing. Influences oxygen readings in upper vs lower body.",
+            "related_domain_knowledge": [
+                "Unequal distribution (differential cyanosis) suggests duct-dependent physiology.",
+                "Pre-ductal (right upper quadrant) and post-ductal (lower body) O2 comparison is diagnostic.",
+                "TGA with right-to-left ductal flow causes reverse differential cyanosis."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "oxygen_distribution_pattern"
+        },
+        {
+            "name": "HypoxiaInO2",
+            "display_name": "Hypoxia in Oxygen",
+            "type": "ordinal",
+            "states": [
+                "Mild",
+                "Moderate",
+                "Severe"
+            ],
+            "role": "endogenous",
+            "category": "oxygenation",
+            "short_description": "Severity of hypoxia when the infant is given supplemental oxygen.",
+            "extended_description": "The degree of persistent hypoxia despite supplemental oxygen administration. Determined by cardiac mixing and lung parenchyma status. Severe hypoxia despite oxygen therapy suggests a cardiac cause (fixed shunt), whereas responsive hypoxia suggests a pulmonary cause.",
+            "sensitivity_hints": "Caused by cardiac mixing and lung condition. Influences oxygen saturation readings.",
+            "related_domain_knowledge": [
+                "The hyperoxia test distinguishes cardiac from pulmonary cyanosis.",
+                "Fixed right-to-left shunts produce oxygen-unresponsive hypoxia.",
+                "Lung disease typically responds to supplemental oxygen.",
+                "Complete mixing produces moderate hypoxia that partially responds to O2."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "oxygen_resistant_hypoxia"
+        },
+        {
+            "name": "CO2",
+            "display_name": "CO2 Level",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Low",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "blood_gases",
+            "short_description": "Blood carbon dioxide level.",
+            "extended_description": "The arterial carbon dioxide tension (PaCO2). Determined by the lung parenchyma condition. High CO2 indicates ventilatory failure (lung disease or severe congestion). Low CO2 may indicate compensatory hyperventilation.",
+            "sensitivity_hints": "Caused by lung parenchyma status. Observed via blood gas analysis and reported by the clinician.",
+            "related_domain_knowledge": [
+                "Elevated CO2 (hypercapnia) indicates hypoventilation or gas exchange failure.",
+                "Purely cardiac causes of cyanosis typically have normal or low CO2.",
+                "CO2 retention is a hallmark of parenchymal lung disease."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "blood_carbon_dioxide"
+        },
+        {
+            "name": "ChestXray",
+            "display_name": "Chest X-ray Appearance",
+            "type": "categorical",
+            "states": [
+                "Normal",
+                "Oligaemic",
+                "Plethoric",
+                "Grd_Glass",
+                "Asy/Patch"
+            ],
+            "role": "endogenous",
+            "category": "imaging",
+            "short_description": "Pattern seen on the chest radiograph.",
+            "extended_description": "The actual chest X-ray findings, determined by lung parenchyma condition and pulmonary blood flow. Oligaemic fields indicate reduced pulmonary flow; plethoric fields indicate increased flow; ground glass and asymmetric/patchy patterns indicate parenchymal disease.",
+            "sensitivity_hints": "Caused by lung condition and pulmonary flow. Observed and reported by the radiologist.",
+            "related_domain_knowledge": [
+                "Oligaemic lung fields suggest reduced pulmonary blood flow (Fallot, PAIVS).",
+                "Plethoric fields suggest increased flow (TAPVD, large shunts).",
+                "Ground glass opacity suggests hyaline membrane disease or pulmonary oedema.",
+                "Patchy changes suggest meconium aspiration or pneumonia."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "radiograph_pattern"
+        },
+        {
+            "name": "Grunting",
+            "display_name": "Grunting",
+            "type": "binary",
+            "states": [
+                "yes",
+                "no"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Whether the infant is grunting during respiration.",
+            "extended_description": "Expiratory grunting is a sign of respiratory distress in neonates, produced by exhaling against a partially closed glottis to maintain functional residual capacity. Caused by abnormal lung parenchyma and influenced by overall illness severity.",
+            "sensitivity_hints": "Caused by lung condition and clinical illness. Observed and reported by the clinician.",
+            "related_domain_knowledge": [
+                "Grunting is a compensatory mechanism to maintain alveolar recruitment.",
+                "More common in lung disease than in purely cardiac conditions.",
+                "Sicker infants are more likely to grunt."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "respiratory_grunting"
+        },
+        {
+            "name": "RUQO2",
+            "display_name": "Right Upper Quadrant O2",
+            "type": "ordinal",
+            "states": [
+                "<5",
+                "5-12",
+                "12+"
+            ],
+            "role": "endogenous",
+            "category": "measurement",
+            "short_description": "Oxygen saturation measured in the right upper quadrant (pre-ductal).",
+            "extended_description": "Transcutaneous oxygen tension measured in the right upper limb or right side of the head (pre-ductal site). Reflects the degree of hypoxia after any response to supplemental oxygen. In normal circulation, pre-ductal O2 is higher than post-ductal in the presence of right-to-left ductal shunting.",
+            "sensitivity_hints": "Determined by the severity of hypoxia in oxygen. Compared with lower body O2 to detect differential cyanosis.",
+            "related_domain_knowledge": [
+                "Pre-ductal site reflects blood oxygenation before any ductal mixing.",
+                "Higher pre-ductal than post-ductal O2 suggests right-to-left ductal shunt.",
+                "Values <5 kPa indicate severe hypoxia."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "preductal_oxygen"
+        },
+        {
+            "name": "LowerBodyO2",
+            "display_name": "Lower Body O2",
+            "type": "ordinal",
+            "states": [
+                "<5",
+                "5-12",
+                "12+"
+            ],
+            "role": "endogenous",
+            "category": "measurement",
+            "short_description": "Oxygen saturation measured in the lower body (post-ductal).",
+            "extended_description": "Transcutaneous oxygen tension measured in the lower limbs (post-ductal site). Reflects both the overall hypoxia severity and the distribution pattern. If oxygen distribution is unequal, lower body O2 will differ from upper body readings.",
+            "sensitivity_hints": "Determined by hypoxia distribution and hypoxia severity. Compared with pre-ductal O2 for differential diagnosis.",
+            "related_domain_knowledge": [
+                "Post-ductal site reflects blood after any ductal mixing with the aorta.",
+                "Lower O2 in the lower body compared to upper suggests right-to-left ductal flow.",
+                "In TGA, lower body O2 may paradoxically be higher (reverse differential cyanosis)."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "postductal_oxygen"
+        },
+        {
+            "name": "CO2Report",
+            "display_name": "CO2 Report",
+            "type": "binary",
+            "states": [
+                "<7.5",
+                ">=7.5"
+            ],
+            "role": "endogenous",
+            "category": "clinical_report",
+            "short_description": "Clinical report of the CO2 blood gas result.",
+            "extended_description": "The clinician's reported interpretation of the arterial CO2 measurement. A noisy observation of the true CO2 level, subject to reporting and measurement error.",
+            "sensitivity_hints": "A noisy report of the true CO2 level. Consider it as downstream of the actual CO2.",
+            "related_domain_knowledge": [
+                "CO2 >= 7.5 kPa indicates significant hypercapnia.",
+                "Reporting may be subject to transcription or rounding errors."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "co2_lab_report"
+        },
+        {
+            "name": "XrayReport",
+            "display_name": "X-ray Report",
+            "type": "categorical",
+            "states": [
+                "Normal",
+                "Oligaemic",
+                "Plethoric",
+                "Grd_Glass",
+                "Asy/Patchy"
+            ],
+            "role": "endogenous",
+            "category": "clinical_report",
+            "short_description": "Radiologist's written report of the chest X-ray.",
+            "extended_description": "The radiologist's interpretation of the chest radiograph. A noisy observation of the true X-ray appearance, subject to inter-observer variability and reporting error.",
+            "sensitivity_hints": "A noisy report of the actual chest X-ray. Consider it as downstream of the true X-ray appearance.",
+            "related_domain_knowledge": [
+                "Radiologist reports may not perfectly match the true X-ray pattern.",
+                "Inter-observer agreement on neonatal chest X-rays is moderate."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "radiology_report"
+        },
+        {
+            "name": "GruntingReport",
+            "display_name": "Grunting Report",
+            "type": "binary",
+            "states": [
+                "yes",
+                "no"
+            ],
+            "role": "endogenous",
+            "category": "clinical_report",
+            "short_description": "Clinical report of whether the infant is grunting.",
+            "extended_description": "The clinician's reported observation of grunting. A noisy observation of the true grunting status, as clinical assessment may miss intermittent grunting or misclassify other respiratory sounds.",
+            "sensitivity_hints": "A noisy report of actual grunting. Consider it as downstream of the true grunting status.",
+            "related_domain_knowledge": [
+                "Grunting may be intermittent and missed on a single examination.",
+                "Other respiratory sounds may be confused with grunting."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "grunting_clinical_report"
+        },
+        {
+            "name": "LVHreport",
+            "display_name": "LVH Report",
+            "type": "binary",
+            "states": [
+                "yes",
+                "no"
+            ],
+            "role": "endogenous",
+            "category": "clinical_report",
+            "short_description": "Clinical report of left ventricular hypertrophy.",
+            "extended_description": "The clinician's reported finding of left ventricular hypertrophy from echocardiography or ECG. A noisy observation of the true LVH status, subject to measurement technique and interpretation.",
+            "sensitivity_hints": "A noisy report of true LVH. Consider it as downstream of the actual LVH status.",
+            "related_domain_knowledge": [
+                "LVH diagnosis by ECG has limited sensitivity in neonates.",
+                "Echocardiographic assessment is more accurate but still observer-dependent."
+            ],
+            "references": [
+                "Spiegelhalter1992"
+            ],
+            "llm_name": "lvh_clinical_report"
+        }
+    ]
+}

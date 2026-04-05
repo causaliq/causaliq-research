@@ -1,0 +1,534 @@
+{
+    "schema_version": "2.0",
+    "network": "covid",
+    "domain": "pandemic_epidemiology",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a COVID-19 pandemic model capturing viral spread, hospitalisations, deaths, vaccinations, policy interventions, and population mobility in the UK.",
+    "provenance": {
+        "source_network": "covid",
+        "source_reference": "Constantinou2023",
+        "source_url": "https://www.sciencedirect.com/science/article/pii/S0957417423015713",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "moderate",
+        "notes": "Network from 'Open problems in causal structure learning: A case study of COVID-19 in the UK' (Expert Systems with Applications, 2023). Contains 17 variables, 37 directed edges in the knowledge graph, 866 daily observations (Jan 2020 - Jun 2022). Data discretised using quartile intervals. Variables capture same-date observational relationships only; temporal/interventional effects are not modelled."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This models UK COVID-19 pandemic dynamics as same-date observational relationships.",
+            "Consider the causal chain: variant/season -> infections -> hospitalisations -> deaths.",
+            "Policy (lockdowns, masks) and vaccination are responses to pandemic severity, not causes of same-day infection rates.",
+            "Mobility is affected by policy interventions and seasonal patterns.",
+            "Excess mortality captures both COVID deaths and indirect lockdown effects.",
+            "Feedback loops exist in reality (e.g., infections -> lockdown -> future infections), but since temporal lag is not modelled, same-day edges flow from pandemic status to policy response.",
+            "Most variables are ordinal with four levels (Very_Low, Low, High, Very_High) derived from quartile discretisation."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The conditional probability tables.",
+            "Temporal lag information that would allow reconstructing feedback loops."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, extended descriptions, domain knowledge, and references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "Season",
+            "display_name": "Season",
+            "type": "categorical",
+            "states": [
+                "Autumn",
+                "Spring",
+                "Summer",
+                "Winter"
+            ],
+            "role": "exogenous",
+            "category": "contextual",
+            "short_description": "The calendar season (autumn, spring, summer, winter).",
+            "extended_description": "Categorical variable representing the four calendar seasons. Season acts as an exogenous background variable that influences both respiratory virus transmission rates and population mobility patterns. Winter is associated with higher transmission due to indoor mixing; summer with lower transmission and higher mobility.",
+            "sensitivity_hints": "Season is a root cause that influences infections and mobility but is not influenced by any other variable in this model.",
+            "related_domain_knowledge": [
+                "Respiratory viruses, including SARS-CoV-2, show seasonal transmission patterns.",
+                "Winter months correlate with increased indoor activity and higher transmission.",
+                "Seasonal mobility patterns affect park visits, transportation, and leisure activity.",
+                "Season is not influenced by anything else in this system."
+            ],
+            "references": [
+                "Constantinou2023"
+            ],
+            "llm_name": "season"
+        },
+        {
+            "name": "Majority_COVID_19_variant",
+            "display_name": "Majority COVID-19 Variant",
+            "type": "categorical",
+            "states": [
+                "Alpha",
+                "Delta",
+                "Initial",
+                "Omicron",
+                "Omicron_BA_2"
+            ],
+            "role": "exogenous",
+            "category": "contextual",
+            "short_description": "The dominant SARS-CoV-2 variant in the UK at the time of observation.",
+            "extended_description": "Categorical variable identifying which COVID-19 variant was dominant in the UK population. Variants differ substantially in transmissibility, immune evasion, and disease severity. The Initial strain was followed by Alpha (more transmissible), Delta (more severe), and Omicron/Omicron BA.2 (highly transmissible but less severe). Variant influences infection rates, hospitalisation risk, and reinfection rates.",
+            "sensitivity_hints": "The COVID-19 variant is an exogenous driver that affects infections, hospitalisations, and reinfection rates through differing biological properties.",
+            "related_domain_knowledge": [
+                "Alpha variant had ~50% higher transmissibility than the Initial strain.",
+                "Delta variant caused more severe disease and higher hospitalisation rates.",
+                "Omicron was highly transmissible but caused less severe disease, partly due to population immunity.",
+                "Omicron BA.2 had higher immune evasion leading to increased reinfections.",
+                "Variant is not influenced by other variables in this model."
+            ],
+            "references": [
+                "GOV.UK_2022k",
+                "Our_World_in_Data_2022b",
+                "Constantinou2023"
+            ],
+            "llm_name": "dominant_pathogen_strain"
+        },
+        {
+            "name": "New_infections",
+            "display_name": "New Infections",
+            "type": "ordinal",
+            "states": [
+                "Very_Low",
+                "Low",
+                "High",
+                "Very_High"
+            ],
+            "role": "endogenous",
+            "category": "infections",
+            "short_description": "Daily count of new COVID-19 infections by specimen date.",
+            "extended_description": "Ordinal variable representing the level of new SARS-CoV-2 infections detected. Influenced by the virus variant (transmissibility) and season (indoor mixing). New infections drive the testing and positive test counts, and ultimately feed through to hospitalisations. Discretised into four levels using quartile intervals.",
+            "sensitivity_hints": "New infections are driven by variant and season. They influence testing activity, positive tests, and downstream hospitalisations. In this same-day model, policy effects on future infections are not captured.",
+            "related_domain_knowledge": [
+                "New infections represent the rate of community transmission.",
+                "Higher transmissibility variants (Omicron) produce more infections.",
+                "Winter conditions facilitate respiratory virus spread.",
+                "Infections drive demand for testing and healthcare resources."
+            ],
+            "references": [
+                "GOV.UK_2022b",
+                "Constantinou2023"
+            ],
+            "llm_name": "new_cases"
+        },
+        {
+            "name": "Positive_tests",
+            "display_name": "Positive Tests",
+            "type": "ordinal",
+            "states": [
+                "Very_Low",
+                "Low",
+                "High",
+                "Very_High"
+            ],
+            "role": "endogenous",
+            "category": "infections",
+            "short_description": "Number of people who tested positive for COVID-19 by specimen date.",
+            "extended_description": "Ordinal variable representing the volume of positive COVID-19 test results. This is a function of both the true infection rate and the testing volume. More infections and more tests both increase positive test counts. Positive tests are a directly observable manifestation of the underlying infection level filtered through testing capacity.",
+            "sensitivity_hints": "Positive tests depend on both infection levels and testing volume. High testing with low infections can yield fewer positives than low testing with high infections.",
+            "related_domain_knowledge": [
+                "Positive tests are jointly determined by infection prevalence and testing volume.",
+                "Testing policy changes (e.g., free lateral flow tests) affected detection rates.",
+                "Positive tests are a lagging indicator of actual infections due to incubation period.",
+                "Case counts depend on who gets tested, introducing ascertainment bias."
+            ],
+            "references": [
+                "GOV.UK_2022b",
+                "Constantinou2023"
+            ],
+            "llm_name": "confirmed_positive_results"
+        },
+        {
+            "name": "Reinfections",
+            "display_name": "Reinfections",
+            "type": "ordinal",
+            "states": [
+                "Very_Low",
+                "Low",
+                "High",
+                "Very_High"
+            ],
+            "role": "endogenous",
+            "category": "infections",
+            "short_description": "Daily count of COVID-19 reinfections by specimen date.",
+            "extended_description": "Ordinal variable representing the rate of reinfection, where individuals previously infected with COVID-19 become infected again. Reinfection rates depend on the dominant variant (immune evasion), the overall infection rate, and population immunity levels. Omicron variants were associated with substantially higher reinfection rates.",
+            "sensitivity_hints": "Reinfections are influenced by variant (immune evasion), infection levels, and population immunity. They were rare pre-Omicron but became common with Omicron variants.",
+            "related_domain_knowledge": [
+                "Reinfections were very rare with the Initial and Alpha variants.",
+                "Omicron's mutations allowed significant immune escape, causing reinfection waves.",
+                "Reinfection risk increases as time since last infection or vaccination grows.",
+                "Reinfections contribute to overall infection counts and healthcare demand."
+            ],
+            "references": [
+                "GOV.UK_2022b",
+                "Constantinou2023"
+            ],
+            "llm_name": "repeat_infections"
+        },
+        {
+            "name": "Tests_across_all_4_Pillars",
+            "display_name": "Tests Across All 4 Pillars",
+            "type": "ordinal",
+            "states": [
+                "Very_Low",
+                "Low",
+                "High",
+                "Very_High"
+            ],
+            "role": "endogenous",
+            "category": "viral_tests",
+            "short_description": "Total number of COVID-19 tests across UK testing Pillars 1, 2, 3 and 4.",
+            "extended_description": "Ordinal variable capturing the overall volume of COVID-19 viral testing. Pillar 1 covers NHS and UKHSA testing, Pillar 2 the government testing programme, Pillar 3 antibody testing, and Pillar 4 national surveillance. Testing volume is driven by infection levels (demand for diagnostic tests), policy (free testing availability), and healthcare capacity. Higher testing enables better detection of positive cases.",
+            "sensitivity_hints": "Testing volume is driven by infection rates and policy decisions. It mediates the relationship between actual infections and detected positive cases.",
+            "related_domain_knowledge": [
+                "UK COVID-19 testing was organised into four Pillars with different purposes.",
+                "Testing capacity expanded significantly over the pandemic.",
+                "Free lateral flow testing was introduced and later withdrawn.",
+                "Testing volume influences the number of detected positive cases."
+            ],
+            "references": [
+                "GOV.UK_2022a",
+                "Constantinou2023"
+            ],
+            "llm_name": "diagnostic_tests_performed"
+        },
+        {
+            "name": "Hospital_admissions",
+            "display_name": "Hospital Admissions",
+            "type": "ordinal",
+            "states": [
+                "Very_Low",
+                "Low",
+                "High",
+                "Very_High"
+            ],
+            "role": "endogenous",
+            "category": "hospitalisation",
+            "short_description": "Number of patients admitted to hospital with COVID-19.",
+            "extended_description": "Ordinal variable representing the daily rate of hospital admissions for COVID-19. Admissions are driven by infection levels and the severity of the dominant variant. Hospital admissions lead to patients in hospital beds and potentially to mechanical ventilator beds (MVBs). They are a key driver of policy responses such as lockdown decisions.",
+            "sensitivity_hints": "Hospital admissions are a downstream consequence of infections and variant severity. They drive inpatient numbers and are a key trigger for policy responses.",
+            "related_domain_knowledge": [
+                "Hospital admissions lag infections by approximately 7-10 days.",
+                "Delta variant caused higher admission rates per infection than Omicron.",
+                "Vaccination reduced the hospitalisation rate per infection.",
+                "Hospital capacity pressures triggered lockdown decisions."
+            ],
+            "references": [
+                "GOV.UK_2022c",
+                "Constantinou2023"
+            ],
+            "llm_name": "hospital_intake"
+        },
+        {
+            "name": "Patients_in_hospital",
+            "display_name": "Patients in Hospital",
+            "type": "ordinal",
+            "states": [
+                "Very_Low",
+                "Low",
+                "High",
+                "Very_High"
+            ],
+            "role": "endogenous",
+            "category": "hospitalisation",
+            "short_description": "Number of patients currently in hospital with COVID-19.",
+            "extended_description": "Ordinal variable representing the number of COVID-19 patients occupying hospital beds on a given day. This is a stock variable determined by the flow of admissions and discharges/deaths. Patients in hospital may require escalation to mechanical ventilation, and hospital occupancy levels influence policy decisions about lockdowns and resource allocation.",
+            "sensitivity_hints": "Patients in hospital is a cumulative measure driven by admissions and length of stay. It influences escalation to MVBs and informs policy.",
+            "related_domain_knowledge": [
+                "Hospital occupancy is a lagging indicator of admissions.",
+                "Length of hospital stay varied by variant and patient characteristics.",
+                "High hospital occupancy strained NHS capacity and triggered policy action.",
+                "Patients in hospital can deteriorate, requiring mechanical ventilation."
+            ],
+            "references": [
+                "GOV.UK_2022c",
+                "Constantinou2023"
+            ],
+            "llm_name": "inpatient_census"
+        },
+        {
+            "name": "Patients_in_MVBs",
+            "display_name": "Patients in Mechanical Ventilator Beds",
+            "type": "ordinal",
+            "states": [
+                "Very_Low",
+                "Low",
+                "High",
+                "Very_High"
+            ],
+            "role": "endogenous",
+            "category": "hospitalisation",
+            "short_description": "Number of COVID-19 patients in mechanical ventilator beds.",
+            "extended_description": "Ordinal variable representing the most severe hospitalised COVID-19 cases requiring mechanical ventilation. MVB occupancy reflects the rate of clinical deterioration among hospitalised patients and is influenced by the COVID-19 variant (severity) and hospital admissions. Patients in MVBs have high mortality risk and their numbers strongly influence death counts.",
+            "sensitivity_hints": "MVB patients represent the most critical cases. They are a downstream consequence of hospitalisations and variant severity, and a strong predictor of COVID deaths.",
+            "related_domain_knowledge": [
+                "Mechanical ventilation is required for the most severe COVID-19 pneumonia.",
+                "MVB capacity was a critical constraint during pandemic peaks.",
+                "Delta variant was associated with higher MVB requirements per hospitalisation.",
+                "Mortality among ventilated COVID-19 patients was high (40-50%)."
+            ],
+            "references": [
+                "GOV.UK_2022c",
+                "Constantinou2023"
+            ],
+            "llm_name": "ventilated_patients"
+        },
+        {
+            "name": "Second_dose_uptake",
+            "display_name": "Second Dose Vaccine Uptake",
+            "type": "ordinal",
+            "states": [
+                "Very_Low",
+                "Low",
+                "High",
+                "Very_High"
+            ],
+            "role": "endogenous",
+            "category": "vaccination",
+            "short_description": "Proportion of the eligible population who received a second COVID-19 vaccine dose.",
+            "extended_description": "Ordinal variable representing cumulative second dose vaccination uptake. In the UK, two doses were required for 'fully vaccinated' status. Vaccination campaigns were accelerated in response to high hospitalisation and death rates. Vaccination reduces disease severity and death risk but has a delayed effect on infection rates. This variable captures the policy-driven vaccination response to pandemic severity.",
+            "sensitivity_hints": "Vaccination uptake is a response to pandemic severity (hospitalisations, deaths). Its protective effect on future infections is not captured in this same-day model.",
+            "related_domain_knowledge": [
+                "UK vaccination programme began December 2020 with Pfizer-BioNTech.",
+                "Oxford-AstraZeneca was the most widely used vaccine in the UK.",
+                "Vaccination reduced hospitalisation and death risk per infection.",
+                "Vaccine uptake was prioritised by age and clinical vulnerability.",
+                "Booster doses are not captured in this variable."
+            ],
+            "references": [
+                "GOV.UK_2022d",
+                "Menni2021",
+                "Constantinou2023"
+            ],
+            "llm_name": "full_vaccination_coverage"
+        },
+        {
+            "name": "Deaths_with_COVID_on_certificate",
+            "display_name": "Deaths with COVID on Certificate",
+            "type": "ordinal",
+            "states": [
+                "Very_Low",
+                "Low",
+                "High",
+                "Very_High"
+            ],
+            "role": "endogenous",
+            "category": "deaths",
+            "short_description": "Daily deaths where COVID-19 was listed on the death certificate.",
+            "extended_description": "Ordinal variable representing deaths where COVID-19 was mentioned on the death certificate. These deaths are driven by the severity of hospitalised cases, particularly patients in MVBs and hospital, and the dominant variant's lethality. COVID deaths influenced public perception and policy responses including lockdown severity and vaccination urgency.",
+            "sensitivity_hints": "COVID deaths are a downstream consequence of hospitalisations and variant severity. They influence policy responses and contribute to excess mortality.",
+            "related_domain_knowledge": [
+                "Deaths lag infections by approximately 2-3 weeks.",
+                "Death rates per infection decreased over time due to vaccination and treatments.",
+                "Variant lethality differed: Delta was more lethal per infection than Omicron.",
+                "COVID deaths are one component of excess mortality."
+            ],
+            "references": [
+                "GOV.UK_2022e",
+                "Constantinou2023"
+            ],
+            "llm_name": "disease_attributed_deaths"
+        },
+        {
+            "name": "Excess_mortality",
+            "display_name": "Excess Mortality",
+            "type": "ordinal",
+            "states": [
+                "Very_Low",
+                "Low",
+                "High",
+                "Very_High"
+            ],
+            "role": "endogenous",
+            "category": "deaths",
+            "short_description": "Percentage difference between reported and projected deaths based on previous years.",
+            "extended_description": "Ordinal variable capturing total excess mortality relative to historical baselines. Excess mortality includes direct COVID-19 deaths and indirect effects: delayed healthcare due to pandemic pressures, mental health impacts of lockdowns, reduced road accidents during lockdowns, and other pandemic-related mortality changes. It is influenced by both COVID deaths and lockdown policy.",
+            "sensitivity_hints": "Excess mortality is influenced by both COVID deaths (directly) and lockdowns (indirectly through disrupted healthcare, reduced accidents, etc.). It captures broader pandemic impact beyond COVID-specific deaths.",
+            "related_domain_knowledge": [
+                "Excess mortality is considered a more comprehensive measure than COVID-specific deaths.",
+                "Lockdowns both reduced some causes of death (road accidents) and increased others (delayed treatment).",
+                "Excess mortality can be negative if lockdowns reduce non-COVID deaths more than COVID adds.",
+                "Measurement uses historical baselines which may be imperfect."
+            ],
+            "references": [
+                "Our_World_in_Data_2022c",
+                "Constantinou2023"
+            ],
+            "llm_name": "excess_deaths"
+        },
+        {
+            "name": "Face_masks",
+            "display_name": "Face Mask Mandates",
+            "type": "categorical",
+            "states": [
+                "No",
+                "Optional",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "policy",
+            "short_description": "UK face mask mandate status (no mandate, optional, mandatory).",
+            "extended_description": "Categorical variable representing UK government policy on face mask requirements. Mask mandates were introduced in response to pandemic severity and relaxed as conditions improved. The three states capture the progression from no requirement, through recommended/optional, to legally mandated face coverings in indoor public spaces. In this same-day model, mask policy is a response to pandemic conditions.",
+            "sensitivity_hints": "Face mask mandates are a policy response driven by pandemic severity (hospitalisations, deaths). Their effect on future infections is not captured in this same-day model.",
+            "related_domain_knowledge": [
+                "Face masks were mandated in indoor public spaces during peak pandemic periods.",
+                "Mask mandates were imposed and lifted multiple times during the pandemic.",
+                "Mask policy followed hospitalisation and death trends with a short lag.",
+                "Effectiveness of mask mandates on transmission remains debated."
+            ],
+            "references": [
+                "GOV.UK_2022g",
+                "Wikipedia_2022a",
+                "Constantinou2023"
+            ],
+            "llm_name": "mask_mandate"
+        },
+        {
+            "name": "Lockdown",
+            "display_name": "Lockdown Severity",
+            "type": "categorical",
+            "states": [
+                "No_or_limited_measures",
+                "Social_distancing",
+                "Weak_lockdown",
+                "Moderate_lockdown",
+                "Severe_lockdown"
+            ],
+            "role": "endogenous",
+            "category": "policy",
+            "short_description": "Severity of UK lockdown restrictions during the COVID-19 pandemic.",
+            "extended_description": "Categorical variable with five ordered levels capturing the severity of UK government lockdown restrictions. Lockdown policy was a response to hospitalisation and death rates. In this same-day model, lockdown is treated as a consequence of pandemic severity rather than a cause of infection rates (the interventional effect would require temporal lag). Lockdowns directly affected population mobility across transportation, work/school, and leisure activities.",
+            "sensitivity_hints": "Lockdown is a policy response to pandemic severity. It directly affects mobility (transportation, work, leisure) and indirectly affects excess mortality. Its effect on future infections is temporal and not captured here.",
+            "related_domain_knowledge": [
+                "UK had three national lockdowns: Mar 2020, Nov 2020, Jan 2021.",
+                "Lockdown severity escalated with hospitalisation rates.",
+                "Lockdowns had profound effects on mobility, economic activity, and mental health.",
+                "Lockdown effectiveness on transmission requires temporal modelling."
+            ],
+            "references": [
+                "Institute_for_Government_2022",
+                "Constantinou2023"
+            ],
+            "llm_name": "movement_restrictions"
+        },
+        {
+            "name": "Transportation_activity",
+            "display_name": "Transportation Activity",
+            "type": "ordinal",
+            "states": [
+                "Very_Low",
+                "Low",
+                "High",
+                "Very_High"
+            ],
+            "role": "endogenous",
+            "category": "mobility",
+            "short_description": "Combined index of UK transportation activity (buses, tubes, flights, transit stations, walking).",
+            "extended_description": "Ordinal variable representing a combined index of transportation-related mobility in the UK. Data sources include Transport for London (bus and tube), Google (transit stations), Citymapper (journeys), Apple (walking), and UK flight data. Transportation activity is primarily driven by lockdown severity but also varies seasonally. Reduced transportation indicates compliance with mobility restrictions.",
+            "sensitivity_hints": "Transportation activity is driven by lockdown policy and season. It reflects population compliance with mobility restrictions.",
+            "related_domain_knowledge": [
+                "Transport activity dropped by ~80% during severe lockdowns.",
+                "Recovery was gradual and varied by transport mode.",
+                "Flight activity was particularly affected by international travel restrictions.",
+                "Public transport usage recovered more slowly than private transport."
+            ],
+            "references": [
+                "GOV.UK_2022f",
+                "Ons.Gov.UK_2022",
+                "EUROCONTROL_2022",
+                "Constantinou2023"
+            ],
+            "llm_name": "transit_usage"
+        },
+        {
+            "name": "Work_and_school_activity",
+            "display_name": "Work and School Activity",
+            "type": "ordinal",
+            "states": [
+                "Very_Low",
+                "Low",
+                "High",
+                "Very_High"
+            ],
+            "role": "endogenous",
+            "category": "mobility",
+            "short_description": "Combined index of UK workplace and school activity.",
+            "extended_description": "Ordinal variable representing a combined index of work and school-related activity. Includes Google data on homeworking and workplace activity, retail and recreation, grocery and pharmacy, and school operational status. Directly affected by lockdown policy (school closures, work-from-home mandates) and seasonal patterns (school holidays). The schools index was manually constructed from government guidance documents.",
+            "sensitivity_hints": "Work and school activity is driven by lockdown policy and season (school holidays). It captures the extent to which normal economic and educational activities continue.",
+            "related_domain_knowledge": [
+                "Schools were closed during national lockdowns.",
+                "Work-from-home was mandated during severe lockdowns.",
+                "Recovery of workplace activity was gradual and uneven across sectors.",
+                "School reopening was often used as a proxy for lockdown relaxation."
+            ],
+            "references": [
+                "GOV.UK_2022f",
+                "GOV.UK_2022h",
+                "GOV.UK_2022i",
+                "GOV.UK_2022j",
+                "Constantinou2023"
+            ],
+            "llm_name": "workplace_and_education_activity"
+        },
+        {
+            "name": "Leisure_activity",
+            "display_name": "Leisure Activity",
+            "type": "ordinal",
+            "states": [
+                "Very_Low",
+                "Low",
+                "High",
+                "Very_High"
+            ],
+            "role": "endogenous",
+            "category": "mobility",
+            "short_description": "Combined index of UK leisure activity (park visits, restaurant bookings).",
+            "extended_description": "Ordinal variable representing a combined index of leisure-related mobility. Includes Google data on park visits and OpenTable data on restaurant bookings. Leisure activity is affected by lockdown severity (closure of hospitality venues, restrictions on gatherings) and strongly varies by season (outdoor activities higher in summer). Of the three mobility variables, leisure activity has the strongest seasonal component.",
+            "sensitivity_hints": "Leisure activity is driven by both lockdown policy and season. It has the strongest seasonal influence among mobility variables due to outdoor activity patterns.",
+            "related_domain_knowledge": [
+                "Restaurants and pubs were closed during severe lockdowns.",
+                "Park visits remained relatively high as outdoor exercise was permitted.",
+                "Leisure activity showed strong seasonal patterns (higher in summer).",
+                "Hospitality sector recovery was among the last to normalise."
+            ],
+            "references": [
+                "GOV.UK_2022f",
+                "Constantinou2023"
+            ],
+            "llm_name": "recreational_activity"
+        }
+    ]
+}

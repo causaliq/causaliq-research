@@ -1,0 +1,650 @@
+{
+    "schema_version": "2.0",
+    "network": "diarrhoea",
+    "domain": "childhood_health_epidemiology",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a model of childhood diarrhoea risk factors based on demographic and health survey data from India.",
+    "provenance": {
+        "source_network": "diarrhoea",
+        "source_reference": "Kitson2021",
+        "source_url": "https://www.sciencedirect.com/science/article/pii/S1532046420302161",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "Network from Kitson and Constantinou (2021) 'Learning Bayesian networks from demographic and health survey data', Journal of Biomedical Informatics 113:103588. Contains 28 variables modelling risk factors for childhood diarrhoea in India derived from the Demographic and Health Survey (DHS) 2015-16. Variables span geographic, cultural, economic, household, maternal, child health, breastfeeding, immunisation, water/sanitation/hygiene, and family planning domains."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This models the factors associated with childhood gastrointestinal illness in a low-to-middle income country.",
+            "Consider the causal hierarchy: geographic and cultural context shapes economic status, which in turn determines household conditions, healthcare access, and maternal education.",
+            "Maternal education and wealth jointly influence health behaviours: media exposure, hygiene practices, immunisation uptake, and breastfeeding patterns.",
+            "Water, sanitation, and hygiene (WASH) practices are downstream of wealth and education, and directly influence disease risk.",
+            "Breastfeeding practices (timing, duration, bottle use) are influenced by cultural, economic, and educational factors, and are direct protective factors against illness.",
+            "Immunisation status depends on child age, media exposure, and maternal education.",
+            "Family planning variables (contraceptive use, birth count) influence child age and spacing.",
+            "The target variable (gastrointestinal illness) is influenced by breastfeeding, immunisation, and WASH practices.",
+            "Birth size and child nutritional status form a pathway from economic factors through delivery outcomes to child health."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, extended descriptions, sensitivity hints, domain knowledge, and references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "GEO_Region",
+            "llm_name": "geographic_zone",
+            "display_name": "Geographic Zone",
+            "type": "categorical",
+            "states": [
+                "Zone_1",
+                "Zone_2",
+                "Zone_3",
+                "Zone_4"
+            ],
+            "role": "exogenous",
+            "category": "geographic",
+            "short_description": "Geographic region of the household.",
+            "extended_description": "The broad geographic zone where the household is located. Region is a root variable that influences cultural practices, language, religion, wealth distribution, and access to infrastructure. Different regions have markedly different disease prevalence and health outcomes.",
+            "sensitivity_hints": "Root variable with broad downstream influence on cultural, economic, and infrastructure variables.",
+            "related_domain_knowledge": [
+                "Geographic location is a major determinant of health outcomes in developing countries due to variation in climate, infrastructure, and public health investment."
+            ],
+            "references": [
+                "Fewtrell et al. (2005) on geographic variation in WASH interventions."
+            ]
+        },
+        {
+            "name": "CUL_Religion",
+            "llm_name": "religious_affiliation",
+            "display_name": "Religious Affiliation",
+            "type": "categorical",
+            "states": [
+                "Majority_faith",
+                "Minority_faith",
+                "Other"
+            ],
+            "role": "exogenous",
+            "category": "cultural",
+            "short_description": "Religious affiliation of the mother.",
+            "extended_description": "The mother's self-reported religious group. Religion is a cultural variable shaped by geographic region. It influences breastfeeding practices, dietary customs, and attitudes toward modern medicine and family planning.",
+            "sensitivity_hints": "Influenced by geographic zone. Affects breastfeeding duration and cultural health practices.",
+            "related_domain_knowledge": [
+                "Cultural and religious practices influence feeding behaviours and healthcare-seeking patterns in developing countries."
+            ],
+            "references": [
+                "Curtis et al. (2009) on cultural factors in hygiene behaviour."
+            ]
+        },
+        {
+            "name": "CUL_LanguageGroup",
+            "llm_name": "primary_language",
+            "display_name": "Primary Language Group",
+            "type": "categorical",
+            "states": [
+                "Language_group_A",
+                "Language_group_B",
+                "Language_group_C"
+            ],
+            "role": "exogenous",
+            "category": "cultural",
+            "short_description": "Dominant language spoken by the mother.",
+            "extended_description": "The mother's primary spoken language group, determined largely by geographic region. Language group is a proxy for ethnic identity and correlates with wealth, education access, breastfeeding norms, and household construction quality.",
+            "sensitivity_hints": "Influenced by geographic zone. Affects economic status, household conditions, breastfeeding timing, and family planning.",
+            "related_domain_knowledge": [
+                "Language group often proxies broader socio-cultural identity, correlated with economic opportunity and health literacy."
+            ],
+            "references": []
+        },
+        {
+            "name": "ECO_WealthQuintile",
+            "llm_name": "household_income_level",
+            "display_name": "Household Income Level",
+            "type": "categorical",
+            "states": [
+                "Low_or_average",
+                "Above_average",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "economic",
+            "short_description": "Wealth level of the household.",
+            "extended_description": "Composite measure of the household's economic status. Wealth is determined by geographic zone and language group, and is a key mediating variable that influences maternal education, housing quality, sanitation and water infrastructure, hygiene practices, healthcare access, feeding practices, and immunisation uptake.",
+            "sensitivity_hints": "Central hub variable with very many downstream effects. Influenced by geographic and cultural variables.",
+            "related_domain_knowledge": [
+                "Economic resources are consistently identified as a primary determinant of both health-protective and health-risk behaviours. Intervention cost and affordability are key barriers to diarrhoea prevention."
+            ],
+            "references": [
+                "Aunger et al. (2010) on economic determinants of handwashing.",
+                "Dobe et al. (2013) on social determinants of hygiene."
+            ]
+        },
+        {
+            "name": "MTH_Education",
+            "llm_name": "maternal_education_level",
+            "display_name": "Maternal Education Level",
+            "type": "categorical",
+            "states": [
+                "Above_primary",
+                "No_education",
+                "Primary"
+            ],
+            "role": "endogenous",
+            "category": "maternal",
+            "short_description": "Mother's highest educational attainment.",
+            "extended_description": "The mother's level of education, influenced by language group and household wealth. Education is a key determinant of health behaviours: it affects media exposure, health knowledge, water treatment practices, feeding choices, and immunisation uptake for children.",
+            "sensitivity_hints": "Influenced by language group and wealth. Affects media exposure, water treatment, bottle feeding, and immunisation.",
+            "related_domain_knowledge": [
+                "Maternal education is one of the strongest predictors of child health outcomes in lower-income settings. Educated mothers are more likely to practise exclusive breastfeeding, use clean water, and vaccinate their children."
+            ],
+            "references": [
+                "Dobe et al. (2013) on maternal education and household hygiene."
+            ]
+        },
+        {
+            "name": "MTH_MaternalAge",
+            "llm_name": "maternal_age_group",
+            "display_name": "Maternal Age Group",
+            "type": "categorical",
+            "states": [
+                "25_or_older",
+                "Under_25"
+            ],
+            "role": "exogenous",
+            "category": "maternal",
+            "short_description": "Age group of the mother.",
+            "extended_description": "The mother's age categorised into younger or older groups. Maternal age influences family planning behaviour and child age distribution. It is treated as a root variable since it is primarily determined by when the survey was conducted.",
+            "sensitivity_hints": "Root variable. Affects contraceptive use and child age.",
+            "related_domain_knowledge": [
+                "Younger mothers may have less experience with child-rearing practices, while older mothers may have more children and different family planning patterns."
+            ],
+            "references": []
+        },
+        {
+            "name": "BF_EarlyBreastfeeding",
+            "llm_name": "initial_feeding_timing",
+            "display_name": "Initial Feeding Timing",
+            "type": "categorical",
+            "states": [
+                "Immediately",
+                "Delayed_over_3_hours",
+                "Within_3_hours"
+            ],
+            "role": "endogenous",
+            "category": "breastfeeding",
+            "short_description": "How soon after birth the child was first breastfed.",
+            "extended_description": "The timing of first breastfeeding after delivery. Early initiation of breastfeeding promotes colonisation of the infant gut with beneficial bacteria and provides colostrum, which is rich in antibodies. Delayed initiation is associated with higher risk of gastrointestinal illness. Timing is influenced by cultural practices (language group) and geographic region.",
+            "sensitivity_hints": "Influenced by language group and geographic zone. Direct protective factor against gastrointestinal illness.",
+            "related_domain_knowledge": [
+                "WHO recommends initiation of breastfeeding within one hour of birth. Not breastfeeding in 0-5 months increases diarrhoea risk ratio by 1.26-2.65 times."
+            ],
+            "references": [
+                "UNICEF/WHO (2013) on breastfeeding and diarrhoea prevention."
+            ]
+        },
+        {
+            "name": "BF_BreastfedMonths",
+            "llm_name": "breastfeeding_duration",
+            "display_name": "Breastfeeding Duration",
+            "type": "categorical",
+            "states": [
+                "3_months_to_2_years",
+                "Under_3_months",
+                "Over_2_years"
+            ],
+            "role": "endogenous",
+            "category": "breastfeeding",
+            "short_description": "Total duration of breastfeeding in months.",
+            "extended_description": "How long the child was breastfed, categorised into short, moderate, and extended duration. Breastfeeding duration is influenced by the child's age, religious/cultural practices, and household wealth. Continued breastfeeding from 6-23 months is protective, with a risk ratio of 2.07 for diarrhoea incidence in non-breastfed infants.",
+            "sensitivity_hints": "Influenced by child age, religion, and wealth. Direct protective factor against gastrointestinal illness.",
+            "related_domain_knowledge": [
+                "WHO recommends exclusive breastfeeding for 6 months followed by continued breastfeeding alongside complementary foods up to 2 years. Adequate complementary feeding reduces all child deaths by 6%."
+            ],
+            "references": [
+                "UNICEF/WHO (2013) on breastfeeding duration and child mortality."
+            ]
+        },
+        {
+            "name": "BF_BottleFeeding",
+            "llm_name": "bottle_feeding_practice",
+            "display_name": "Bottle Feeding Practice",
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "breastfeeding",
+            "short_description": "Whether the child drank from a bottle with nipple recently.",
+            "extended_description": "Whether the child used a bottle with nipple in the previous day or night. Bottle feeding is a risk factor for diarrhoea due to the difficulty of sterilising bottles in low-resource settings. It is influenced by the child's age, household wealth, geographic region, and maternal education.",
+            "sensitivity_hints": "Influenced by child age, wealth, region, and maternal education. Direct risk factor for gastrointestinal illness.",
+            "related_domain_knowledge": [
+                "Bottle feeding in environments with poor water quality and limited sterilisation facilities substantially increases infection risk. It is one of the most consistently identified causal paths to diarrhoea across structure learning algorithms."
+            ],
+            "references": []
+        },
+        {
+            "name": "WSH_ImprovedToilet",
+            "llm_name": "sanitation_facility_quality",
+            "display_name": "Sanitation Facility Quality",
+            "type": "categorical",
+            "states": [
+                "Unimproved",
+                "Partially_improved",
+                "Improved"
+            ],
+            "role": "endogenous",
+            "category": "water_sanitation_hygiene",
+            "short_description": "Quality of the household's toilet facility.",
+            "extended_description": "The type and quality of toilet or sanitation facility available to the household. Improved sanitation reduces faecal-oral pathogen transmission. Facility quality is determined by household wealth and geographic region, and it influences hygiene practices such as handwashing and stool disposal.",
+            "sensitivity_hints": "Influenced by wealth and region. Affects handwashing practices, stool disposal, and water source quality.",
+            "related_domain_knowledge": [
+                "Improved sanitation reduces diarrhoea risk by approximately 36%. Sanitation infrastructure quality varies enormously by wealth and region in developing countries."
+            ],
+            "references": [
+                "Fewtrell et al. (2005) on sanitation interventions and diarrhoea risk."
+            ]
+        },
+        {
+            "name": "WSH_ImprovedWaterSource",
+            "llm_name": "drinking_water_quality",
+            "display_name": "Drinking Water Source Quality",
+            "type": "binary",
+            "states": [
+                "Unimproved",
+                "Improved"
+            ],
+            "role": "endogenous",
+            "category": "water_sanitation_hygiene",
+            "short_description": "Whether the household uses an improved drinking water source.",
+            "extended_description": "Whether the household's drinking water comes from an improved source (piped water, protected well, etc.) versus an unimproved source (surface water, unprotected well). Water source quality is influenced by language group, wealth, geographic zone, and sanitation facility quality. Clean water is a direct protective factor against waterborne gastrointestinal illness.",
+            "sensitivity_hints": "Influenced by language group, wealth, region, and sanitation quality. Direct protective factor against illness.",
+            "related_domain_knowledge": [
+                "Increased quantity and quality of water reduces diarrhoea risk by approximately 17%, with an advised 25 litres of water per day. Household water treatment and safe storage provide 31-52% additional risk reduction."
+            ],
+            "references": [
+                "Fewtrell et al. (2005) on water interventions and diarrhoea risk."
+            ]
+        },
+        {
+            "name": "WSH_WaterTreated",
+            "llm_name": "water_treatment_practice",
+            "display_name": "Water Treatment Practice",
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "water_sanitation_hygiene",
+            "short_description": "Whether the household treats its drinking water.",
+            "extended_description": "Whether the household applies any form of treatment to make drinking water safe (boiling, filtering, chlorination, etc.). Water treatment is influenced by cooking fuel type (proxy for modernity), maternal education, and water source quality. Households with improved water sources may paradoxically treat less. Treatment is a direct protective factor against waterborne illness.",
+            "sensitivity_hints": "Influenced by fuel type, maternal education, and water source. Direct protective factor against gastrointestinal illness.",
+            "related_domain_knowledge": [
+                "Household water treatment and safe storage reduce diarrhoea risk by 31-52%. Education and awareness are key drivers of water treatment behaviour."
+            ],
+            "references": [
+                "UNICEF/WHO (2013) on water treatment and diarrhoea prevention."
+            ]
+        },
+        {
+            "name": "WSH_WashWithAgent",
+            "llm_name": "handwashing_practice",
+            "display_name": "Handwashing Practice",
+            "type": "binary",
+            "states": [
+                "No_soap_observed",
+                "Soap_observed"
+            ],
+            "role": "endogenous",
+            "category": "water_sanitation_hygiene",
+            "short_description": "Whether a hand-washing cleansing agent was observed in the household.",
+            "extended_description": "Whether a cleansing agent (soap, detergent) was observed at the household handwashing station. This is a proxy for hygiene practice. Handwashing with soap is influenced by household wealth and sanitation facility quality. It is a direct protective factor against faecal-oral pathogen transmission.",
+            "sensitivity_hints": "Influenced by wealth and sanitation quality. Direct protective factor against gastrointestinal illness.",
+            "related_domain_knowledge": [
+                "Handwashing with soap reduces diarrhoea risk by 31-48%. Promotional campaigns and economic resources are key determinants of handwashing behaviour."
+            ],
+            "references": [
+                "Schmidt et al. (2009) on determinants of handwashing in developing countries.",
+                "Aunger et al. (2010) on psychological determinants of handwashing."
+            ]
+        },
+        {
+            "name": "WSH_SafeStoolDisposal",
+            "llm_name": "child_waste_management",
+            "display_name": "Child Waste Disposal Method",
+            "type": "categorical",
+            "states": [
+                "Into_refuse",
+                "Other_method",
+                "Used_latrine"
+            ],
+            "role": "endogenous",
+            "category": "water_sanitation_hygiene",
+            "short_description": "How the youngest child's stools are disposed of.",
+            "extended_description": "The method used for disposal of the youngest child's faeces when the child does not use a toilet. Safe stool disposal (using a latrine) prevents environmental contamination. Disposal method is influenced by household wealth and sanitation facility quality.",
+            "sensitivity_hints": "Influenced by wealth and sanitation quality. Direct protective factor against gastrointestinal illness.",
+            "related_domain_knowledge": [
+                "Safe disposal of child faeces is part of the WASH framework for diarrhoea prevention. Unsafe disposal contaminates the environment and increases transmission of enteric pathogens."
+            ],
+            "references": []
+        },
+        {
+            "name": "HOU_CookingFuel",
+            "llm_name": "domestic_fuel_type",
+            "display_name": "Domestic Cooking Fuel Type",
+            "type": "categorical",
+            "states": [
+                "Biomass",
+                "Clean_fuel"
+            ],
+            "role": "endogenous",
+            "category": "household",
+            "short_description": "Type of fuel used for household cooking.",
+            "extended_description": "Whether the household uses biomass/agricultural fuels or cleaner fuels (gas, electricity) for cooking. Fuel type is a proxy for household modernisation and is influenced by language group and wealth. It affects water treatment behaviour since households with modern fuel sources tend to have more modern health practices.",
+            "sensitivity_hints": "Influenced by language group and wealth. Affects water treatment practice.",
+            "related_domain_knowledge": [
+                "Cooking fuel type is a commonly used proxy for socioeconomic development and household modernity in DHS analyses."
+            ],
+            "references": []
+        },
+        {
+            "name": "HOU_ModernWallMaterial",
+            "llm_name": "dwelling_construction_quality",
+            "display_name": "Dwelling Construction Quality",
+            "type": "categorical",
+            "states": [
+                "Basic_brick",
+                "Mud_or_stone",
+                "Minimal_structure"
+            ],
+            "role": "endogenous",
+            "category": "household",
+            "short_description": "Main wall material of the dwelling.",
+            "extended_description": "The primary construction material used for the dwelling's walls, reflecting housing quality. Better wall materials indicate higher socioeconomic status. Construction quality is influenced by language group and household wealth.",
+            "sensitivity_hints": "Influenced by language group and wealth. Indicator of overall household development level.",
+            "related_domain_knowledge": [
+                "Housing quality is part of the DHS composite wealth index and correlates with access to improved sanitation and water infrastructure."
+            ],
+            "references": []
+        },
+        {
+            "name": "KNW_WatchTV",
+            "llm_name": "media_exposure",
+            "display_name": "Media Exposure",
+            "type": "categorical",
+            "states": [
+                "Frequent",
+                "Moderate_or_none"
+            ],
+            "role": "endogenous",
+            "category": "knowledge",
+            "short_description": "Frequency of watching television.",
+            "extended_description": "How frequently the mother watches television. Media exposure is influenced by wealth and maternal education. It is a proxy for health awareness and knowledge dissemination, affecting family planning decisions and immunisation uptake for children.",
+            "sensitivity_hints": "Influenced by wealth and education. Affects contraceptive use and immunisation uptake.",
+            "related_domain_knowledge": [
+                "Media exposure is a channel for health education campaigns. Promotional campaigns on hygiene and health behaviours are more effective when mothers have regular media access."
+            ],
+            "references": [
+                "Schmidt et al. (2009) on media exposure and hygiene behaviour."
+            ]
+        },
+        {
+            "name": "SRV_Near",
+            "llm_name": "healthcare_proximity",
+            "display_name": "Healthcare Proximity",
+            "type": "binary",
+            "states": [
+                "Difficult_access",
+                "Easy_access"
+            ],
+            "role": "endogenous",
+            "category": "health_services",
+            "short_description": "Whether distance to health facilities is a barrier.",
+            "extended_description": "Whether the mother reports difficulty accessing health services due to distance. Healthcare proximity is influenced by wealth and education. It affects birth outcomes (small baby), healthcare autonomy, and overall health service utilisation.",
+            "sensitivity_hints": "Influenced by wealth and education. Affects birth size and healthcare autonomy.",
+            "related_domain_knowledge": [
+                "Geographic access to healthcare is a fundamental determinant of health service utilisation in low-resource settings."
+            ],
+            "references": []
+        },
+        {
+            "name": "SRV_OKAlone",
+            "llm_name": "healthcare_autonomy",
+            "display_name": "Healthcare Autonomy",
+            "type": "binary",
+            "states": [
+                "Not_comfortable_alone",
+                "Comfortable_alone"
+            ],
+            "role": "endogenous",
+            "category": "health_services",
+            "short_description": "Whether the mother is comfortable seeking healthcare alone.",
+            "extended_description": "Whether the mother reports being comfortable visiting health facilities without accompaniment. Autonomy is influenced by wealth and healthcare proximity. It reflects gender norms and the mother's independence in seeking care for herself and her children.",
+            "sensitivity_hints": "Influenced by wealth and healthcare proximity.",
+            "related_domain_knowledge": [
+                "Maternal autonomy in healthcare-seeking is a recognised barrier to child health outcomes, particularly in patriarchal societies."
+            ],
+            "references": []
+        },
+        {
+            "name": "DEL_SmallBaby",
+            "llm_name": "birth_size",
+            "display_name": "Birth Size",
+            "type": "categorical",
+            "states": [
+                "Average_or_above",
+                "Small",
+                "Very_small"
+            ],
+            "role": "endogenous",
+            "category": "birth_delivery",
+            "short_description": "Perceived size of the child at birth.",
+            "extended_description": "The mother's assessment of the child's size at birth (a proxy for birth weight). Birth size is influenced by household wealth and healthcare proximity. Small birth size is associated with lower nutritional reserves and vulnerability to infection.",
+            "sensitivity_hints": "Influenced by wealth and healthcare proximity. Affects child nutritional status.",
+            "related_domain_knowledge": [
+                "Low birth weight is a significant risk factor for childhood morbidity and mortality, including susceptibility to infectious disease."
+            ],
+            "references": []
+        },
+        {
+            "name": "CHI_Age",
+            "llm_name": "child_age",
+            "display_name": "Child Age",
+            "type": "categorical",
+            "states": [
+                "1_year",
+                "2_years",
+                "3_years",
+                "4_years",
+                "Under_1_year"
+            ],
+            "role": "endogenous",
+            "category": "child",
+            "short_description": "Age of the child in years.",
+            "extended_description": "The child's age at the time of the survey. Age is influenced by the number of recent births and maternal age. It determines eligibility for age-dependent interventions (immunisation schedules), breastfeeding duration, and bottle feeding patterns. Diarrhoea risk varies substantially with age.",
+            "sensitivity_hints": "Influenced by birth count and maternal age. Affects breastfeeding duration, bottle feeding, and immunisation status.",
+            "related_domain_knowledge": [
+                "Diarrhoea incidence peaks in children aged 6-23 months when complementary foods are introduced and maternal antibody protection wanes."
+            ],
+            "references": []
+        },
+        {
+            "name": "CHI_Weight4Height",
+            "llm_name": "child_nutritional_status",
+            "display_name": "Child Nutritional Status",
+            "type": "categorical",
+            "states": [
+                "Normal_or_mild",
+                "Underweight",
+                "Severely_underweight"
+            ],
+            "role": "endogenous",
+            "category": "child",
+            "short_description": "Child's weight-for-height nutritional status.",
+            "extended_description": "The child's nutritional status measured as weight-for-height in standard deviations from the reference mean. Nutritional status is influenced by birth size and household wealth. Malnourished children have weakened immune systems and are more susceptible to infectious disease.",
+            "sensitivity_hints": "Influenced by birth size and wealth.",
+            "related_domain_knowledge": [
+                "Malnutrition and diarrhoea form a vicious cycle: malnutrition increases susceptibility to diarrhoea, and repeated diarrhoea episodes worsen nutritional status."
+            ],
+            "references": [
+                "Luby et al. (2009) on nutritional status and household health."
+            ]
+        },
+        {
+            "name": "FP_ModernMethod",
+            "llm_name": "contraceptive_use",
+            "display_name": "Modern Contraceptive Use",
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "family_planning",
+            "short_description": "Whether the mother uses a modern family planning method.",
+            "extended_description": "Whether the mother uses a modern contraceptive method. Contraceptive use is influenced by media exposure and maternal age. It affects the number of births and birth spacing, which in turn influence child age distribution and available resources per child.",
+            "sensitivity_hints": "Influenced by media exposure and maternal age. Affects recent birth count.",
+            "related_domain_knowledge": [
+                "Family planning is an indirect determinant of child health: fewer, better-spaced births allow greater investment per child in nutrition, healthcare, and hygiene."
+            ],
+            "references": []
+        },
+        {
+            "name": "FP_BirthsLast5Yrs",
+            "llm_name": "recent_birth_count",
+            "display_name": "Recent Birth Count",
+            "type": "categorical",
+            "states": [
+                "1_child",
+                "2_children",
+                "3_or_more"
+            ],
+            "role": "endogenous",
+            "category": "family_planning",
+            "short_description": "Number of births in the last five years.",
+            "extended_description": "The number of children born to the mother in the five years preceding the survey. Birth count is influenced by language group, wealth, and contraceptive use. Higher birth counts may dilute household resources and reduce the quality of care per child.",
+            "sensitivity_hints": "Influenced by language group, wealth, and contraceptive use. Affects child age.",
+            "related_domain_knowledge": [
+                "Higher fertility is associated with reduced per-child investment and increased competition for household health resources."
+            ],
+            "references": []
+        },
+        {
+            "name": "IMM_VitaminA1",
+            "llm_name": "vitamin_supplementation",
+            "display_name": "Vitamin A Supplementation",
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "immunisation",
+            "short_description": "Whether the child received vitamin A supplementation.",
+            "extended_description": "Whether the child received at least one dose of vitamin A supplement. Supplementation is influenced by child age, media exposure, and maternal education. Vitamin A supplementation reduces all-cause child mortality by approximately 23%.",
+            "sensitivity_hints": "Influenced by child age, media exposure, and education. Affects measles vaccination status.",
+            "related_domain_knowledge": [
+                "Vitamin A supplementation is part of integrated child survival programmes and is often co-delivered with immunisation. It strengthens immune function and reduces severity of infectious disease."
+            ],
+            "references": [
+                "UNICEF/WHO (2013) on vitamin A and child mortality."
+            ]
+        },
+        {
+            "name": "IMM_Diptheria",
+            "llm_name": "diphtheria_vaccination",
+            "display_name": "Diphtheria Vaccination",
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "immunisation",
+            "short_description": "Whether the child received diphtheria immunisation.",
+            "extended_description": "Whether the child received the diphtheria vaccine (typically part of a combined DPT vaccine). Vaccination status is influenced by child age, media exposure, and maternal education. It serves as a marker of general immunisation uptake and healthcare engagement.",
+            "sensitivity_hints": "Influenced by child age, media exposure, and education. Correlates with other immunisation variables.",
+            "related_domain_knowledge": [
+                "Diphtheria vaccination is part of the routine childhood immunisation schedule and is a proxy for overall vaccine coverage in DHS analyses."
+            ],
+            "references": []
+        },
+        {
+            "name": "IMM_Measles",
+            "llm_name": "measles_vaccination",
+            "display_name": "Measles Vaccination",
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "immunisation",
+            "short_description": "Whether the child received measles immunisation.",
+            "extended_description": "Whether the child received the measles vaccine. Vaccination status is influenced by child age, diphtheria vaccination status, vitamin A supplementation, media exposure, and maternal education. Although measles vaccination does not directly prevent diarrhoea, it reflects overall immunisation coverage and healthcare engagement, and measles itself can cause diarrhoea as a complication.",
+            "sensitivity_hints": "Influenced by child age, other immunisation variables, media exposure, and education. Direct protective factor against gastrointestinal illness.",
+            "related_domain_knowledge": [
+                "Vaccinations reduce very serious rotavirus diarrhoea infection by 74%. Measles vaccination is a proxy for overall vaccine programme reach."
+            ],
+            "references": [
+                "UNICEF/WHO (2013) on vaccination and diarrhoea prevention."
+            ]
+        },
+        {
+            "name": "DIA_HadDiarrhoea",
+            "llm_name": "gastrointestinal_illness",
+            "display_name": "Gastrointestinal Illness",
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "outcome",
+            "short_description": "Whether the child had a gastrointestinal illness episode recently.",
+            "extended_description": "Whether the child experienced diarrhoeal illness in the two weeks preceding the survey. This is the primary outcome variable of the model. It is influenced by breastfeeding practices (initial feeding timing, duration, bottle use), immunisation status (measles), and WASH factors (water source quality, water treatment, handwashing, stool disposal).",
+            "sensitivity_hints": "Terminal node. Influenced by breastfeeding, immunisation, and WASH variables. Eight direct parent variables.",
+            "related_domain_knowledge": [
+                "Diarrhoea remains one of the leading causes of death in children under 5 worldwide. The majority of cases are preventable through improved breastfeeding, sanitation, hygiene, and vaccination. Community-based care with zinc and ORS reduces diarrhoeal deaths by 93%."
+            ],
+            "references": [
+                "Kitson and Constantinou (2021) on BN structure learning from DHS data.",
+                "UNICEF/WHO (2013) on ending preventable child deaths from diarrhoea."
+            ]
+        }
+    ]
+}

@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This network was created in BNBENCH -->
+<smile version="1.0" id="bnbench" numsamples="100000" discsamples="100000">
+    <nodes>
+        <cpt id="Age">
+            <state id="Adolescent" />
+            <state id="Adult" />
+            <state id="Senior" />
+            <probabilities>0.2 0.6 0.2</probabilities>
+        </cpt>
+        <cpt id="Mileage">
+            <state id="Domino" />
+            <state id="FiftyThou" />
+            <state id="FiveThou" />
+            <state id="TwentyThou" />
+            <probabilities>0.1 0.4 0.1 0.4</probabilities>
+        </cpt>
+        <cpt id="SocioEcon">
+            <state id="Middle" />
+            <state id="Prole" />
+            <state id="UpperMiddle" />
+            <state id="Wealthy" />
+            <parents>Age</parents>
+            <probabilities>0.4 0.4 0.19 0.01 0.4 0.4 0.19 0.01 0.2 0.5 0.29 0.01</probabilities>
+        </cpt>
+        <cpt id="GoodStudent">
+            <state id="False" />
+            <state id="True" />
+            <parents>Age SocioEcon</parents>
+            <probabilities>0.8 0.2 0.9 0.1 0.5 0.5 0.6 0.4 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0</probabilities>
+        </cpt>
+        <cpt id="RiskAversion">
+            <state id="Adventurous" />
+            <state id="Cautious" />
+            <state id="Normal" />
+            <state id="Psychopath" />
+            <parents>Age SocioEcon</parents>
+            <probabilities>0.38 0.1 0.5 0.02 0.58 0.1 0.3 0.02 0.48 0.1 0.4 0.02 0.58 0.1 0.3 0.02 0.185 0.2 0.6 0.015 0.285 0.2 0.5 0.015 0.285 0.2 0.5 0.015 0.285 0.3 0.4 0.015 0.04 0.6 0.35 0.01 0.09 0.5 0.4 0.01 0.09 0.5 0.4 0.01 0.09 0.5 0.4 0.01</probabilities>
+        </cpt>
+        <cpt id="OtherCar">
+            <state id="False" />
+            <state id="True" />
+            <parents>SocioEcon</parents>
+            <probabilities>0.2 0.8 0.5 0.5 0.1 0.9 0.05 0.95</probabilities>
+        </cpt>
+        <cpt id="AntiTheft">
+            <state id="False" />
+            <state id="True" />
+            <parents>RiskAversion SocioEcon</parents>
+            <probabilities>0.999999 1e-06 0.999999 1e-06 0.8 0.2 0.5 0.5 1e-06 0.999999 0.05 0.95 1e-06 0.999999 1e-06 0.999999 0.7 0.3 0.9 0.1 0.1 0.9 0.2 0.8 0.999999 1e-06 0.999999 1e-06 0.95 0.05 0.5 0.5</probabilities>
+        </cpt>
+        <cpt id="VehicleYear">
+            <state id="Current" />
+            <state id="Older" />
+            <parents>RiskAversion SocioEcon</parents>
+            <probabilities>0.3 0.7 0.15 0.85 0.8 0.2 0.9 0.1 0.3 0.7 0.15 0.85 0.8 0.2 0.9 0.1 0.3 0.7 0.15 0.85 0.8 0.2 0.9 0.1 0.3 0.7 0.15 0.85 0.8 0.2 0.9 0.1</probabilities>
+        </cpt>
+        <cpt id="MakeModel">
+            <state id="Economy" />
+            <state id="FamilySedan" />
+            <state id="Luxury" />
+            <state id="SportsCar" />
+            <state id="SuperLuxury" />
+            <parents>RiskAversion SocioEcon</parents>
+            <probabilities>0.2 0.65 0.0 0.15 0.0 0.7 0.2 0.0 0.1 0.0 0.05 0.3 0.45 0.2 0.0 0.01 0.09 0.4 0.3 0.2 0.2 0.65 0.0 0.15 0.0 0.7 0.2 0.0 0.1 0.0 0.05 0.3 0.45 0.2 0.0 0.01 0.09 0.4 0.3 0.2 0.2 0.65 0.0 0.15 0.0 0.7 0.2 0.0 0.1 0.0 0.05 0.3 0.45 0.2 0.0 0.01 0.09 0.4 0.3 0.2 0.2 0.65 0.0 0.15 0.0 0.7 0.2 0.0 0.1 0.0 0.05 0.3 0.45 0.2 0.0 0.01 0.09 0.4 0.3 0.2</probabilities>
+        </cpt>
+        <cpt id="HomeBase">
+            <state id="City" />
+            <state id="Rural" />
+            <state id="Secure" />
+            <state id="Suburb" />
+            <parents>RiskAversion SocioEcon</parents>
+            <probabilities>0.25 0.14 0.01 0.6 0.8 0.149999 1e-06 0.05 0.4 0.1 0.2 0.3 1e-06 0.049998 0.95 1e-06 1e-06 0.025554 0.95 0.024445 0.8 0.149999 1e-06 0.05 1e-06 1e-06 0.999997 1e-06 1e-06 1e-06 0.999997 1e-06 1e-06 0.1 0.299999 0.6 0.8 0.149999 1e-06 0.05 1e-06 0.099999 0.5 0.4 1e-06 0.148999 0.85 0.001 0.8 0.01 0.15 0.04 0.8 0.15 1e-06 0.049999 0.6 0.01 0.35 0.04 0.5 0.01 0.489999 1e-06</probabilities>
+        </cpt>
+        <cpt id="SeniorTrain">
+            <state id="False" />
+            <state id="True" />
+            <parents>Age RiskAversion</parents>
+            <probabilities>1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.999999 1e-06 0.1 0.9 0.7 0.3 0.999999 1e-06</probabilities>
+        </cpt>
+        <cpt id="RuggedAuto">
+            <state id="EggShell" />
+            <state id="Football" />
+            <state id="Tank" />
+            <parents>MakeModel VehicleYear</parents>
+            <probabilities>0.5 0.5 0.0 0.9 0.1 0.0 0.2 0.6 0.2 0.05 0.55 0.4 0.1 0.6 0.3 0.1 0.6 0.3 0.95 0.04 0.01 0.95 0.04 0.01 0.05 0.55 0.4 0.05 0.55 0.4</probabilities>
+        </cpt>
+        <cpt id="DrivingSkill">
+            <state id="Expert" />
+            <state id="Normal" />
+            <state id="SubStandard" />
+            <parents>Age SeniorTrain</parents>
+            <probabilities>0.05 0.45 0.5 0.05 0.45 0.5 0.1 0.6 0.3 0.1 0.6 0.3 0.1 0.5 0.4 0.3 0.6 0.1</probabilities>
+        </cpt>
+        <cpt id="Airbag">
+            <state id="False" />
+            <state id="True" />
+            <parents>MakeModel VehicleYear</parents>
+            <probabilities>0.0 1.0 0.95 0.05 0.0 1.0 0.8 0.2 0.0 1.0 0.4 0.6 0.0 1.0 0.9 0.1 0.0 1.0 0.9 0.1</probabilities>
+        </cpt>
+        <cpt id="Antilock">
+            <state id="False" />
+            <state id="True" />
+            <parents>MakeModel VehicleYear</parents>
+            <probabilities>0.999 0.001 1.0 0.0 0.6 0.4 1.0 0.0 0.01 0.99 0.7 0.3 0.1 0.9 0.9 0.1 0.01 0.99 0.85 0.15</probabilities>
+        </cpt>
+        <cpt id="CarValue">
+            <state id="FiftyThou" />
+            <state id="FiveThou" />
+            <state id="Million" />
+            <state id="TenThou" />
+            <state id="TwentyThou" />
+            <parents>MakeModel Mileage VehicleYear</parents>
+            <probabilities>0.0 0.1 0.0 0.8 0.1 0.0 0.999998 0.0 1e-06 1e-06 0.0 0.1 0.0 0.8 0.1 0.0 0.99 0.0 0.009999 1e-06 0.0 0.1 0.0 0.8 0.1 0.0 0.25 0.0 0.7 0.05 0.0 0.1 0.0 0.8 0.1 0.0 0.7 0.0 0.2999 0.0001 0.0 0.0 0.0 0.1 0.9 0.0 0.99 0.0 0.009999 1e-06 0.0 0.0 0.0 0.1 0.9 0.0 0.7 0.0 0.2 0.1 0.0 0.0 0.0 0.1 0.9 0.0 0.2 0.0 0.3 0.5 0.0 0.0 0.0 0.1 0.9 0.0 0.5 0.0 0.3 0.2 1.0 0.0 0.0 0.0 0.0 0.3 0.2 0.0 0.2 0.3 1.0 0.0 0.0 0.0 0.0 0.3 0.1 0.0 0.3 0.3 1.0 0.0 0.0 0.0 0.0 0.7 0.01 0.0 0.09 0.2 1.0 0.0 0.0 0.0 0.0 0.5 0.05 0.0 0.15 0.3 0.09 0.0 0.01 0.1 0.8 0.01 0.9 0.01 0.06 0.02 0.09 0.0 0.01 0.1 0.8 0.02 0.4 0.01 0.47 0.1 0.09 0.0 0.01 0.1 0.8 0.06 0.03 0.01 0.3 0.6 0.09 0.0 0.01 0.1 0.8 0.03 0.16 0.01 0.5 0.3 0.0 0.0 1.0 0.0 0.0 1e-06 1e-06 0.999996 1e-06 1e-06 0.0 0.0 1.0 0.0 0.0 1e-06 1e-06 0.999996 1e-06 1e-06 0.0 0.0 1.0 0.0 0.0 1e-06 1e-06 0.999996 1e-06 1e-06 0.0 0.0 1.0 0.0 0.0 1e-06 1e-06 0.999996 1e-06 1e-06</probabilities>
+        </cpt>
+        <cpt id="DrivHist">
+            <state id="Many" />
+            <state id="One" />
+            <state id="Zero" />
+            <parents>DrivingSkill RiskAversion</parents>
+            <probabilities>0.1 0.3 0.6 1e-06 1e-06 0.999998 1e-06 0.009999 0.99 0.4 0.3 0.3 0.2 0.3 0.5 0.01 0.04 0.95 0.03 0.07 0.9 0.6 0.3 0.1 0.99 0.008 0.002 0.4 0.3 0.3 0.82 0.15 0.03 0.995 0.004 0.001</probabilities>
+        </cpt>
+        <cpt id="Cushioning">
+            <state id="Excellent" />
+            <state id="Fair" />
+            <state id="Good" />
+            <state id="Poor" />
+            <parents>Airbag RuggedAuto</parents>
+            <probabilities>0.0 0.3 0.0 0.7 0.0 0.6 0.3 0.1 0.3 0.0 0.7 0.0 0.0 0.3 0.2 0.5 0.3 0.1 0.6 0.0 1.0 0.0 0.0 0.0</probabilities>
+        </cpt>
+        <cpt id="Theft">
+            <state id="False" />
+            <state id="True" />
+            <parents>AntiTheft CarValue HomeBase</parents>
+            <probabilities>0.99 0.01 0.9998 0.0002 0.999998 2e-06 0.9995 0.0005 0.999 0.001 0.99999 1e-05 0.999999 1e-06 0.99999 1e-05 0.999999 1e-06 0.999999 1e-06 0.999999 1e-06 0.999999 1e-06 0.995 0.005 0.9999 0.0001 0.999998 2e-06 0.9998 0.0002 0.99 0.01 0.9998 0.0002 0.999997 3e-06 0.9995 0.0005 0.995 0.005 0.99995 5e-05 0.999998 2e-06 0.9997 0.0003 0.9995 0.0005 0.99999 1e-05 0.999999 1e-06 0.99999 1e-05 0.999999 1e-06 0.999999 1e-06 0.999999 1e-06 0.999999 1e-06 0.998 0.002 0.99998 2e-05 0.999998 2e-06 0.9999 0.0001 0.995 0.005 0.99995 5e-05 0.999997 3e-06 0.9997 0.0003</probabilities>
+        </cpt>
+        <cpt id="DrivQuality">
+            <state id="Excellent" />
+            <state id="Normal" />
+            <state id="Poor" />
+            <parents>DrivingSkill RiskAversion</parents>
+            <probabilities>0.98 0.01 0.01 1.0 0.0 0.0 1.0 0.0 0.0 0.5 0.2 0.3 0.3 0.4 0.3 0.2 0.8 0.0 0.0 1.0 0.0 0.3 0.2 0.5 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</probabilities>
+        </cpt>
+        <cpt id="Accident">
+            <state id="Mild" />
+            <state id="Moderate" />
+            <state id="None" />
+            <state id="Severe" />
+            <parents>Antilock DrivQuality Mileage</parents>
+            <probabilities>0.01 0.007 0.98 0.003 0.01 0.005 0.98 0.005 0.003 0.001 0.995 0.001 0.007 0.002 0.99 0.001 0.03 0.02 0.94 0.01 0.03 0.015 0.95 0.005 0.01 0.005 0.98 0.005 0.02 0.015 0.96 0.005 0.1 0.3 0.1 0.5 0.2 0.2 0.2 0.4 0.2 0.1 0.6 0.1 0.2 0.2 0.3 0.3 0.01 0.003 0.985 0.002 0.007 0.002 0.99 0.001 0.0007 0.0002 0.999 0.0001 0.003 0.001 0.995 0.001 0.03 0.01 0.95 0.01 0.02 0.007 0.97 0.003 0.007 0.002 0.99 0.001 0.01 0.005 0.98 0.005 0.2 0.3 0.2 0.3 0.3 0.2 0.3 0.2 0.2 0.07 0.7 0.03 0.3 0.2 0.4 0.1</probabilities>
+        </cpt>
+        <cpt id="ILiCost">
+            <state id="HundredThou" />
+            <state id="Million" />
+            <state id="TenThou" />
+            <state id="Thousand" />
+            <parents>Accident</parents>
+            <probabilities>1e-06 1e-06 0.000998 0.999 0.03 0.02 0.05 0.9 0.0 0.0 0.0 1.0 0.06 0.04 0.1 0.8</probabilities>
+        </cpt>
+        <cpt id="MedCost">
+            <state id="HundredThou" />
+            <state id="Million" />
+            <state id="TenThou" />
+            <state id="Thousand" />
+            <parents>Accident Age Cushioning</parents>
+            <probabilities>9e-06 1e-06 0.00099 0.999 0.0009 0.0001 0.019 0.98 9e-05 1e-05 0.0099 0.99 0.009 0.001 0.03 0.96 9e-06 1e-06 0.00099 0.999 0.0009 0.0001 0.019 0.98 9e-05 1e-05 0.0099 0.99 0.009 0.001 0.03 0.96 0.002 0.001 0.007 0.99 0.007 0.003 0.04 0.95 0.003 0.002 0.025 0.97 0.02 0.01 0.07 0.9 0.002 0.001 0.007 0.99 0.03 0.02 0.15 0.8 0.02 0.01 0.02 0.95 0.2 0.1 0.2 0.5 0.002 0.001 0.007 0.99 0.03 0.02 0.15 0.8 0.02 0.01 0.02 0.95 0.2 0.1 0.2 0.5 0.01 0.01 0.03 0.95 0.2 0.1 0.2 0.5 0.02 0.01 0.07 0.9 0.2 0.2 0.3 0.3 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.01 0.01 0.03 0.95 0.2 0.1 0.2 0.5 0.02 0.01 0.07 0.9 0.2 0.2 0.3 0.3 0.01 0.01 0.03 0.95 0.2 0.1 0.2 0.5 0.02 0.01 0.07 0.9 0.2 0.2 0.3 0.3 0.03 0.02 0.05 0.9 0.2 0.2 0.3 0.3 0.07 0.03 0.3 0.6 0.3 0.3 0.2 0.2</probabilities>
+        </cpt>
+        <cpt id="OtherCarCost">
+            <state id="HundredThou" />
+            <state id="Million" />
+            <state id="TenThou" />
+            <state id="Thousand" />
+            <parents>Accident RuggedAuto</parents>
+            <probabilities>0.00499 1e-05 0.005 0.99 0.009984651 4.999825e-05 0.00999965 0.9799657 0.01998 2e-05 0.03 0.95 0.19998 2e-05 0.2 0.6 0.29997 3e-05 0.2 0.5 0.29996 4e-05 0.3 0.4 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.39996 4e-05 0.4 0.2 0.39994 6e-05 0.5 0.1 0.4449 0.0001 0.55 0.005</probabilities>
+        </cpt>
+        <cpt id="ThisCarDam">
+            <state id="Mild" />
+            <state id="Moderate" />
+            <state id="None" />
+            <state id="Severe" />
+            <parents>Accident RuggedAuto</parents>
+            <probabilities>0.9 0.098 0.001 0.001 0.75 0.049999 0.2 1e-06 0.29 0.009999 0.7 1e-06 0.000999 0.7 1e-06 0.299 0.099 0.8 0.001 0.1 0.6 0.3 0.05 0.05 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 9e-06 9e-05 1e-06 0.9999 0.000999 0.009 1e-06 0.99 0.2 0.2 0.05 0.55</probabilities>
+        </cpt>
+        <cpt id="ThisCarCost">
+            <state id="HundredThou" />
+            <state id="Million" />
+            <state id="TenThou" />
+            <state id="Thousand" />
+            <parents>CarValue Theft ThisCarDam</parents>
+            <probabilities>0.0 0.0 0.01 0.99 0.99 0.0 0.005 0.005 0.0 0.0 0.0 1.0 0.998 0.0 0.001 0.001 0.95 0.0 0.02 0.03 0.998 0.0 0.001 0.001 0.95 0.0 0.01 0.04 0.999998 0.0 1e-06 1e-06 0.0 0.0 0.05 0.95 0.0 0.0 0.75 0.25 0.0 0.0 0.0 1.0 0.0 0.0 0.95 0.05 0.0 0.0 0.85 0.15 0.0 0.0 0.95 0.05 0.0 0.0 0.8 0.2 0.0 0.0 0.97 0.03 0.01 0.0 0.01 0.98 0.044 0.95 0.003 0.003 0.0 0.0 0.0 1.0 0.029998 0.97 1e-06 1e-06 0.25 0.7 0.03 0.02 0.018 0.98 0.001 0.001 0.2 0.75 0.01 0.04 0.009998 0.99 1e-06 1e-06 0.0 0.0 0.05 0.95 0.0 0.0 0.85 0.15 0.0 0.0 0.0 1.0 0.0 0.0 0.99 0.01 0.0 0.0 0.97 0.03 0.0 0.0 0.99 0.01 0.0 0.0 0.95 0.05 0.0 0.0 0.999999 1e-06 0.0 0.0 0.01 0.99 0.98 0.0 0.01 0.01 0.0 0.0 0.0 1.0 0.99 0.0 0.005 0.005 0.95 0.0 0.02 0.03 0.998 0.0 0.001 0.001 0.95 0.0 0.01 0.04 0.999998 0.0 1e-06 1e-06</probabilities>
+        </cpt>
+        <cpt id="PropCost">
+            <state id="HundredThou" />
+            <state id="Million" />
+            <state id="TenThou" />
+            <state id="Thousand" />
+            <parents>OtherCarCost ThisCarCost</parents>
+            <probabilities>0.6 0.4 0.0 0.0 0.0 1.0 0.0 0.0 0.8 0.2 0.0 0.0 0.98 0.02 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.95 0.05 0.0 0.0 0.0 1.0 0.0 0.0 0.4 0.0 0.6 0.0 0.05 0.0 0.95 0.0 0.98 0.02 0.0 0.0 0.0 1.0 0.0 0.0 0.05 0.0 0.95 0.0 0.0 0.0 0.3 0.7</probabilities>
+        </cpt>
+    </nodes>
+    <extensions>
+        <genie version="1.0" app="GeNIe 4.0.1922.0 ACADEMIC" name="Network1">
+            <node id="Age">
+                <name>Age</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 100 100 140</position>
+            </node>
+            <node id="Mileage">
+                <name>Mileage</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 100 200 140</position>
+            </node>
+            <node id="SocioEcon">
+                <name>SocioEcon</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 200 100 240</position>
+            </node>
+            <node id="GoodStudent">
+                <name>GoodStudent</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 300 100 340</position>
+            </node>
+            <node id="RiskAversion">
+                <name>RiskAversion</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 300 200 340</position>
+            </node>
+            <node id="OtherCar">
+                <name>OtherCar</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 300 300 340</position>
+            </node>
+            <node id="AntiTheft">
+                <name>AntiTheft</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 400 100 440</position>
+            </node>
+            <node id="VehicleYear">
+                <name>VehicleYear</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 400 200 440</position>
+            </node>
+            <node id="MakeModel">
+                <name>MakeModel</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 400 300 440</position>
+            </node>
+            <node id="HomeBase">
+                <name>HomeBase</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 400 400 440</position>
+            </node>
+            <node id="SeniorTrain">
+                <name>SeniorTrain</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 400 500 440</position>
+            </node>
+            <node id="RuggedAuto">
+                <name>RuggedAuto</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 500 100 540</position>
+            </node>
+            <node id="DrivingSkill">
+                <name>DrivingSkill</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 500 200 540</position>
+            </node>
+            <node id="Airbag">
+                <name>Airbag</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 500 300 540</position>
+            </node>
+            <node id="Antilock">
+                <name>Antilock</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 500 400 540</position>
+            </node>
+            <node id="CarValue">
+                <name>CarValue</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 500 500 540</position>
+            </node>
+            <node id="DrivHist">
+                <name>DrivHist</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 600 100 640</position>
+            </node>
+            <node id="Cushioning">
+                <name>Cushioning</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 600 200 640</position>
+            </node>
+            <node id="Theft">
+                <name>Theft</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 600 300 640</position>
+            </node>
+            <node id="DrivQuality">
+                <name>DrivQuality</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 600 400 640</position>
+            </node>
+            <node id="Accident">
+                <name>Accident</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 700 100 740</position>
+            </node>
+            <node id="ILiCost">
+                <name>ILiCost</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 800 100 840</position>
+            </node>
+            <node id="MedCost">
+                <name>MedCost</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 800 200 840</position>
+            </node>
+            <node id="OtherCarCost">
+                <name>OtherCarCost</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 800 300 840</position>
+            </node>
+            <node id="ThisCarDam">
+                <name>ThisCarDam</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 800 400 840</position>
+            </node>
+            <node id="ThisCarCost">
+                <name>ThisCarCost</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 900 100 940</position>
+            </node>
+            <node id="PropCost">
+                <name>PropCost</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 1000 100 1040</position>
+            </node>
+        </genie>
+    </extensions>
+</smile>

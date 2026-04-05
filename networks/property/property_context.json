@@ -1,0 +1,861 @@
+{
+    "schema_version": "2.0",
+    "network": "property",
+    "domain": "property_investment_analysis",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a residential property investment model covering purchase costs, rental income, financing, expenses, taxation, and net returns over a one-year holding period.",
+    "provenance": {
+        "source_network": "property",
+        "source_reference": "Constantinou2016Property",
+        "source_url": "https://www.bnlearn.com/bnrepository/discrete-medium.html#property",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "A Bayesian network for residential buy-to-let property investment analysis. Models the causal relationships between purchase price, financing, rental yields, operating expenses, taxation, and overall profitability. Includes time-stepped variables (T1) representing values after one year of growth. 27 variables and 26 directed edges."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This models the financial analysis of a residential rental property investment over one year.",
+            "Consider the causal chain: purchase price and financing terms → rental income and expenses → net profitability.",
+            "The model distinguishes between initial values (year 0) and projected values after one year (T1).",
+            "Loan-to-value ratio is determined jointly by borrowing amount and purchase price.",
+            "Rental profitability flows through: gross rent → minus expenses → minus tax → minus interest → net profit.",
+            "Capital appreciation depends on growth rate applied to purchase price.",
+            "Property management fees are a percentage of rental income that contributes to total expenses.",
+            "Stamp duty (transaction tax) depends on purchase price bands.",
+            "Interest payments depend on borrowing amount, interest rate, and ancillary fees."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, extended descriptions, sensitivity hints, domain knowledge, and references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "LTV",
+            "display_name": "Loan-to-Value Ratio",
+            "type": "categorical",
+            "states": [
+                "biggerThan65_",
+                "lessThan20_",
+                "x0_25_",
+                "x0_65_",
+                "x5_50_"
+            ],
+            "role": "endogenous",
+            "category": "financing",
+            "short_description": "Ratio of mortgage borrowing to property purchase price.",
+            "extended_description": "The loan-to-value (LTV) ratio expresses the mortgage amount as a percentage of the property value. Higher LTV means more leverage and greater financial risk. Lenders typically offer better interest rates at lower LTV bands. Determined jointly by borrowing amount and property purchase price.",
+            "sensitivity_hints": "LTV is a derived ratio from two inputs: the loan amount and the property value. It is not a cause of either.",
+            "related_domain_knowledge": [
+                "LTV above 75% typically attracts higher interest rates.",
+                "First-time buyers often have higher LTV due to smaller deposits.",
+                "LTV is a key risk metric for mortgage lenders."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "leverage_ratio"
+        },
+        {
+            "name": "actualRentalIncome",
+            "display_name": "Actual Rental Income",
+            "type": "categorical",
+            "states": [
+                "biggerThan45k",
+                "lessThan25k",
+                "x0_35k",
+                "x0_45k",
+                "x5_30k",
+                "x5_40k"
+            ],
+            "role": "endogenous",
+            "category": "rental_income",
+            "short_description": "Rental income actually received after accounting for void periods.",
+            "extended_description": "The rental income the landlord actually receives, which is the advertised rental income reduced by the proportion of time the property is unoccupied (void periods). A property advertised at high rent but with significant vacancy will have lower actual income.",
+            "sensitivity_hints": "This is a function of both the headline rent and the vacancy rate. It feeds into gross yield, gross profit, and expenses calculations.",
+            "related_domain_knowledge": [
+                "Void periods are a major risk in buy-to-let investment.",
+                "Actual income is always less than or equal to advertised income.",
+                "Location strongly influences both rental level and void rate."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "received_rent"
+        },
+        {
+            "name": "borrowing",
+            "display_name": "Borrowing Amount",
+            "type": "categorical",
+            "states": [
+                "biggerThan400k",
+                "lessThan200k",
+                "x00_300k",
+                "x00_400k"
+            ],
+            "role": "exogenous",
+            "category": "financing",
+            "short_description": "Total mortgage borrowing against the property.",
+            "extended_description": "The total amount of mortgage debt taken out to finance the property purchase. Higher borrowing increases interest costs but also increases leverage, amplifying both gains and losses on the investment.",
+            "sensitivity_hints": "A root variable that directly affects LTV, interest costs, and indirectly the overall profitability of the investment.",
+            "related_domain_knowledge": [
+                "Buy-to-let mortgages typically require a minimum 25% deposit.",
+                "Higher borrowing increases monthly repayments and interest charges.",
+                "Leverage amplifies capital gains but also capital losses."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "loan_amount"
+        },
+        {
+            "name": "capitalGains",
+            "display_name": "Capital Gains",
+            "type": "categorical",
+            "states": [
+                "biggerThan160k",
+                "lessThan40k",
+                "x0_120k",
+                "x0_80k",
+                "x20_160k"
+            ],
+            "role": "endogenous",
+            "category": "capital_appreciation",
+            "short_description": "Monetary gain from property value increase over the holding period.",
+            "extended_description": "The absolute monetary increase in property value, determined by applying the capital growth rate to the purchase price. A property bought for more will generate larger absolute gains at the same growth rate.",
+            "sensitivity_hints": "Depends on both the growth rate and the initial purchase price. Feeds into the projected property value at T1.",
+            "related_domain_knowledge": [
+                "Capital gains are unrealised until the property is sold.",
+                "Capital gains tax may apply on disposal of investment property.",
+                "Historical UK property appreciation has averaged around 3-5% per annum."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "appreciation_amount"
+        },
+        {
+            "name": "capitalGrowth",
+            "display_name": "Capital Growth Rate",
+            "type": "categorical",
+            "states": [
+                "biggerThan9_",
+                "lessThan3_",
+                "x_5_",
+                "x_7_",
+                "x_9_"
+            ],
+            "role": "exogenous",
+            "category": "capital_appreciation",
+            "short_description": "Annual percentage increase in property value.",
+            "extended_description": "The rate at which the property value appreciates over one year, expressed as a percentage. This is an exogenous market-driven variable that combines macroeconomic conditions, local housing supply and demand, and general inflation.",
+            "sensitivity_hints": "A root variable that drives capital gains and the projected property value. Independent of the investor's decisions.",
+            "related_domain_knowledge": [
+                "Capital growth varies significantly by region and property type.",
+                "Growth rates can be negative in downturns.",
+                "Long-run average growth tends to track slightly above inflation."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "value_growth_rate"
+        },
+        {
+            "name": "incomeTax",
+            "display_name": "Income Tax Rate",
+            "type": "categorical",
+            "states": [
+                "biggerThan30_",
+                "lessThan10_",
+                "x0_20_",
+                "x0_30_"
+            ],
+            "role": "exogenous",
+            "category": "taxation",
+            "short_description": "Marginal income tax rate applicable to rental profits.",
+            "extended_description": "The landlord's marginal tax rate applied to rental profits. Higher-rate taxpayers keep less of each pound of rental profit. This is determined by the investor's total income from all sources, not just property.",
+            "sensitivity_hints": "A root variable that directly reduces rental profitability. Higher tax rates make the after-tax return less attractive.",
+            "related_domain_knowledge": [
+                "UK rental income is taxed as ordinary income.",
+                "Higher-rate taxpayers face a larger tax burden on rental profits.",
+                "Tax relief on mortgage interest has been restricted to basic rate since 2020."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "marginal_tax_rate"
+        },
+        {
+            "name": "interest",
+            "display_name": "Total Interest Payments",
+            "type": "categorical",
+            "states": [
+                "biggerThan25k",
+                "lessThan5k",
+                "x0_15k",
+                "x0_25k",
+                "x5_20k",
+                "x_10k"
+            ],
+            "role": "endogenous",
+            "category": "financing",
+            "short_description": "Total annual interest paid on mortgage and other borrowing.",
+            "extended_description": "The total interest cost incurred during the year, combining the mortgage interest (borrowing times interest rate) with any additional fees or charges on other borrowing. This is a major cost that directly reduces the net profit from the investment.",
+            "sensitivity_hints": "Determined by borrowing amount, interest rate, and ancillary fees. Feeds into both interest tax relief and net profit calculations.",
+            "related_domain_knowledge": [
+                "Interest is typically the largest single cost in a leveraged property investment.",
+                "Variable rate mortgages expose the investor to interest rate risk.",
+                "Interest-only mortgages keep payments lower but do not reduce the loan balance."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "total_interest_cost"
+        },
+        {
+            "name": "interestRate",
+            "display_name": "Interest Rate",
+            "type": "categorical",
+            "states": [
+                "x",
+                "x2",
+                "x3",
+                "x4",
+                "x5",
+                "x6"
+            ],
+            "role": "exogenous",
+            "category": "financing",
+            "short_description": "Annual mortgage interest rate.",
+            "extended_description": "The annual interest rate charged on the mortgage. This is an exogenous market variable influenced by central bank rates, lender risk appetite, and the borrower's creditworthiness. Combined with the borrowing amount, it determines the annual interest cost.",
+            "sensitivity_hints": "A root variable that directly drives interest costs. Small changes in rate can significantly affect profitability on highly leveraged investments.",
+            "related_domain_knowledge": [
+                "Buy-to-let mortgage rates are typically higher than residential rates.",
+                "Fixed rates provide certainty; variable rates carry upside and downside risk.",
+                "The Bank of England base rate strongly influences mortgage pricing."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "mortgage_rate"
+        },
+        {
+            "name": "interestTaxRelief",
+            "display_name": "Interest Tax Relief",
+            "type": "categorical",
+            "states": [
+                "biggerThan5k",
+                "lessThan1k",
+                "x_2k",
+                "x_3k",
+                "x_4k",
+                "x_5k"
+            ],
+            "role": "endogenous",
+            "category": "taxation",
+            "short_description": "Tax credit received for mortgage interest paid.",
+            "extended_description": "The monetary value of tax relief the landlord receives on mortgage interest payments. Since 2020 in the UK this is restricted to a basic-rate (20%) credit regardless of the investor's marginal tax rate. Higher interest payments generate larger absolute relief amounts.",
+            "sensitivity_hints": "Determined solely by interest payments. It offsets some of the interest cost in the net profit calculation.",
+            "related_domain_knowledge": [
+                "Previously landlords could deduct full mortgage interest from rental income.",
+                "The Section 24 tax change phased in a 20% tax credit instead.",
+                "This change disproportionately affects higher-rate taxpayers."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "interest_tax_credit"
+        },
+        {
+            "name": "netProfit",
+            "display_name": "Net Profit",
+            "type": "categorical",
+            "states": [
+                "biggerThan25k",
+                "lessThan_5k",
+                "x0_15k",
+                "x0_25k",
+                "x5_20k",
+                "x5_5k",
+                "x_10k"
+            ],
+            "role": "endogenous",
+            "category": "profitability",
+            "short_description": "Final net profit after all costs, interest, and tax adjustments.",
+            "extended_description": "The bottom-line annual profit from the property investment after deducting interest costs and adding back the interest tax relief to the pre-interest rental net profit. This is the key outcome variable for evaluating the investment. Can be negative if costs exceed income.",
+            "sensitivity_hints": "The terminal outcome variable for annual cash-flow analysis. Determined by rental net profit before interest, interest costs, and interest tax relief.",
+            "related_domain_knowledge": [
+                "Negative net profit means the investment is cash-flow negative.",
+                "Net profit excludes capital gains which are only realised on sale.",
+                "Investors often accept low or negative cash flow if capital growth is expected."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "annual_net_return"
+        },
+        {
+            "name": "otherInterestFees",
+            "display_name": "Other Interest and Fees",
+            "type": "categorical",
+            "states": [
+                "lessThan1k",
+                "x1_5k",
+                "x_1_5k"
+            ],
+            "role": "exogenous",
+            "category": "financing",
+            "short_description": "Ancillary borrowing costs such as arrangement and valuation fees.",
+            "extended_description": "Additional costs associated with borrowing beyond the main mortgage interest, including arrangement fees, valuation fees, broker fees, and any other lender charges. These are typically incurred at the start of the mortgage but may be added to the loan balance.",
+            "sensitivity_hints": "A root variable that contributes to total interest costs. Usually smaller than the main interest charge but adds to overall financing expense.",
+            "related_domain_knowledge": [
+                "Arrangement fees can be substantial on buy-to-let mortgages.",
+                "Some fees can be added to the loan but this increases the borrowing amount.",
+                "Fee-free mortgages typically have higher interest rates."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "ancillary_borrowing_costs"
+        },
+        {
+            "name": "otherPropertyExpenses",
+            "display_name": "Other Property Expenses",
+            "type": "categorical",
+            "states": [
+                "biggerThan5k",
+                "lessThan3k",
+                "x_5k"
+            ],
+            "role": "exogenous",
+            "category": "operating_costs",
+            "short_description": "Miscellaneous annual property costs such as insurance and maintenance.",
+            "extended_description": "Annual expenditure on property-related items other than management fees, including insurance, maintenance, repairs, ground rent, service charges, and sundry costs. This is an exogenous variable representing the baseline cost of keeping the property in rentable condition.",
+            "sensitivity_hints": "A root variable that feeds into total property expenses and the projected year-1 expenses via the expenses growth rate.",
+            "related_domain_knowledge": [
+                "Maintenance costs tend to increase with property age.",
+                "Landlords must meet minimum safety and habitability standards.",
+                "Insurance, gas safety certificates, and EPC are mandatory costs."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "miscellaneous_costs"
+        },
+        {
+            "name": "otherPropertyExpensesT1",
+            "display_name": "Other Property Expenses (Year 1)",
+            "type": "categorical",
+            "states": [
+                "biggerThan5k",
+                "lessThan3k",
+                "x_5k"
+            ],
+            "role": "endogenous",
+            "category": "operating_costs",
+            "short_description": "Projected miscellaneous property costs after one year of growth.",
+            "extended_description": "The expected miscellaneous property expenses at the end of year one, calculated by applying the property expenses growth rate to the initial miscellaneous costs. Reflects the impact of inflation and cost escalation on the running costs of the property.",
+            "sensitivity_hints": "Derived from the initial miscellaneous costs and the expenses growth rate. Represents the forward-looking cost burden.",
+            "related_domain_knowledge": [
+                "Property maintenance costs tend to rise faster than general inflation.",
+                "Older properties typically see higher cost growth due to wear.",
+                "Unexpected major repairs can cause spikes in expenses."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "projected_miscellaneous_costs"
+        },
+        {
+            "name": "propertyExpenses",
+            "display_name": "Total Property Expenses",
+            "type": "categorical",
+            "states": [
+                "biggerThan9k",
+                "lessThan5k",
+                "x_8k",
+                "x_9k"
+            ],
+            "role": "endogenous",
+            "category": "operating_costs",
+            "short_description": "Total annual operating costs including management and maintenance.",
+            "extended_description": "The combined annual cost of operating the rental property, aggregating the management fee (a percentage of actual rental income) and the miscellaneous property expenses. This is subtracted from actual rental income to give the gross profit.",
+            "sensitivity_hints": "Determined by actual rental income (via the management fee percentage), the management fee rate, and the miscellaneous costs. Feeds into gross profit.",
+            "related_domain_knowledge": [
+                "Total expenses typically represent 20-35% of gross rental income.",
+                "Self-managing reduces costs but increases the landlord's time commitment.",
+                "Unexpected repairs can cause expenses to exceed budget."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "total_operating_costs"
+        },
+        {
+            "name": "propertyExpensesGrowth",
+            "display_name": "Property Expenses Growth Rate",
+            "type": "categorical",
+            "states": [
+                "biggerThan9_",
+                "lessThan3_",
+                "x_5_",
+                "x_7_",
+                "x_9_"
+            ],
+            "role": "exogenous",
+            "category": "operating_costs",
+            "short_description": "Annual percentage increase in property operating costs.",
+            "extended_description": "The rate at which miscellaneous property expenses grow over one year, reflecting inflation in maintenance materials, labour, insurance premiums, and service charges. Applied to the initial expenses to project year-1 costs.",
+            "sensitivity_hints": "A root variable that drives the projected year-1 expenses. Independent of the investor's decisions.",
+            "related_domain_knowledge": [
+                "Property maintenance inflation often exceeds general inflation.",
+                "Labour shortages can push maintenance costs up sharply.",
+                "Insurance premiums may spike after claims or extreme weather events."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "cost_escalation_rate"
+        },
+        {
+            "name": "propertyManagement",
+            "display_name": "Property Management Fee Rate",
+            "type": "categorical",
+            "states": [
+                "biggerThan17_",
+                "upTo9_",
+                "x3_17_",
+                "x_13_"
+            ],
+            "role": "exogenous",
+            "category": "operating_costs",
+            "short_description": "Percentage of rental income charged by the property manager.",
+            "extended_description": "The fee rate charged by a lettings agent or property management company, expressed as a percentage of actual rental income received. Higher service levels (full management vs let-only) attract higher fees. Self-managing landlords effectively pay 0%.",
+            "sensitivity_hints": "A root variable that contributes to total property expenses as a proportion of actual rental income.",
+            "related_domain_knowledge": [
+                "Typical UK letting agent fees range from 8-15% of rent.",
+                "Full management (including maintenance coordination) costs more than let-only.",
+                "Self-management saves fees but requires landlord availability."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "management_fee_rate"
+        },
+        {
+            "name": "propertyPurchaseValue",
+            "display_name": "Property Purchase Value",
+            "type": "categorical",
+            "states": [
+                "biggerThan1_75m",
+                "lessThan750k",
+                "x50k_1m",
+                "x_1_25m",
+                "x_25_1_5m",
+                "x_5_1_75m"
+            ],
+            "role": "exogenous",
+            "category": "acquisition",
+            "short_description": "Purchase price of the investment property.",
+            "extended_description": "The price paid to acquire the property. This is a root variable that influences many downstream quantities: the LTV ratio, absolute capital gains, rental yield, stamp duty, and the projected future value. It is the single most important variable in determining the scale of the investment.",
+            "sensitivity_hints": "A central root variable with wide-reaching effects. Determines the scale of the investment and feeds into LTV, capital gains, rental yield, stamp duty, and projected value.",
+            "related_domain_knowledge": [
+                "Higher-value properties may offer lower yield but stronger capital growth.",
+                "Purchase price determines stamp duty band and rate.",
+                "Location is the primary driver of property values."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "acquisition_price"
+        },
+        {
+            "name": "propertyValueT1",
+            "display_name": "Property Value (Year 1)",
+            "type": "categorical",
+            "states": [
+                "biggerThan1_75m",
+                "lessThan750k",
+                "x50k_1m",
+                "x_1_25m",
+                "x_25_1_5m",
+                "x_5_1_75m"
+            ],
+            "role": "endogenous",
+            "category": "capital_appreciation",
+            "short_description": "Projected property value after one year of capital growth.",
+            "extended_description": "The estimated market value of the property at the end of year one, calculated from the purchase price plus capital gains. This represents the equity position if the property were sold and is used for assessing total return on investment.",
+            "sensitivity_hints": "Derived from capital gains and the original purchase price. Represents the forward-looking asset value.",
+            "related_domain_knowledge": [
+                "Property valuation is uncertain and based on comparable transactions.",
+                "Paper gains are unrealised until the property is sold.",
+                "Property value affects remortgage options and equity release."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "projected_asset_value"
+        },
+        {
+            "name": "rentalGrossProfit",
+            "display_name": "Rental Gross Profit",
+            "type": "categorical",
+            "states": [
+                "biggerThan30k",
+                "lessThan10k",
+                "x0_15k",
+                "x0_25k",
+                "x5_20k",
+                "x5_30k"
+            ],
+            "role": "endogenous",
+            "category": "profitability",
+            "short_description": "Rental income minus total property operating expenses.",
+            "extended_description": "The gross profit from renting the property, calculated as actual rental income minus total property expenses (management fees plus miscellaneous costs). This represents the operating surplus before considering taxation and financing costs.",
+            "sensitivity_hints": "Directly determined by actual rental income and total property expenses. Feeds into the pre-interest net profit via the tax calculation.",
+            "related_domain_knowledge": [
+                "Gross profit margins in buy-to-let typically range from 60-80% of gross rent.",
+                "Properties requiring significant maintenance have lower gross margins.",
+                "Newly built properties tend to have lower maintenance costs initially."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "operating_surplus"
+        },
+        {
+            "name": "rentalGrossYield",
+            "display_name": "Rental Gross Yield",
+            "type": "categorical",
+            "states": [
+                "biggerThan5_",
+                "lessThan2_",
+                "x_3_",
+                "x_4_",
+                "x_5_"
+            ],
+            "role": "endogenous",
+            "category": "profitability",
+            "short_description": "Actual rental income as a percentage of the purchase price.",
+            "extended_description": "The gross rental yield, expressing the actual annual rental income as a percentage of the property purchase price. This is a key metric for comparing rental investment opportunities across different price points and locations.",
+            "sensitivity_hints": "Derived from actual rental income and purchase price. A comparison metric rather than a driver of other variables.",
+            "related_domain_knowledge": [
+                "UK gross yields typically range from 3-7% depending on location.",
+                "Higher yields are often found in lower-value areas with higher risk.",
+                "London properties tend to have lower yields but stronger capital growth."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "income_yield"
+        },
+        {
+            "name": "rentalGrowth",
+            "display_name": "Rental Growth Rate",
+            "type": "categorical",
+            "states": [
+                "biggerThan9_",
+                "lessThan3_",
+                "x_5_",
+                "x_7_",
+                "x_9_"
+            ],
+            "role": "exogenous",
+            "category": "rental_income",
+            "short_description": "Annual percentage increase in rental income.",
+            "extended_description": "The rate at which rental income grows over one year, reflecting local rental market conditions, demand-supply balance, and general inflation. Applied to actual rental income to project the year-1 rental level.",
+            "sensitivity_hints": "A root variable that drives the projected year-1 rental income. Independent of the investor's current rent level.",
+            "related_domain_knowledge": [
+                "Rental growth varies by region and property type.",
+                "Strong employment growth in an area drives rental demand.",
+                "Rent controls or tenant protection laws can limit rental growth."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "rent_escalation_rate"
+        },
+        {
+            "name": "rentalIncome",
+            "display_name": "Rental Income (Advertised)",
+            "type": "categorical",
+            "states": [
+                "biggerThan45k",
+                "lessThan25k",
+                "x0_35k",
+                "x0_45k",
+                "x5_30k",
+                "x5_40k"
+            ],
+            "role": "exogenous",
+            "category": "rental_income",
+            "short_description": "Annual rental income assuming full occupancy.",
+            "extended_description": "The headline annual rental income the property could achieve if fully occupied, based on current market rents for comparable properties. The actual income received will be lower once void periods are accounted for.",
+            "sensitivity_hints": "A root variable representing the income potential. Actual rental income is reduced from this by the void rate.",
+            "related_domain_knowledge": [
+                "Market rent is driven by location, property size, and condition.",
+                "Rental comparables from similar properties set the achievable rent.",
+                "Overpricing risks longer void periods."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "headline_rent"
+        },
+        {
+            "name": "rentalIncomeLoss",
+            "display_name": "Rental Income Loss Rate",
+            "type": "categorical",
+            "states": [
+                "biggerThan9_",
+                "lessThan3_",
+                "x_5_",
+                "x_7_",
+                "x_9_"
+            ],
+            "role": "exogenous",
+            "category": "rental_income",
+            "short_description": "Percentage of potential income lost to void periods.",
+            "extended_description": "The proportion of the year the property is unoccupied between tenancies, expressed as a percentage of potential rental income. Higher void rates reduce actual income. Influenced by location, property type, tenant demand, and the landlord's pricing strategy.",
+            "sensitivity_hints": "A root variable that reduces headline rent to actual rent. Higher void rates directly decrease income and profitability.",
+            "related_domain_knowledge": [
+                "Typical void rates range from 2-8% in strong rental markets.",
+                "Student lets and short-term lets often have higher void rates.",
+                "Professional property management can help minimise void periods."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "vacancy_rate"
+        },
+        {
+            "name": "rentalIncomeT1",
+            "display_name": "Rental Income (Year 1)",
+            "type": "categorical",
+            "states": [
+                "biggerThan45k",
+                "lessThan25k",
+                "x0_35k",
+                "x0_45k",
+                "x5_30k",
+                "x5_40k"
+            ],
+            "role": "endogenous",
+            "category": "rental_income",
+            "short_description": "Projected actual rental income after one year of growth.",
+            "extended_description": "The expected actual rental income at the end of year one, calculated by applying the rental growth rate to the current actual rental income. This represents the forward-looking income for future profitability projections.",
+            "sensitivity_hints": "Derived from actual rental income and the rental growth rate. Represents the projected income trajectory.",
+            "related_domain_knowledge": [
+                "Rent reviews typically occur annually or at tenancy renewal.",
+                "In a fixed-term tenancy the rent cannot be increased mid-term.",
+                "Projected income is used for forward-looking investment appraisal."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "projected_rent"
+        },
+        {
+            "name": "rentalNetProfitBeforeInterest",
+            "display_name": "Rental Net Profit Before Interest",
+            "type": "categorical",
+            "states": [
+                "biggerThan35k",
+                "lessThan15k",
+                "x0_25k",
+                "x0_35k",
+                "x5_20k",
+                "x5_30k"
+            ],
+            "role": "endogenous",
+            "category": "profitability",
+            "short_description": "Rental profit after expenses and tax but before interest deduction.",
+            "extended_description": "The rental profit remaining after subtracting property operating expenses and income tax from the gross rental income, but before deducting mortgage interest. This isolates the operating and tax performance of the property from its financing structure.",
+            "sensitivity_hints": "Determined by gross profit and the income tax rate. Feeds into the final net profit calculation alongside interest and tax relief.",
+            "related_domain_knowledge": [
+                "Separating operating profit from financing costs allows comparison across different leverage levels.",
+                "A positive pre-interest profit can turn negative once financing costs are added.",
+                "This metric is analogous to EBIT in corporate finance."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "pre_finance_net_income"
+        },
+        {
+            "name": "stampDutyTax",
+            "display_name": "Stamp Duty Tax Payable",
+            "type": "categorical",
+            "states": [
+                "lessThan55k",
+                "x5_900k"
+            ],
+            "role": "endogenous",
+            "category": "taxation",
+            "short_description": "Transaction tax due on the property purchase.",
+            "extended_description": "The stamp duty land tax payable on completion of the property purchase. The amount depends on the purchase price and the applicable tax band. Investment properties attract a 3% surcharge above the standard residential rates.",
+            "sensitivity_hints": "Determined by purchase price and the stamp duty band. A one-off acquisition cost rather than a recurring expense.",
+            "related_domain_knowledge": [
+                "Stamp duty is a transaction cost that reduces the initial return on investment.",
+                "The 3% surcharge for additional properties was introduced in 2016.",
+                "First-time buyers may be exempt or get relief, but not for buy-to-let."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "transaction_tax"
+        },
+        {
+            "name": "stampDutyTaxBand",
+            "display_name": "Stamp Duty Tax Band",
+            "type": "categorical",
+            "states": [
+                "x",
+                "x2",
+                "x3"
+            ],
+            "role": "endogenous",
+            "category": "taxation",
+            "short_description": "Tax band determining the stamp duty rate.",
+            "extended_description": "The stamp duty tax band applicable to the property purchase, determined by the purchase price. Higher purchase prices fall into higher bands with progressively greater tax rates. The band determines the effective stamp duty rate applied to the transaction.",
+            "sensitivity_hints": "Determined solely by the purchase price. Acts as an intermediate variable between price and the actual tax amount.",
+            "related_domain_knowledge": [
+                "Stamp duty bands are set by the government and change periodically.",
+                "The system is progressive — higher rates apply only to the portion above each threshold.",
+                "Band thresholds have been temporarily adjusted during economic crises."
+            ],
+            "references": [
+                "Constantinou2016Property"
+            ],
+            "llm_name": "tax_bracket"
+        }
+    ],
+    "network_summary": {
+        "num_variables": 27,
+        "num_edges": 26,
+        "root_nodes": [
+            "borrowing",
+            "capitalGrowth",
+            "incomeTax",
+            "interestRate",
+            "otherInterestFees",
+            "otherPropertyExpenses",
+            "propertyExpensesGrowth",
+            "propertyManagement",
+            "propertyPurchaseValue",
+            "rentalGrowth",
+            "rentalIncome",
+            "rentalIncomeLoss"
+        ],
+        "variable_types": {
+            "categorical": [
+                "LTV",
+                "actualRentalIncome",
+                "borrowing",
+                "capitalGains",
+                "capitalGrowth",
+                "incomeTax",
+                "interest",
+                "interestRate",
+                "interestTaxRelief",
+                "netProfit",
+                "otherInterestFees",
+                "otherPropertyExpenses",
+                "otherPropertyExpensesT1",
+                "propertyExpenses",
+                "propertyExpensesGrowth",
+                "propertyManagement",
+                "propertyPurchaseValue",
+                "propertyValueT1",
+                "rentalGrossProfit",
+                "rentalGrossYield",
+                "rentalGrowth",
+                "rentalIncome",
+                "rentalIncomeLoss",
+                "rentalIncomeT1",
+                "rentalNetProfitBeforeInterest",
+                "stampDutyTax",
+                "stampDutyTaxBand"
+            ]
+        },
+        "functional_modules": {
+            "acquisition": [
+                "propertyPurchaseValue",
+                "stampDutyTaxBand",
+                "stampDutyTax"
+            ],
+            "financing": [
+                "borrowing",
+                "interestRate",
+                "otherInterestFees",
+                "interest",
+                "LTV"
+            ],
+            "rental_income": [
+                "rentalIncome",
+                "rentalIncomeLoss",
+                "actualRentalIncome",
+                "rentalGrowth",
+                "rentalIncomeT1"
+            ],
+            "operating_costs": [
+                "propertyManagement",
+                "otherPropertyExpenses",
+                "propertyExpenses",
+                "propertyExpensesGrowth",
+                "otherPropertyExpensesT1"
+            ],
+            "capital_appreciation": [
+                "capitalGrowth",
+                "capitalGains",
+                "propertyValueT1"
+            ],
+            "profitability": [
+                "rentalGrossProfit",
+                "rentalGrossYield",
+                "rentalNetProfitBeforeInterest",
+                "netProfit"
+            ],
+            "taxation": [
+                "incomeTax",
+                "interestTaxRelief",
+                "stampDutyTaxBand",
+                "stampDutyTax"
+            ]
+        }
+    }
+}

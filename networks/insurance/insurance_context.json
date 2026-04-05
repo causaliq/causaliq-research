@@ -1,0 +1,876 @@
+{
+    "schema_version": "2.0",
+    "network": "insurance",
+    "domain": "automobile_insurance_risk",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for an automobile insurance risk assessment model covering driver demographics, vehicle characteristics, accident risk, theft risk, and claim costs.",
+    "provenance": {
+        "source_network": "insurance",
+        "source_reference": "Binder1997",
+        "source_url": "https://link.springer.com/article/10.1023/A:1007421730016",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "moderate",
+        "notes": "Network from Binder, Koller, Russell, and Kanazawa (1997) 'Adaptive Probabilistic Networks with Hidden Variables', Machine Learning 29(2-3):213-244. Contains 27 variables and 52 directed edges modelling automobile insurance risk assessment including policyholder demographics, vehicle properties, accident severity, theft, and resulting claim costs."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This models automobile insurance risk assessment linking driver attributes to claim costs.",
+            "Consider the causal chain: demographics → behaviour → accident risk → claim costs.",
+            "Policyholder characteristics (age, income, caution) influence vehicle choice, driving behaviour, and security precautions.",
+            "Vehicle properties (class, model year) determine safety features, durability, and market value.",
+            "Accident severity depends on driving quality, mileage, and braking systems.",
+            "Damage to vehicles depends on accident severity and vehicle durability.",
+            "Claim costs are downstream consequences determined by damage, vehicle value, theft, and injury.",
+            "There are two parallel cost pathways: own-vehicle costs and third-party costs, which combine into total property cost.",
+            "Theft risk depends on vehicle value, parking location, and security systems."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, extended descriptions, sensitivity hints, domain knowledge, and references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "Age",
+            "display_name": "Age Group",
+            "type": "categorical",
+            "states": [
+                "Adolescent",
+                "Adult",
+                "Senior"
+            ],
+            "role": "exogenous",
+            "category": "demographics",
+            "short_description": "Age group of the policyholder.",
+            "extended_description": "Categorical variable representing the policyholder's age bracket. Age is a root cause in the model that influences socioeconomic status, risk attitude, driving skill, eligibility for advanced training, and vehicle choice. Young drivers have higher accident risk; senior drivers may have declining skill but greater caution.",
+            "sensitivity_hints": "Age is a root variable with wide-reaching effects on income, driving skill, risk attitude, vehicle choice, and training eligibility.",
+            "related_domain_knowledge": [
+                "Young drivers are statistically more likely to be involved in accidents.",
+                "Socioeconomic status tends to increase with age up to retirement.",
+                "Senior drivers may benefit from refresher training programmes.",
+                "Age affects both driving competence and risk-taking behaviour."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "age_group"
+        },
+        {
+            "name": "Mileage",
+            "display_name": "Annual Mileage",
+            "type": "categorical",
+            "states": [
+                "FiveThou",
+                "TwentyThou",
+                "FiftyThou",
+                "Domino"
+            ],
+            "role": "exogenous",
+            "category": "driving",
+            "short_description": "Annual distance driven by the policyholder.",
+            "extended_description": "Categorical variable representing how many miles per year the policyholder drives. Higher mileage increases exposure to accident risk and affects vehicle depreciation. Mileage is an exogenous variable in this model, not caused by other modelled factors.",
+            "sensitivity_hints": "Mileage is a root cause of accident exposure and vehicle depreciation. It directly influences collision risk and market value.",
+            "related_domain_knowledge": [
+                "Higher annual mileage increases the probability of being involved in an accident.",
+                "High-mileage vehicles depreciate faster, reducing their market value.",
+                "Commercial drivers and commuters tend to have higher mileage.",
+                "Mileage is a standard factor in insurance premium calculation."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "annual_distance"
+        },
+        {
+            "name": "SocioEcon",
+            "display_name": "Socioeconomic Status",
+            "type": "categorical",
+            "states": [
+                "Prole",
+                "Middle",
+                "UpperMiddle",
+                "Wealthy"
+            ],
+            "role": "endogenous",
+            "category": "demographics",
+            "short_description": "Socioeconomic level of the policyholder.",
+            "extended_description": "Categorical variable representing the policyholder's wealth and social class. Influenced by age, socioeconomic status in turn affects vehicle choice, risk attitude, home location, security precautions, and whether the household owns a second vehicle.",
+            "sensitivity_hints": "Socioeconomic status is a major hub: it influences vehicle class, parking environment, security systems, and whether the policyholder has additional vehicles.",
+            "related_domain_knowledge": [
+                "Wealthier policyholders tend to own more expensive and newer vehicles.",
+                "Income level affects neighbourhood choice, which influences theft risk.",
+                "Higher socioeconomic status is associated with investment in security systems.",
+                "Vehicle insurance premiums vary significantly by postcode and income area."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "income_bracket"
+        },
+        {
+            "name": "RiskAversion",
+            "display_name": "Risk Aversion",
+            "type": "categorical",
+            "states": [
+                "Psychopath",
+                "Adventurous",
+                "Normal",
+                "Cautious"
+            ],
+            "role": "endogenous",
+            "category": "demographics",
+            "short_description": "How cautious or risk-seeking the policyholder is.",
+            "extended_description": "Categorical variable representing the policyholder's attitude toward risk. Influenced by age and socioeconomic status, risk aversion affects many downstream choices: vehicle selection, home location, security precautions, driving quality, driving record, and whether the policyholder seeks advanced training.",
+            "sensitivity_hints": "Risk aversion is a central behavioural hub. More cautious policyholders choose safer vehicles, invest in security, live in safer areas, and drive more carefully.",
+            "related_domain_knowledge": [
+                "Risk-seeking individuals choose sportier vehicles and drive more aggressively.",
+                "Cautious policyholders invest in anti-theft devices and choose secure parking.",
+                "Risk attitude interacts with driving skill to determine overall driving quality.",
+                "Insurance companies attempt to infer risk aversion from observable proxies."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "caution_level"
+        },
+        {
+            "name": "GoodStudent",
+            "display_name": "Good Student",
+            "type": "binary",
+            "states": [
+                "True",
+                "False"
+            ],
+            "role": "endogenous",
+            "category": "demographics",
+            "short_description": "Whether the policyholder qualifies for a good student discount.",
+            "extended_description": "Binary variable indicating eligibility for the good student insurance discount. Determined by age and socioeconomic status. Only adolescent policyholders can qualify, with higher socioeconomic status increasing the probability. This is a leaf node that does not influence other variables.",
+            "sensitivity_hints": "Good student status is determined by age and socioeconomic background. It only applies to young policyholders and is a terminal node in the network.",
+            "related_domain_knowledge": [
+                "Good student discounts are available only to young drivers still in education.",
+                "Academic performance is used as a proxy for responsibility and lower risk.",
+                "Socioeconomic background correlates with educational attainment.",
+                "This variable affects premium pricing but not accident risk directly."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "academic_performer"
+        },
+        {
+            "name": "SeniorTrain",
+            "display_name": "Senior Training",
+            "type": "binary",
+            "states": [
+                "True",
+                "False"
+            ],
+            "role": "endogenous",
+            "category": "driving",
+            "short_description": "Whether the policyholder has completed an advanced driving course.",
+            "extended_description": "Binary variable indicating whether the policyholder has undertaken a senior or advanced driving training programme. Determined by age and risk aversion: only senior drivers are eligible, and more cautious seniors are more likely to enrol. Training improves driving skill.",
+            "sensitivity_hints": "Advanced training is restricted to senior drivers and is more common among cautious individuals. It directly improves driving competence.",
+            "related_domain_knowledge": [
+                "Advanced driver training programmes aim to maintain skill in older drivers.",
+                "Cautious seniors proactively seek refresher courses.",
+                "Training completion can qualify policyholders for insurance discounts.",
+                "Training improves skill but does not directly change risk attitude."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "advanced_training"
+        },
+        {
+            "name": "DrivingSkill",
+            "display_name": "Driving Skill",
+            "type": "categorical",
+            "states": [
+                "SubStandard",
+                "Normal",
+                "Expert"
+            ],
+            "role": "endogenous",
+            "category": "driving",
+            "short_description": "The policyholder's underlying driving competence.",
+            "extended_description": "Categorical variable representing the latent driving ability of the policyholder. Determined by age and whether they have completed advanced training. Driving skill combines with risk aversion to produce observed driving quality and driving history. Young and untrained drivers tend to have lower skill.",
+            "sensitivity_hints": "Driving skill is a latent variable determined by age and training. It influences driving quality and driving record but is not directly observable by insurers.",
+            "related_domain_knowledge": [
+                "Driving skill improves with experience up to a point, then declines with age.",
+                "Advanced training can partially offset age-related skill decline.",
+                "Skill and risk attitude jointly determine on-road driving quality.",
+                "Insurers infer skill indirectly from driving history and demographics."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "operator_competence"
+        },
+        {
+            "name": "DrivQuality",
+            "display_name": "Driving Quality",
+            "type": "categorical",
+            "states": [
+                "Poor",
+                "Normal",
+                "Excellent"
+            ],
+            "role": "endogenous",
+            "category": "driving",
+            "short_description": "The observed quality of the policyholder's driving behaviour.",
+            "extended_description": "Categorical variable representing actual on-road driving behaviour. Jointly determined by driving skill and risk aversion: a skilled but reckless driver may still drive poorly, while a cautious driver with moderate skill may drive adequately. Driving quality directly affects accident probability.",
+            "sensitivity_hints": "Driving quality is the proximate cause of accidents. It combines skill (ability) with caution (willingness to be safe).",
+            "related_domain_knowledge": [
+                "A skilled driver who is risk-seeking may still drive dangerously.",
+                "A cautious driver compensates for lower skill by driving more carefully.",
+                "Driving quality is the most direct predictor of accident involvement.",
+                "Insurers cannot directly observe driving quality in traditional models."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "driving_standard"
+        },
+        {
+            "name": "DrivHist",
+            "display_name": "Driving History",
+            "type": "categorical",
+            "states": [
+                "Zero",
+                "One",
+                "Many"
+            ],
+            "role": "endogenous",
+            "category": "driving",
+            "short_description": "Number of previous incidents on the policyholder's driving record.",
+            "extended_description": "Categorical variable representing the policyholder's historical driving record. Determined by driving skill and risk aversion: skilled, cautious drivers have clean records while unskilled, risk-seeking drivers accumulate incidents. This is a leaf node used by insurers as an observable proxy for unobservable driving quality.",
+            "sensitivity_hints": "Driving history is an observable consequence of skill and risk attitude. Insurers use it heavily in premium setting as a proxy for future risk.",
+            "related_domain_knowledge": [
+                "Driving history is one of the strongest predictors used in insurance pricing.",
+                "Past incidents signal both low skill and high risk-taking.",
+                "Clean driving records often qualify for no-claims discounts.",
+                "Driving history is observable, unlike the latent skill and risk attitude."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "incident_record"
+        },
+        {
+            "name": "MakeModel",
+            "display_name": "Vehicle Make and Model",
+            "type": "categorical",
+            "states": [
+                "SportsCar",
+                "Economy",
+                "FamilySedan",
+                "Luxury",
+                "SuperLuxury"
+            ],
+            "role": "endogenous",
+            "category": "vehicle",
+            "short_description": "The class of vehicle owned by the policyholder.",
+            "extended_description": "Categorical variable representing the type of vehicle. Determined by socioeconomic status and risk aversion: wealthier policyholders buy luxury vehicles, risk-seekers choose sports cars. Vehicle class influences many downstream properties: structural durability, safety features (braking systems, airbags), and market value.",
+            "sensitivity_hints": "Vehicle class is a major hub connecting demographics to physical vehicle properties. It determines safety equipment, durability, and value.",
+            "related_domain_knowledge": [
+                "Sports cars are less structurally robust but may have advanced safety features.",
+                "Economy vehicles are often older with fewer safety features.",
+                "Luxury vehicles tend to have comprehensive safety equipment.",
+                "Vehicle class is a strong predictor of repair costs after an accident."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "vehicle_class"
+        },
+        {
+            "name": "VehicleYear",
+            "display_name": "Vehicle Year",
+            "type": "binary",
+            "states": [
+                "Current",
+                "Older"
+            ],
+            "role": "endogenous",
+            "category": "vehicle",
+            "short_description": "Whether the vehicle is a current or older model year.",
+            "extended_description": "Binary variable indicating the recency of the vehicle model. Determined by socioeconomic status and risk aversion: wealthier and more cautious policyholders are more likely to own current models. Model year affects safety features (newer vehicles have better braking and airbags), structural durability, and market value.",
+            "sensitivity_hints": "Model recency is a key determinant of safety equipment availability. Newer vehicles have better braking systems, airbags, and structural design.",
+            "related_domain_knowledge": [
+                "Newer vehicles incorporate improved safety standards and technology.",
+                "Older vehicles may lack anti-lock braking and airbag systems.",
+                "Vehicle age affects both repair costs and replacement value.",
+                "Wealthier policyholders replace vehicles more frequently."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "model_recency"
+        },
+        {
+            "name": "RuggedAuto",
+            "display_name": "Vehicle Ruggedness",
+            "type": "categorical",
+            "states": [
+                "EggShell",
+                "Football",
+                "Tank"
+            ],
+            "role": "endogenous",
+            "category": "vehicle",
+            "short_description": "How structurally robust the vehicle is in a collision.",
+            "extended_description": "Categorical variable representing the vehicle's structural integrity and crash resistance. Determined by vehicle class and model year. Ruggedness affects how much damage results from a given accident severity, both to the own vehicle and to other vehicles involved. It also influences occupant protection (cushioning).",
+            "sensitivity_hints": "Structural durability mediates the effect of accidents on damage severity. A rugged vehicle suffers less damage and provides better occupant protection, but may cause more damage to the other vehicle.",
+            "related_domain_knowledge": [
+                "Sports cars tend to be structurally fragile despite being fast.",
+                "Larger vehicles and SUVs tend to be more structurally robust.",
+                "Vehicle ruggedness affects both own-damage and other-party damage.",
+                "Crash test ratings reflect structural integrity and occupant protection."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "structural_durability"
+        },
+        {
+            "name": "Antilock",
+            "display_name": "Anti-lock Brakes",
+            "type": "binary",
+            "states": [
+                "True",
+                "False"
+            ],
+            "role": "endogenous",
+            "category": "vehicle",
+            "short_description": "Whether the vehicle has anti-lock braking systems.",
+            "extended_description": "Binary variable indicating the presence of anti-lock braking. Determined by vehicle class and model year: newer and more expensive vehicles are more likely to have ABS. Anti-lock brakes reduce accident severity by preventing wheel lock-up during emergency braking.",
+            "sensitivity_hints": "Anti-lock brakes directly reduce accident risk. Their presence depends on vehicle class and age.",
+            "related_domain_knowledge": [
+                "ABS prevents wheel lock-up, maintaining steering control during hard braking.",
+                "ABS became standard on most new vehicles from the late 1990s.",
+                "Economy and older vehicles are less likely to have ABS.",
+                "ABS is most beneficial on wet or slippery road surfaces."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "brake_assist"
+        },
+        {
+            "name": "Airbag",
+            "display_name": "Airbag",
+            "type": "binary",
+            "states": [
+                "True",
+                "False"
+            ],
+            "role": "endogenous",
+            "category": "vehicle",
+            "short_description": "Whether the vehicle is equipped with airbags.",
+            "extended_description": "Binary variable indicating airbag presence. Determined by vehicle class and model year. Airbags contribute to occupant cushioning in a collision, reducing injury severity and therefore medical costs. They do not prevent accidents but mitigate their consequences.",
+            "sensitivity_hints": "Airbags affect injury protection (cushioning) rather than accident probability. Their presence depends on vehicle class and model year.",
+            "related_domain_knowledge": [
+                "Airbags reduce fatality risk by approximately 30% in frontal collisions.",
+                "Older and economy vehicles may lack airbag systems.",
+                "Airbags work in conjunction with the vehicle's structural design.",
+                "Airbag presence affects medical cost outcomes, not accident frequency."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "supplemental_restraint"
+        },
+        {
+            "name": "Cushioning",
+            "display_name": "Occupant Cushioning",
+            "type": "categorical",
+            "states": [
+                "Poor",
+                "Fair",
+                "Good",
+                "Excellent"
+            ],
+            "role": "endogenous",
+            "category": "vehicle",
+            "short_description": "Overall level of occupant impact protection in the vehicle.",
+            "extended_description": "Categorical variable representing how well the vehicle protects occupants during a collision. Jointly determined by vehicle ruggedness and airbag presence. Better cushioning reduces injury severity and medical costs for any given accident severity level.",
+            "sensitivity_hints": "Cushioning mediates between vehicle properties (ruggedness, airbags) and injury cost outcomes. It does not affect accident probability.",
+            "related_domain_knowledge": [
+                "Occupant protection combines structural crumple zones with restraint systems.",
+                "A rugged vehicle with airbags provides the best protection.",
+                "A fragile vehicle without airbags provides the worst protection.",
+                "Cushioning quality is a key factor in medical cost prediction."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "impact_protection"
+        },
+        {
+            "name": "CarValue",
+            "display_name": "Car Value",
+            "type": "categorical",
+            "states": [
+                "FiveThou",
+                "TenThou",
+                "TwentyThou",
+                "FiftyThou",
+                "Million"
+            ],
+            "role": "endogenous",
+            "category": "vehicle",
+            "short_description": "Market value of the insured vehicle.",
+            "extended_description": "Categorical variable representing the current market value of the vehicle. Determined by vehicle class, model year, and mileage. Higher-value vehicles cost more to repair or replace, increasing claim costs. Vehicle value also influences theft attractiveness.",
+            "sensitivity_hints": "Market value links vehicle properties to financial outcomes. It affects both own-vehicle repair costs and theft risk.",
+            "related_domain_knowledge": [
+                "Luxury and super-luxury vehicles have the highest market values.",
+                "High mileage and older model year reduce vehicle value.",
+                "Vehicle value directly determines maximum repair/replacement costs.",
+                "High-value vehicles are more attractive targets for theft."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "market_value"
+        },
+        {
+            "name": "HomeBase",
+            "display_name": "Home Base Location",
+            "type": "categorical",
+            "states": [
+                "Secure",
+                "City",
+                "Suburb",
+                "Rural"
+            ],
+            "role": "endogenous",
+            "category": "crime",
+            "short_description": "Type of area where the vehicle is normally parked.",
+            "extended_description": "Categorical variable representing where the policyholder lives and parks their vehicle. Determined by risk aversion and socioeconomic status: cautious, wealthy policyholders choose secure locations, while lower-income or risk-seeking individuals may park in higher-crime areas. Location directly influences theft risk.",
+            "sensitivity_hints": "Parking environment is a key theft risk factor. Urban areas have higher theft rates than secure garages or rural locations.",
+            "related_domain_knowledge": [
+                "City centre parking has the highest vehicle theft rates.",
+                "Secure garages and gated facilities substantially reduce theft risk.",
+                "Wealthier policyholders can afford secure parking arrangements.",
+                "Insurance premiums vary significantly by postcode due to theft risk."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "parking_environment"
+        },
+        {
+            "name": "AntiTheft",
+            "display_name": "Anti-theft Device",
+            "type": "binary",
+            "states": [
+                "True",
+                "False"
+            ],
+            "role": "endogenous",
+            "category": "crime",
+            "short_description": "Whether the vehicle has an anti-theft security system.",
+            "extended_description": "Binary variable indicating whether the vehicle is fitted with an anti-theft device (alarm, immobiliser, tracker). Determined by risk aversion and socioeconomic status: cautious and wealthier policyholders are more likely to invest in security. Anti-theft devices reduce theft probability.",
+            "sensitivity_hints": "Security systems are a preventive measure against theft. Investment in security depends on the policyholder's risk attitude and financial means.",
+            "related_domain_knowledge": [
+                "Vehicle immobilisers are the most effective anti-theft device.",
+                "Insurance discounts are often available for approved security systems.",
+                "Cautious and wealthy policyholders are more likely to install security.",
+                "Anti-theft presence reduces but does not eliminate theft risk."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "security_system"
+        },
+        {
+            "name": "Theft",
+            "display_name": "Theft",
+            "type": "binary",
+            "states": [
+                "True",
+                "False"
+            ],
+            "role": "endogenous",
+            "category": "crime",
+            "short_description": "Whether the vehicle was stolen.",
+            "extended_description": "Binary variable indicating whether the insured vehicle has been stolen. Jointly determined by anti-theft device presence, home base location, and vehicle value. Theft increases own-vehicle costs (replacement) independently of accident damage.",
+            "sensitivity_hints": "Theft risk is a function of opportunity (location), reward (vehicle value), and deterrence (security system). It affects own-vehicle cost independently of the accident pathway.",
+            "related_domain_knowledge": [
+                "Vehicle theft is more common in urban areas and for high-value vehicles.",
+                "Anti-theft devices significantly reduce theft probability.",
+                "Theft costs are separate from accident-related claim costs.",
+                "Theft contributes to own-vehicle claim costs even without an accident."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "vehicle_stolen"
+        },
+        {
+            "name": "Accident",
+            "display_name": "Accident Severity",
+            "type": "categorical",
+            "states": [
+                "None",
+                "Mild",
+                "Moderate",
+                "Severe"
+            ],
+            "role": "endogenous",
+            "category": "accident",
+            "short_description": "Severity of any accident involving the insured vehicle.",
+            "extended_description": "Categorical variable representing whether and how severely the policyholder was involved in a collision. Determined by driving quality, mileage, and anti-lock brakes. Accident severity is the central event that triggers the cost pathways: own-vehicle damage, other-vehicle damage, medical costs, and liability costs.",
+            "sensitivity_hints": "Accident severity is the pivotal event in the model. It is caused by driving behaviour and vehicle safety, and it triggers all damage and cost downstream nodes.",
+            "related_domain_knowledge": [
+                "Higher mileage increases accident exposure.",
+                "Better driving quality reduces both frequency and severity.",
+                "Anti-lock brakes reduce accident severity by maintaining vehicle control.",
+                "Accident severity determines the magnitude of all claim types."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "collision_severity"
+        },
+        {
+            "name": "ThisCarDam",
+            "display_name": "Own Vehicle Damage",
+            "type": "categorical",
+            "states": [
+                "None",
+                "Mild",
+                "Moderate",
+                "Severe"
+            ],
+            "role": "endogenous",
+            "category": "accident",
+            "short_description": "Extent of damage to the policyholder's own vehicle.",
+            "extended_description": "Categorical variable representing damage sustained by the insured vehicle in an accident. Jointly determined by accident severity and vehicle ruggedness: a rugged vehicle sustains less damage for the same accident severity. Own-vehicle damage feeds into own-vehicle repair cost.",
+            "sensitivity_hints": "Own-vehicle damage depends on both accident severity and how structurally robust the vehicle is.",
+            "related_domain_knowledge": [
+                "More rugged vehicles sustain less damage in equivalent collisions.",
+                "Fragile sports cars suffer disproportionate damage in minor accidents.",
+                "Damage assessment determines whether the vehicle is repaired or written off.",
+                "Own-vehicle damage is a key component of the policyholder's claim."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "own_vehicle_damage"
+        },
+        {
+            "name": "OtherCarCost",
+            "display_name": "Other Car Repair Cost",
+            "type": "categorical",
+            "states": [
+                "Thousand",
+                "TenThou",
+                "HundredThou",
+                "Million"
+            ],
+            "role": "endogenous",
+            "category": "cost",
+            "short_description": "Cost of repairing the other vehicle involved in an accident.",
+            "extended_description": "Categorical variable representing the repair cost for the third party's vehicle. Determined by accident severity and own-vehicle ruggedness: more rugged vehicles cause more damage to other vehicles in a collision. This cost contributes to total property cost.",
+            "sensitivity_hints": "Third-party repair cost depends on accident severity and how much damage the insured vehicle inflicts. Heavier, more rugged vehicles cause more damage to other vehicles.",
+            "related_domain_knowledge": [
+                "Rugged vehicles (SUVs, trucks) cause more damage to smaller vehicles.",
+                "Third-party repair costs are covered under liability insurance.",
+                "Severe accidents can total the other vehicle, maximising this cost.",
+                "This cost combines with own-vehicle cost to form total property cost."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "third_party_repair_cost"
+        },
+        {
+            "name": "OtherCar",
+            "display_name": "Other Car Ownership",
+            "type": "binary",
+            "states": [
+                "True",
+                "False"
+            ],
+            "role": "endogenous",
+            "category": "demographics",
+            "short_description": "Whether the policyholder owns a second vehicle.",
+            "extended_description": "Binary variable indicating whether the household owns an additional vehicle. Determined by socioeconomic status: wealthier households are more likely to own multiple vehicles. This is a leaf node representing additional risk exposure.",
+            "sensitivity_hints": "Second vehicle ownership is a proxy for household wealth and additional risk exposure. It is a terminal node in the network.",
+            "related_domain_knowledge": [
+                "Multi-vehicle households are more common among wealthier families.",
+                "Owning multiple vehicles increases total insurance exposure.",
+                "Multi-car policies often receive discounted premiums.",
+                "Second vehicle ownership is determined by financial means."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "secondary_vehicle"
+        },
+        {
+            "name": "ThisCarCost",
+            "display_name": "Own Vehicle Repair Cost",
+            "type": "categorical",
+            "states": [
+                "Thousand",
+                "TenThou",
+                "HundredThou",
+                "Million"
+            ],
+            "role": "endogenous",
+            "category": "cost",
+            "short_description": "Cost of repairing or replacing the policyholder's own vehicle.",
+            "extended_description": "Categorical variable representing the financial cost associated with the insured vehicle. Determined by own-vehicle damage, vehicle market value, and theft. Even without an accident, theft can generate own-vehicle costs. Higher-value vehicles cost more to repair or replace.",
+            "sensitivity_hints": "Own-vehicle cost is determined by three factors: physical damage, vehicle value, and whether the vehicle was stolen. It is a convergence point for the accident and theft pathways.",
+            "related_domain_knowledge": [
+                "Repair costs scale with vehicle value and damage severity.",
+                "Total loss (write-off) occurs when repair cost exceeds vehicle value.",
+                "Theft generates replacement cost equal to market value.",
+                "Own-vehicle cost is covered under comprehensive insurance."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "own_repair_cost"
+        },
+        {
+            "name": "PropCost",
+            "display_name": "Total Property Cost",
+            "type": "categorical",
+            "states": [
+                "Thousand",
+                "TenThou",
+                "HundredThou",
+                "Million"
+            ],
+            "role": "endogenous",
+            "category": "cost",
+            "short_description": "Total property damage cost combining own and other vehicle costs.",
+            "extended_description": "Categorical variable representing the aggregate property damage cost from an incident. Determined by own-vehicle repair cost and other-vehicle repair cost. This is the total property damage claim that the insurer must cover, combining both sides of a collision.",
+            "sensitivity_hints": "Total property cost is a simple aggregation of own-vehicle and third-party vehicle costs. It is a terminal cost node.",
+            "related_domain_knowledge": [
+                "Property cost is the sum of all vehicle repair and replacement costs.",
+                "Severe multi-vehicle accidents generate the highest property costs.",
+                "Property damage claims are the most common type of insurance claim.",
+                "Total property cost determines the property damage component of premiums."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "total_property_cost"
+        },
+        {
+            "name": "MedCost",
+            "display_name": "Medical Cost",
+            "type": "categorical",
+            "states": [
+                "Thousand",
+                "TenThou",
+                "HundredThou",
+                "Million"
+            ],
+            "role": "endogenous",
+            "category": "cost",
+            "short_description": "Medical treatment costs resulting from injuries in an accident.",
+            "extended_description": "Categorical variable representing the cost of medical treatment for injuries sustained in a collision. Jointly determined by accident severity, policyholder age, and vehicle cushioning. Seniors incur higher medical costs for equivalent injuries. Better cushioning reduces injury severity and therefore costs.",
+            "sensitivity_hints": "Medical cost is where the accident, demographic, and vehicle protection pathways converge. Age vulnerability, accident severity, and occupant protection all contribute.",
+            "related_domain_knowledge": [
+                "Older individuals sustain more severe injuries in equivalent accidents.",
+                "Better vehicle cushioning (airbags, rugged structure) reduces injury severity.",
+                "Medical costs can be extremely high for severe accident injuries.",
+                "Medical cost claims are separate from property damage claims."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "injury_treatment_cost"
+        },
+        {
+            "name": "ILiCost",
+            "display_name": "Liability Cost",
+            "type": "categorical",
+            "states": [
+                "Thousand",
+                "TenThou",
+                "HundredThou",
+                "Million"
+            ],
+            "role": "endogenous",
+            "category": "cost",
+            "short_description": "Third-party liability cost from an accident.",
+            "extended_description": "Categorical variable representing the insurer's liability exposure from a collision. Determined solely by accident severity. Liability costs cover legal claims, third-party injury compensation, and other legal obligations arising from the accident. This is a leaf node.",
+            "sensitivity_hints": "Liability cost depends only on accident severity. It captures legal and compensation costs to third parties.",
+            "related_domain_knowledge": [
+                "Liability costs include compensation for third-party injuries and losses.",
+                "Severe accidents can generate very large liability claims.",
+                "Liability insurance is mandatory in most jurisdictions.",
+                "Liability cost is independent of own-vehicle properties."
+            ],
+            "references": [
+                "Binder1997"
+            ],
+            "llm_name": "liability_cost"
+        }
+    ],
+    "network_properties": {
+        "num_variables": 27,
+        "num_edges": 52,
+        "causal_hierarchy": {
+            "level_0_roots": [
+                "Age",
+                "Mileage"
+            ],
+            "level_1_demographics": [
+                "SocioEcon",
+                "RiskAversion"
+            ],
+            "level_2_choices": [
+                "GoodStudent",
+                "SeniorTrain",
+                "MakeModel",
+                "VehicleYear",
+                "HomeBase",
+                "AntiTheft",
+                "OtherCar"
+            ],
+            "level_3_vehicle_properties": [
+                "RuggedAuto",
+                "Antilock",
+                "Airbag",
+                "CarValue",
+                "DrivingSkill"
+            ],
+            "level_4_behaviour_and_protection": [
+                "DrivQuality",
+                "Cushioning",
+                "DrivHist",
+                "Theft"
+            ],
+            "level_5_events": [
+                "Accident",
+                "ThisCarDam",
+                "OtherCarCost"
+            ],
+            "level_6_costs": [
+                "ThisCarCost",
+                "MedCost",
+                "ILiCost",
+                "PropCost"
+            ]
+        },
+        "variable_types": {
+            "binary": [
+                "GoodStudent",
+                "VehicleYear",
+                "Antilock",
+                "SeniorTrain",
+                "Airbag",
+                "AntiTheft",
+                "Theft",
+                "OtherCar"
+            ],
+            "categorical_3_state": [
+                "Age",
+                "RuggedAuto",
+                "DrivQuality",
+                "DrivingSkill",
+                "DrivHist"
+            ],
+            "categorical_4_state": [
+                "SocioEcon",
+                "RiskAversion",
+                "ThisCarDam",
+                "Accident",
+                "Mileage",
+                "ThisCarCost",
+                "PropCost",
+                "OtherCarCost",
+                "MedCost",
+                "Cushioning",
+                "ILiCost",
+                "HomeBase"
+            ],
+            "categorical_5_state": [
+                "MakeModel",
+                "CarValue"
+            ]
+        },
+        "functional_modules": {
+            "demographics": [
+                "Age",
+                "SocioEcon",
+                "RiskAversion",
+                "GoodStudent",
+                "OtherCar"
+            ],
+            "driving_behaviour": [
+                "DrivingSkill",
+                "DrivQuality",
+                "SeniorTrain",
+                "DrivHist",
+                "Mileage"
+            ],
+            "vehicle_properties": [
+                "MakeModel",
+                "VehicleYear",
+                "RuggedAuto",
+                "Antilock",
+                "Airbag",
+                "Cushioning",
+                "CarValue"
+            ],
+            "crime": [
+                "HomeBase",
+                "AntiTheft",
+                "Theft"
+            ],
+            "accident_pathway": [
+                "Accident",
+                "ThisCarDam",
+                "OtherCarCost"
+            ],
+            "cost_outcomes": [
+                "ThisCarCost",
+                "PropCost",
+                "MedCost",
+                "ILiCost"
+            ]
+        }
+    }
+}
