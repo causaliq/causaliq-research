@@ -1,0 +1,1506 @@
+{
+    "schema_version": "2.0",
+    "network": "barley",
+    "domain": "crop_yield_prediction",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a barley crop yield prediction model, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "barley",
+        "source_reference": "Kristensen2002",
+        "source_url": "https://www.bnlearn.com/bnrepository/discrete-large.html#barley",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "The Barley network models spring barley yield prediction in Denmark, originally developed by Kristensen and Rasmussen for decision support in malting barley production. It captures relationships between soil properties, climate, management decisions (sowing, fertilisation, pesticides), crop genetics, growth physiology, and yield/quality outcomes. Contains 48 nodes and 84 edges. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a crop yield prediction model for spring barley production in Denmark.",
+            "The causal chain follows: soil/environment + management decisions → nitrogen dynamics → crop growth → yield components → yield and quality.",
+            "Soil type, geographic region, previous crop, sowing date, seed rate, cultivar choice, fertiliser placement, seed germination capacity, pesticide regime, and seed thousand kernel weight are exogenous root variables.",
+            "Soil type is a fundamental driver affecting root zone water capacity, nitrogen dynamics, yield expectation, and annual climate adjustment.",
+            "Nitrogen flows through a multi-step chain: mineral N → soil available N → nitrogen availability → crop N uptake → yield components and protein.",
+            "Nitrogen recommendations are calculated from expected yield, previous crop contribution, and measured/modelled mineral nitrogen.",
+            "Cultivar genetics determine baseline potential for kernel weight, protein, and grain size, which interact with growing conditions.",
+            "Sowing date controls thermal time accumulation across all growth phases, affecting both yield components and quality.",
+            "Yield is the product of ears per m² and individual ear weight. These are the two proximal yield determinants.",
+            "There is a compensatory relationship between yield components: more ears means fewer kernels per ear and lighter kernels.",
+            "Grain quality for malting requires specific protein (9.5–11.5%), kernel size (>90% above 2.5mm), and other threshold criteria.",
+            "Fertiliser placement method affects nitrogen use efficiency: placed > incorporated > top-dressed."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "aar_mod",
+            "display_name": "Annual Climate Modifier",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9",
+                "level_10",
+                "level_11"
+            ],
+            "role": "endogenous",
+            "category": "environment",
+            "short_description": "Annual regional climate adjustment factor.",
+            "extended_description": "A modifier capturing year-to-year climate variation specific to the soil type and geographic region. Represents the combined effect of annual weather patterns on growing conditions beyond what individual weather variables capture. Positive values indicate favourable years, negative values unfavourable.",
+            "sensitivity_hints": "Driven by regional climate and soil type interaction. Affects soil nitrogen dynamics and mineralisation rates.",
+            "related_domain_knowledge": [
+                "Annual climate variation affects crop growth independently of field management.",
+                "The interaction between soil type and regional weather determines local growing conditions.",
+                "Climate adjustment is region-specific, varying across Danish municipalities."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "annual_climate_adjustment"
+        },
+        {
+            "name": "aks_m2",
+            "display_name": "Ears per Square Metre",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8"
+            ],
+            "role": "endogenous",
+            "category": "yield_component",
+            "short_description": "Number of grain-bearing ears per square metre.",
+            "extended_description": "The density of productive tillers that develop ears at harvest. A primary yield component determined by plant density, thermal accumulation during the vegetative phase, nitrogen uptake, and the genetic potential of the cultivar. Higher ear counts generally increase yield but may reduce individual ear weight.",
+            "sensitivity_hints": "Key yield component. Determined by plant density, thermal time during vegetative growth, nitrogen uptake, and cultivar grain weight potential.",
+            "related_domain_knowledge": [
+                "Ear density is the product of plant density and tillers per plant.",
+                "Higher nitrogen uptake promotes tillering and thus more ears.",
+                "There is a compensatory relationship between ear density and kernels per ear.",
+                "Thermal accumulation during vegetative growth determines tiller survival."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "ears_per_square_metre"
+        },
+        {
+            "name": "aks_vgt",
+            "display_name": "Individual Ear Weight",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9"
+            ],
+            "role": "endogenous",
+            "category": "yield_component",
+            "short_description": "Average weight of individual grain-bearing ears.",
+            "extended_description": "The mean weight per ear at harvest, reflecting grain filling success. Determined by the number of ears competing for resources, thermal accumulation during the reproductive phase, and nitrogen availability for grain filling.",
+            "sensitivity_hints": "Compensatory with ear density: more ears typically means lighter individual ears. Late-season thermal time and nitrogen uptake are key drivers.",
+            "related_domain_knowledge": [
+                "Ear weight depends on kernels per ear and individual kernel weight.",
+                "Grain filling requires adequate thermal time during the reproductive phase.",
+                "Competition among ears for assimilates reduces individual ear weight."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "ear_weight"
+        },
+        {
+            "name": "antplnt",
+            "display_name": "Established Plant Density",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7"
+            ],
+            "role": "endogenous",
+            "category": "crop_establishment",
+            "short_description": "Number of established plants per square metre.",
+            "extended_description": "The density of barley plants that successfully establish after sowing. Determined by the number of viable seeds sown and the field germination rate. A fundamental determinant of ear density and thus final yield.",
+            "sensitivity_hints": "Driven by seed kernel count and field germination. Directly determines ear density through tillering.",
+            "related_domain_knowledge": [
+                "Target plant density for spring barley is typically 250–350 plants/m².",
+                "Too low density reduces yield; too high increases lodging risk.",
+                "Plant density is the product of seed rate and germination success."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "plant_density"
+        },
+        {
+            "name": "bgbyg",
+            "display_name": "Barley Quality Grade",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6"
+            ],
+            "role": "endogenous",
+            "category": "grain_quality",
+            "short_description": "Overall barley grain quality classification.",
+            "extended_description": "A composite quality grading of the harvested barley, influenced by thermal accumulation during both vegetative and reproductive phases. Reflects the overall commercial quality for malting or feed use.",
+            "sensitivity_hints": "Determined by thermal time during vegetative and reproductive growth stages.",
+            "related_domain_knowledge": [
+                "Malting barley requires specific quality thresholds for protein, size, and germination.",
+                "Weather during grain filling strongly affects quality attributes.",
+                "Quality grades determine market price and end-use suitability."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "barley_quality_grade"
+        },
+        {
+            "name": "dg25",
+            "display_name": "Thermal Time to Growth Stage 25",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7"
+            ],
+            "role": "endogenous",
+            "category": "crop_development",
+            "short_description": "Accumulated thermal time to early tillering.",
+            "extended_description": "Degree-days accumulated from sowing to growth stage 25 (tillering). Warmer conditions after sowing lead to faster early development. Determined primarily by sowing date.",
+            "sensitivity_hints": "Controlled by sowing date. Affects nitrogen availability timing through its influence on growth.",
+            "related_domain_knowledge": [
+                "Earlier sowing typically accumulates more thermal time to GS25.",
+                "Thermal time drives developmental rate in cereals.",
+                "Growth stage 25 corresponds to the main tillering phase."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "thermal_time_early_growth"
+        },
+        {
+            "name": "dgv1059",
+            "display_name": "Thermal Time Vegetative Phase",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6"
+            ],
+            "role": "endogenous",
+            "category": "crop_development",
+            "short_description": "Thermal accumulation during vegetative growth (GS10–59).",
+            "extended_description": "Degree-days accumulated between growth stages 10 and 59, covering the main vegetative period from emergence through stem elongation to heading. Determined by sowing date and root zone capacity. Affects ear formation, kernel development, quality, and protein content.",
+            "sensitivity_hints": "A central hub variable affecting multiple yield components and quality traits. Driven by sowing timing and root zone capacity.",
+            "related_domain_knowledge": [
+                "Longer vegetative phase allows more tiller and spikelet development.",
+                "Thermal time during this phase determines ear fertility.",
+                "Both sowing date and root zone capacity influence vegetative duration."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "thermal_time_vegetative"
+        },
+        {
+            "name": "dgv5980",
+            "display_name": "Thermal Time Reproductive Phase",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6"
+            ],
+            "role": "endogenous",
+            "category": "crop_development",
+            "short_description": "Thermal accumulation during grain filling (GS59–80).",
+            "extended_description": "Degree-days accumulated between heading (GS59) and soft dough (GS80), covering the main grain filling period. Determined by root zone capacity. Affects ear weight, barley quality grade, and specific weight.",
+            "sensitivity_hints": "Critical for grain filling. Insufficient thermal time during this phase reduces kernel weight and quality.",
+            "related_domain_knowledge": [
+                "Grain filling rate and duration determine final kernel weight.",
+                "Heat stress during grain filling can reduce quality.",
+                "Root zone capacity influences water availability during this critical period."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "thermal_time_reproductive"
+        },
+        {
+            "name": "exptgens",
+            "display_name": "Expected Average Yield",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6"
+            ],
+            "role": "endogenous",
+            "category": "management",
+            "short_description": "Expected average yield for the field conditions.",
+            "extended_description": "The baseline expected yield for the specific combination of soil type, previous crop, and pesticide regime. Used as a reference for calculating optimal nitrogen application rates. Represents long-term average yield potential.",
+            "sensitivity_hints": "Integrates soil type, crop rotation, and pest management into a yield expectation. Drives nitrogen recommendation calculations.",
+            "related_domain_knowledge": [
+                "Expected yield is used in Danish nitrogen recommendation systems.",
+                "Higher yield expectations justify higher nitrogen application.",
+                "Previous crop and soil type are the main determinants of yield potential."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "expected_yield_baseline"
+        },
+        {
+            "name": "forfrugt",
+            "display_name": "Previous Crop",
+            "type": "categorical",
+            "states": [
+                "beets",
+                "cereal_rotation",
+                "continuous_cereals",
+                "clover_grass",
+                "other"
+            ],
+            "role": "exogenous",
+            "category": "management",
+            "short_description": "Crop grown in the field the previous season.",
+            "extended_description": "The preceding crop in the rotation, which affects soil nitrogen availability, disease pressure, and overall growing conditions for the current barley crop. Categories include beets, cereal rotation, continuous cereals, clover-grass, and other crops.",
+            "sensitivity_hints": "Clover-grass predecessors leave high residual nitrogen. Continuous cereals increase disease risk. Rotation history affects yield potential and nitrogen needs.",
+            "related_domain_knowledge": [
+                "Legume predecessors (clover-grass) fix atmospheric nitrogen, increasing soil N.",
+                "Continuous cereal cropping increases root disease pressure.",
+                "Crop rotation is a primary management tool in Danish agriculture.",
+                "Previous crop affects both nitrogen mineralisation and pest/disease carryover."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "previous_crop"
+        },
+        {
+            "name": "frspdag",
+            "display_name": "Frost-Free Period After Sowing",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8"
+            ],
+            "role": "endogenous",
+            "category": "environment",
+            "short_description": "Duration of frost-free conditions after crop emergence.",
+            "extended_description": "The length of the frost-free period following crop emergence, determined by sowing date. Affects soil infiltration conditions and early crop establishment. Earlier sowing increases frost risk during emergence.",
+            "sensitivity_hints": "Driven by sowing date. Affects soil structure and infiltration during the critical establishment phase.",
+            "related_domain_knowledge": [
+                "Late frosts can damage emerging barley seedlings.",
+                "Frost-thaw cycles affect soil structure and infiltration.",
+                "Danish spring barley is typically sown from late March to late April."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "frost_free_emergence_period"
+        },
+        {
+            "name": "jordinf",
+            "display_name": "Soil Infiltration Rate",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9"
+            ],
+            "role": "endogenous",
+            "category": "soil",
+            "short_description": "Rate of water infiltration into the soil.",
+            "extended_description": "The soil's capacity to absorb water, influenced by frost-thaw dynamics during the establishment period. Affects field germination rate through waterlogging or crusting effects.",
+            "sensitivity_hints": "Driven by frost conditions. Affects germination through soil physical conditions.",
+            "related_domain_knowledge": [
+                "Poor infiltration leads to surface crusting, reducing emergence.",
+                "Soil infiltration varies with texture, structure, and moisture.",
+                "Frost-thaw cycles can improve or degrade soil structure depending on timing."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "soil_infiltration_rate"
+        },
+        {
+            "name": "jordn",
+            "display_name": "Soil Available Nitrogen",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9"
+            ],
+            "role": "endogenous",
+            "category": "nitrogen",
+            "short_description": "Plant-available nitrogen in the soil profile.",
+            "extended_description": "The total plant-available nitrogen in the soil, determined by mineral nitrogen content, annual climate adjustment, and potential mineralisation from organic matter. A key driver of crop nitrogen uptake and thus yield.",
+            "sensitivity_hints": "Central nitrogen pool variable. Determined by mineral N, climate, and mineralisation potential. Drives crop N uptake and protein content.",
+            "related_domain_knowledge": [
+                "Soil available N is the sum of mineral N and mineralised organic N.",
+                "Annual climate variation affects mineralisation rates.",
+                "Nitrogen availability timing must match crop demand for efficient uptake."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "soil_available_nitrogen"
+        },
+        {
+            "name": "jordtype",
+            "display_name": "Soil Type Classification",
+            "type": "categorical",
+            "states": [
+                "JB_1",
+                "JB_2",
+                "JB_3",
+                "JB_4",
+                "JB_5",
+                "JB_6",
+                "JB_7",
+                "JB_8",
+                "JB_9"
+            ],
+            "role": "exogenous",
+            "category": "soil",
+            "short_description": "Danish JB soil type classification.",
+            "extended_description": "The official Danish soil classification (JB numbers 1–9) describing soil texture from coarse sand to heavy clay. Influences water holding capacity, nutrient retention, root zone capacity, mineral nitrogen dynamics, and yield potential.",
+            "sensitivity_hints": "Fundamental environmental variable affecting multiple downstream processes. Determines root zone capacity, nitrogen dynamics, and baseline yield expectation.",
+            "related_domain_knowledge": [
+                "JB1–2: sandy soils with low water retention.",
+                "JB5–6: loamy soils with good water and nutrient retention.",
+                "JB7–9: clay soils with high retention but potential drainage issues.",
+                "Soil type is the primary determinant of agricultural potential in Denmark."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "soil_type_class"
+        },
+        {
+            "name": "keraks",
+            "display_name": "Kernels per Ear",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7"
+            ],
+            "role": "endogenous",
+            "category": "yield_component",
+            "short_description": "Average number of kernels per ear.",
+            "extended_description": "The mean number of filled grains in each ear, determined by ear density, vegetative thermal time, and nitrogen uptake. Together with ear density and kernel weight, it forms the three-component yield equation. Affects kernel size grading and sieve fractions.",
+            "sensitivity_hints": "Compensatory with ear density. More ears per m² typically means fewer kernels per ear.",
+            "related_domain_knowledge": [
+                "Kernel number is set between floret initiation and anthesis.",
+                "Nitrogen stress during stem elongation reduces kernel number.",
+                "Spring barley typically has 15–25 kernels per ear."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "kernels_per_ear"
+        },
+        {
+            "name": "komm",
+            "display_name": "Geographic Region",
+            "type": "categorical",
+            "states": [
+                "region_1",
+                "region_2",
+                "region_3",
+                "region_4",
+                "region_5"
+            ],
+            "role": "exogenous",
+            "category": "environment",
+            "short_description": "Danish municipality or regional zone.",
+            "extended_description": "The geographic region (municipality) where the field is located. Determines local climate patterns, rainfall zone, and the regional component of the annual climate adjustment.",
+            "sensitivity_hints": "Exogenous location variable. Affects climate adjustment and rainfall distribution.",
+            "related_domain_knowledge": [
+                "Denmark has significant east–west variation in rainfall.",
+                "Western Jutland receives more precipitation than eastern islands.",
+                "Regional climate differences affect growing season length and yield potential."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "geographic_region"
+        },
+        {
+            "name": "ksort",
+            "display_name": "Kernel Size Grading",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5"
+            ],
+            "role": "endogenous",
+            "category": "grain_quality",
+            "short_description": "Proportion of grains above minimum size threshold.",
+            "extended_description": "The percentage of harvested grain meeting the minimum size criteria for malting barley. Determined by ear weight, kernels per ear, and the cultivar's inherent grain size. A key quality parameter for malting barley acceptance.",
+            "sensitivity_hints": "Important malting quality criterion. Driven by ear weight, kernel number, and cultivar genetics.",
+            "related_domain_knowledge": [
+                "Malting barley typically requires >90% kernels above 2.5mm.",
+                "Large, uniform kernels produce more consistent malt extract.",
+                "Kernel size is influenced by both genetics and growing conditions."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "kernel_size_grading"
+        },
+        {
+            "name": "markgrm",
+            "display_name": "Field Germination Rate",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9",
+                "level_10"
+            ],
+            "role": "endogenous",
+            "category": "crop_establishment",
+            "short_description": "Percentage of sown seeds that successfully germinate in the field.",
+            "extended_description": "The proportion of sown seeds that emerge as seedlings under field conditions. Determined by the seed lot's germination capacity and soil infiltration conditions. Lower than laboratory germination due to field stresses.",
+            "sensitivity_hints": "Driven by seed quality and soil conditions. Directly determines final plant density.",
+            "related_domain_knowledge": [
+                "Field germination is typically 80–95% of laboratory germination.",
+                "Soil crusting, waterlogging, and seedbed quality reduce field emergence.",
+                "Seed vigour declines with age, reducing field germination."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "field_germination_rate"
+        },
+        {
+            "name": "mod_nmin",
+            "display_name": "Modelled Mineral Nitrogen",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6"
+            ],
+            "role": "endogenous",
+            "category": "nitrogen",
+            "short_description": "Model-predicted mineral nitrogen in soil.",
+            "extended_description": "The estimated mineral nitrogen level based on the annual climate adjustment and measured mineral nitrogen. Used to refine nitrogen recommendations by accounting for annual variation in mineralisation.",
+            "sensitivity_hints": "Adjustment of measured Nmin for annual climate effects. Feeds into target nitrogen dose calculation.",
+            "related_domain_knowledge": [
+                "Mineral nitrogen measurements are taken in early spring before fertilising.",
+                "Climate variation causes measured Nmin to differ from long-term averages.",
+                "Modelled Nmin improves nitrogen recommendation accuracy."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "modelled_mineral_nitrogen"
+        },
+        {
+            "name": "nedbarea",
+            "display_name": "Rainfall Zone",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3"
+            ],
+            "role": "endogenous",
+            "category": "environment",
+            "short_description": "Regional rainfall classification zone.",
+            "extended_description": "The precipitation zone determined by geographic region. Affects soil mineral nitrogen through leaching intensity. Higher rainfall zones experience more nitrogen leaching.",
+            "sensitivity_hints": "Driven by geographic region. Affects nitrogen leaching and thus mineral nitrogen availability.",
+            "related_domain_knowledge": [
+                "Higher rainfall increases nitrogen leaching from sandy soils.",
+                "Danish rainfall ranges from ~500mm (east) to ~900mm (west) annually.",
+                "Rainfall zone is a key input to Danish nitrogen recommendation models."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "rainfall_zone"
+        },
+        {
+            "name": "ngodn",
+            "display_name": "Total Nitrogen Applied",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9",
+                "level_10"
+            ],
+            "role": "endogenous",
+            "category": "nitrogen",
+            "short_description": "Total nitrogen fertiliser applied to the crop.",
+            "extended_description": "The sum of target nitrogen dose and any supplemental nitrogen application. Determines the total exogenous nitrogen input to the crop system, affecting nitrogen availability and crop nitrogen uptake.",
+            "sensitivity_hints": "Sum of target and supplemental doses. Directly affects available nitrogen for crop uptake and protein accumulation.",
+            "related_domain_knowledge": [
+                "Danish regulations limit total nitrogen application per hectare.",
+                "Optimal nitrogen balances yield gain against environmental cost.",
+                "Over-application increases protein but may reduce malting quality."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "total_nitrogen_applied"
+        },
+        {
+            "name": "ngodnn",
+            "display_name": "Supplemental Nitrogen Dose",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9",
+                "level_10"
+            ],
+            "role": "endogenous",
+            "category": "nitrogen",
+            "short_description": "Additional nitrogen applied beyond the target dose.",
+            "extended_description": "Extra nitrogen applied based on the difference between optimal nitrogen rate and soil available nitrogen. Represents the top-up fertiliser needed to reach optimal nutrition.",
+            "sensitivity_hints": "Calculated from optimal N rate minus soil available N. Contributes to total applied nitrogen.",
+            "related_domain_knowledge": [
+                "Supplemental nitrogen is applied when soil N supply is insufficient.",
+                "Split application timing improves nitrogen use efficiency.",
+                "The supplemental dose closes the gap between soil supply and crop demand."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "supplemental_nitrogen_dose"
+        },
+        {
+            "name": "ngodnt",
+            "display_name": "Target Nitrogen Dose",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9",
+                "level_10"
+            ],
+            "role": "endogenous",
+            "category": "nitrogen",
+            "short_description": "Recommended nitrogen application for the field.",
+            "extended_description": "The target nitrogen dose calculated from expected yield, previous crop contribution, and modelled mineral nitrogen. Represents the standard recommended fertiliser rate before adjustments.",
+            "sensitivity_hints": "Driven by expected yield, crop rotation effects, and modelled soil nitrogen. The baseline for fertiliser planning.",
+            "related_domain_knowledge": [
+                "Target dose follows Danish national nitrogen recommendation norms.",
+                "Higher expected yields require more nitrogen.",
+                "Clover-grass predecessors reduce the target dose due to residual N."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "target_nitrogen_dose"
+        },
+        {
+            "name": "ngtilg",
+            "display_name": "Nitrogen Availability",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9",
+                "level_10"
+            ],
+            "role": "endogenous",
+            "category": "nitrogen",
+            "short_description": "Total nitrogen available to the crop from all sources.",
+            "extended_description": "The combined nitrogen available from soil reserves, applied fertiliser, and environmental inputs. Determined by early thermal time, total applied nitrogen, fertiliser placement, and atmospheric deposition. The immediate precursor to crop nitrogen uptake.",
+            "sensitivity_hints": "Integrates multiple nitrogen sources. Placement method and thermal time affect availability timing. Directly drives nitrogen uptake.",
+            "related_domain_knowledge": [
+                "Nitrogen availability depends on both amount and placement.",
+                "Incorporated fertiliser is more available than surface-applied.",
+                "Thermal accumulation affects mineralisation rate of organic N sources."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "nitrogen_availability"
+        },
+        {
+            "name": "nmin",
+            "display_name": "Soil Mineral Nitrogen",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6"
+            ],
+            "role": "endogenous",
+            "category": "nitrogen",
+            "short_description": "Measured mineral nitrogen in the soil profile.",
+            "extended_description": "The spring-measured concentration of plant-available mineral nitrogen (ammonium + nitrate) in the soil. Determined by soil type and rainfall zone through their effects on leaching and mineralisation. A key input to nitrogen recommendation models.",
+            "sensitivity_hints": "Measured in early spring. Soil type and rainfall determine the level through leaching and mineralisation balance.",
+            "related_domain_knowledge": [
+                "Nmin is typically measured in the 0–100cm soil layer in early spring.",
+                "Sandy soils in high rainfall areas have low Nmin due to leaching.",
+                "Clay soils retain more mineral nitrogen over winter."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "mineral_nitrogen_content"
+        },
+        {
+            "name": "nopt",
+            "display_name": "Optimal Nitrogen Rate",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6"
+            ],
+            "role": "endogenous",
+            "category": "nitrogen",
+            "short_description": "Economically optimal nitrogen application rate.",
+            "extended_description": "The nitrogen rate that maximises economic return, balancing yield gain against fertiliser cost. Determined by expected yield baseline and pesticide regime. Used to calculate the supplemental nitrogen dose.",
+            "sensitivity_hints": "Driven by expected yield and pesticide use. Determines the supplemental N needed beyond soil supply.",
+            "related_domain_knowledge": [
+                "Optimal N is where marginal yield gain equals marginal fertiliser cost.",
+                "Pesticide-free regimes may have lower optimal N due to disease interaction.",
+                "Danish norms prescribe optimal N rates by crop, soil, and previous crop."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "optimal_nitrogen_rate"
+        },
+        {
+            "name": "nplac",
+            "display_name": "Fertiliser Placement Method",
+            "type": "categorical",
+            "states": [
+                "placed",
+                "top_dressed",
+                "worked_into_soil"
+            ],
+            "role": "exogenous",
+            "category": "management",
+            "short_description": "Method of nitrogen fertiliser application.",
+            "extended_description": "How the nitrogen fertiliser is physically applied: placed (banded near seed), top-dressed (broadcast on surface), or worked into soil. Placement method affects nitrogen availability to the crop by altering root-fertiliser proximity.",
+            "sensitivity_hints": "Exogenous management choice. Placed fertiliser is more efficiently accessed by crop roots than surface-applied.",
+            "related_domain_knowledge": [
+                "Band placement increases nitrogen use efficiency by 10–20%.",
+                "Top-dressing is simpler but more prone to volatilisation losses.",
+                "Incorporation reduces ammonia losses from urea-based fertilisers."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "fertiliser_placement_method"
+        },
+        {
+            "name": "nprot",
+            "display_name": "Nitrogen-to-Protein Conversion",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8"
+            ],
+            "role": "endogenous",
+            "category": "grain_quality",
+            "short_description": "Nitrogen content in grain related to protein formation.",
+            "extended_description": "The nitrogen accumulated in the grain, which is directly converted to protein content. Determined by soil available nitrogen and total nitrogen applied. Higher grain nitrogen produces higher protein but may exceed malting specifications.",
+            "sensitivity_hints": "Driven by soil N and applied N. Directly determines grain protein content alongside cultivar genetics.",
+            "related_domain_knowledge": [
+                "Grain protein = grain N × conversion factor (typically 6.25).",
+                "Late-season N availability preferentially increases grain protein.",
+                "Malting barley requires protein between 9.5–11.5%."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "nitrogen_protein_conversion"
+        },
+        {
+            "name": "ntilg",
+            "display_name": "Crop Nitrogen Uptake",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9",
+                "level_10"
+            ],
+            "role": "endogenous",
+            "category": "nitrogen",
+            "short_description": "Total nitrogen taken up by the crop.",
+            "extended_description": "The cumulative nitrogen absorbed by the barley crop from all soil sources. Determined by nitrogen availability, soil available nitrogen, and growing conditions. A central variable linking nitrogen supply to yield components and quality.",
+            "sensitivity_hints": "Major hub variable. Affects ear density, ear weight, kernels per ear, kernel weight, and specific weight. Driven by all nitrogen supply variables.",
+            "related_domain_knowledge": [
+                "Crop N uptake typically ranges 100–200 kg N/ha in well-fertilised barley.",
+                "Uptake efficiency (N uptake / N available) is typically 50–70%.",
+                "Nitrogen uptake drives both yield (through ear density) and quality (through protein)."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "crop_nitrogen_uptake"
+        },
+        {
+            "name": "partigerm",
+            "display_name": "Seed Lot Germination Capacity",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9"
+            ],
+            "role": "exogenous",
+            "category": "crop_establishment",
+            "short_description": "Laboratory germination percentage of the seed lot.",
+            "extended_description": "The germination capacity of the seed lot as measured under controlled laboratory conditions. Reflects seed quality and vigour. Together with soil conditions, determines field germination rate.",
+            "sensitivity_hints": "Exogenous seed quality variable. Drives field germination rate alongside soil infiltration.",
+            "related_domain_knowledge": [
+                "Certified seed must have >85% germination in Denmark.",
+                "Seed vigour declines with storage duration and conditions.",
+                "High germination capacity buffers against poor field conditions."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "seed_germination_capacity"
+        },
+        {
+            "name": "pesticid",
+            "display_name": "Pesticide Treatment Regime",
+            "type": "binary",
+            "states": [
+                "no_pesticide",
+                "pesticide_applied"
+            ],
+            "role": "exogenous",
+            "category": "management",
+            "short_description": "Whether pesticides are applied to the crop.",
+            "extended_description": "Binary indicator of pesticide use (conventional vs pesticide-free production). Affects expected yield and optimal nitrogen rate, as pest and disease pressure reduce nitrogen use efficiency.",
+            "sensitivity_hints": "Exogenous management decision. Affects yield expectation and optimal nitrogen calculation.",
+            "related_domain_knowledge": [
+                "Pesticide-free barley production is promoted in Danish organic farming.",
+                "Disease and weed pressure reduce yield by 10–30% without pesticides.",
+                "Pesticide regime interacts with nitrogen management for optimal results."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "pesticide_regime"
+        },
+        {
+            "name": "potnmin",
+            "display_name": "Potential Mineral Nitrogen",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8"
+            ],
+            "role": "endogenous",
+            "category": "nitrogen",
+            "short_description": "Potential nitrogen mineralisation from soil organic matter.",
+            "extended_description": "The estimated nitrogen that will become available through mineralisation of soil organic matter during the growing season. Determined by soil type and previous crop. Higher after organic-rich predecessors and in clay soils with more organic matter.",
+            "sensitivity_hints": "Driven by soil type and previous crop. Contributes to total soil available nitrogen for the crop.",
+            "related_domain_knowledge": [
+                "Clover-grass predecessors can mineralise 50–100 kg N/ha.",
+                "Clay soils have higher organic matter and thus higher mineralisation potential.",
+                "Mineralisation rate depends on soil temperature and moisture."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "potential_mineral_nitrogen"
+        },
+        {
+            "name": "protein",
+            "display_name": "Grain Protein Content",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8"
+            ],
+            "role": "endogenous",
+            "category": "grain_quality",
+            "short_description": "Protein concentration in harvested grain.",
+            "extended_description": "The measured protein content of the barley grain, a critical quality parameter for malting. Determined by cultivar protein potential, nitrogen-to-protein conversion, kernel size grading, and thermal time during the vegetative phase. Must fall within a specific range for malting acceptance.",
+            "sensitivity_hints": "Key malting quality variable. Influenced by cultivar genetics, nitrogen supply, and grain size. Must be 9.5–11.5% for most malting specifications.",
+            "related_domain_knowledge": [
+                "Low protein (<9.5%) indicates insufficient nitrogen supply.",
+                "High protein (>11.5%) produces harsh, enzymatically unbalanced malt.",
+                "Protein content is inversely correlated with yield (dilution effect).",
+                "Cultivar genetics set the baseline; nitrogen supply adjusts it."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "grain_protein_content"
+        },
+        {
+            "name": "rokap",
+            "display_name": "Root Zone Water Capacity",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7"
+            ],
+            "role": "endogenous",
+            "category": "soil",
+            "short_description": "Plant-available water capacity in the root zone.",
+            "extended_description": "The volume of water available to crop roots, determined by soil type. Affects thermal accumulation during both vegetative and reproductive phases by modulating drought stress. Sandy soils have low root zone capacity; clay soils have high.",
+            "sensitivity_hints": "Driven by soil type. Modulates thermal time accumulation in both vegetative and reproductive growth phases through water stress.",
+            "related_domain_knowledge": [
+                "Root zone capacity ranges from ~50mm (coarse sand) to >200mm (loam).",
+                "Drought stress during grain filling is the main yield limitation on sandy soils.",
+                "Root zone capacity determines irrigation need and drought vulnerability."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "root_zone_capacity"
+        },
+        {
+            "name": "s2225",
+            "display_name": "Sieve Fraction 2.2–2.5mm",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4"
+            ],
+            "role": "endogenous",
+            "category": "grain_quality",
+            "short_description": "Percentage of kernels between 2.2mm and 2.5mm sieve size.",
+            "extended_description": "The proportion of grain falling between the 2.2mm and 2.5mm sieve apertures. Determined by ear weight, kernels per ear, and cultivar grain size genetics. In malting barley, a high proportion in this fraction is undesirable.",
+            "sensitivity_hints": "Driven by ear weight, kernel count, and cultivar grain size. Higher fractions indicate smaller than ideal grain.",
+            "related_domain_knowledge": [
+                "Kernels in this range are below optimal malting size.",
+                "Stress during grain filling shifts grain towards smaller fractions.",
+                "Cultivar genetics have a strong influence on kernel size distribution."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "sieve_fraction_small"
+        },
+        {
+            "name": "s2528",
+            "display_name": "Sieve Fraction 2.5–2.8mm",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9",
+                "level_10",
+                "level_11",
+                "level_12",
+                "level_13",
+                "level_14",
+                "level_15",
+                "level_16",
+                "level_17",
+                "level_18",
+                "level_19",
+                "level_20"
+            ],
+            "role": "endogenous",
+            "category": "grain_quality",
+            "short_description": "Percentage of kernels between 2.5mm and 2.8mm sieve size.",
+            "extended_description": "The proportion of grain in the main commercial sieve fraction (2.5–2.8mm). This is the primary size fraction for malting barley. Determined by ear weight, kernels per ear, and cultivar grain size.",
+            "sensitivity_hints": "Primary commercial fraction. Higher proportion indicates better grain quality for malting.",
+            "related_domain_knowledge": [
+                "Malting specifications typically require high proportion above 2.5mm.",
+                "This fraction reflects ideal kernel plumpness.",
+                "Good growing conditions increase the proportion in this fraction."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "sieve_fraction_medium"
+        },
+        {
+            "name": "saakern",
+            "display_name": "Seed Kernels Sown per m²",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7"
+            ],
+            "role": "endogenous",
+            "category": "crop_establishment",
+            "short_description": "Number of seed kernels sown per square metre.",
+            "extended_description": "The actual number of seeds deposited per unit area, calculated from the seed rate (kg/ha) and the seed lot's thousand kernel weight. Together with field germination, determines final plant density.",
+            "sensitivity_hints": "Driven by seed rate and seed thousand kernel weight. Directly determines potential plant density.",
+            "related_domain_knowledge": [
+                "Typical sowing density is 250–400 seeds/m² for spring barley.",
+                "Heavier seeds (higher TKW) mean fewer seeds per kg.",
+                "Seed count is more agronomically relevant than seed weight per area."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "seed_kernel_count"
+        },
+        {
+            "name": "saamng",
+            "display_name": "Seed Rate",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9",
+                "level_10"
+            ],
+            "role": "exogenous",
+            "category": "management",
+            "short_description": "Weight of seed sown per hectare.",
+            "extended_description": "The mass of barley seed applied per unit area (kg/ha). An exogenous management decision that, together with seed thousand kernel weight, determines the number of kernels sown.",
+            "sensitivity_hints": "Exogenous management input. Combined with seed TKW to calculate actual seed kernel count.",
+            "related_domain_knowledge": [
+                "Typical spring barley seed rates are 130–200 kg/ha in Denmark.",
+                "Higher seed rates compensate for poor germination conditions.",
+                "Seed rate interacts with seed size to determine seed count."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "seed_rate"
+        },
+        {
+            "name": "saatid",
+            "display_name": "Sowing Date",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5"
+            ],
+            "role": "exogenous",
+            "category": "management",
+            "short_description": "Calendar date of crop sowing.",
+            "extended_description": "The date on which the barley crop is sown. A major management decision affecting thermal accumulation throughout the season, frost exposure during emergence, and the duration of each growth phase.",
+            "sensitivity_hints": "Exogenous management timing. Controls thermal time accumulation across all growth phases and frost exposure during emergence.",
+            "related_domain_knowledge": [
+                "Danish spring barley is typically sown late March to late April.",
+                "Earlier sowing extends the growing season and generally increases yield.",
+                "Very early sowing increases frost risk during emergence.",
+                "Sowing date is the most important management decision for spring barley."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "sowing_date"
+        },
+        {
+            "name": "slt22",
+            "display_name": "Sieve Fraction Below 2.2mm",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4"
+            ],
+            "role": "endogenous",
+            "category": "grain_quality",
+            "short_description": "Percentage of kernels passing through the 2.2mm sieve.",
+            "extended_description": "The proportion of undersized grain that passes through the 2.2mm sieve. High values indicate poor grain filling or excessive kernel competition. Screenings are removed before malting.",
+            "sensitivity_hints": "Indicates poor grain quality. Driven by the same factors as other sieve fractions: ear weight, kernel count, and cultivar genetics.",
+            "related_domain_knowledge": [
+                "Screenings (<2.2mm) are discarded or used as animal feed.",
+                "High screening levels result from drought stress or disease.",
+                "Malting barley specifications limit screenings to <5%."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "sieve_fraction_undersized"
+        },
+        {
+            "name": "sort",
+            "display_name": "Barley Cultivar",
+            "type": "categorical",
+            "states": [
+                "Abelone",
+                "Alexis",
+                "Alis",
+                "Amber",
+                "Ariel",
+                "Baracuda",
+                "Baronesse",
+                "Bartok",
+                "Blenheim",
+                "Brewster",
+                "Caminant",
+                "Canut",
+                "Caruso",
+                "Chariot",
+                "Collie",
+                "Cooper",
+                "Cork",
+                "Delibes",
+                "Derkado",
+                "Digger",
+                "Etna",
+                "Evelyn",
+                "G_363ta",
+                "Give",
+                "Goldie",
+                "Heron",
+                "Jarek",
+                "Jill",
+                "Korinna",
+                "Krona",
+                "Lamba",
+                "Lenka",
+                "Limbo",
+                "Loma",
+                "Lysimax",
+                "Maresi",
+                "Marielle",
+                "Marina",
+                "Maud",
+                "Meltan",
+                "Mentor",
+                "Mie",
+                "Miralix",
+                "Nevada",
+                "Optic",
+                "Peel",
+                "Polygena",
+                "Portia",
+                "Princesse",
+                "Prisma",
+                "Ragtime",
+                "Reggae",
+                "Rima",
+                "Saxo",
+                "Segu",
+                "Sehila",
+                "Selim",
+                "Semal",
+                "Senor",
+                "Shamu",
+                "Teal",
+                "Texane",
+                "Tofta",
+                "Trebon",
+                "Vintage",
+                "andre",
+                "x_321rja"
+            ],
+            "role": "exogenous",
+            "category": "genetics",
+            "short_description": "Selected barley variety/cultivar.",
+            "extended_description": "The barley cultivar grown, selected from 67 varieties registered for Danish trials. Each cultivar has inherent genetic potential for grain weight, protein content, and grain size that interact with growing conditions to determine yield and quality.",
+            "sensitivity_hints": "Exogenous genetic base variable. Determines cultivar kernel weight, protein potential, and grain size genetics.",
+            "related_domain_knowledge": [
+                "Cultivar choice is a primary management decision in barley production.",
+                "Danish variety trials evaluate cultivars across multiple locations and years.",
+                "Cultivars differ in yield potential, disease resistance, and quality traits.",
+                "Malting cultivars are selected for specific quality profiles."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "barley_cultivar"
+        },
+        {
+            "name": "sorttkv",
+            "display_name": "Cultivar Kernel Weight Class",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9"
+            ],
+            "role": "endogenous",
+            "category": "genetics",
+            "short_description": "Genetic kernel weight class of the cultivar.",
+            "extended_description": "The inherent thousand kernel weight classification of the selected cultivar. Genetically determined and represents the potential kernel size under optimal conditions. Interacts with growing conditions to determine actual ear density and kernel weight.",
+            "sensitivity_hints": "Determined by cultivar selection. Affects ear density and actual thousand kernel weight.",
+            "related_domain_knowledge": [
+                "Cultivars with high TKW potential tend to have fewer but larger kernels.",
+                "TKW class is a stable genetic characteristic used in variety descriptions.",
+                "Higher TKW classes generally favour malting quality."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "cultivar_kernel_weight_class"
+        },
+        {
+            "name": "spndx",
+            "display_name": "Grain Specific Weight",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4"
+            ],
+            "role": "endogenous",
+            "category": "grain_quality",
+            "short_description": "Specific weight (hectolitre weight) of the grain.",
+            "extended_description": "The bulk density of the harvested grain, measured as weight per unit volume. Determined by thermal time during the reproductive phase, nitrogen uptake, and kernel size grading. A measure of grain plumpness and filling quality.",
+            "sensitivity_hints": "Reflects grain filling quality. Driven by reproductive thermal time, N uptake, and kernel grading.",
+            "related_domain_knowledge": [
+                "Specific weight (hectolitre weight) is a standard grain trading parameter.",
+                "Well-filled grain has higher specific weight.",
+                "Minimum specific weight is required for malting barley acceptance."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "specific_weight"
+        },
+        {
+            "name": "srtprot",
+            "display_name": "Cultivar Protein Potential",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9"
+            ],
+            "role": "endogenous",
+            "category": "genetics",
+            "short_description": "Genetic protein content potential of the cultivar.",
+            "extended_description": "The inherent protein level classification of the selected cultivar under standard conditions. Genetically determined and interacts with nitrogen supply to determine actual grain protein content.",
+            "sensitivity_hints": "Determined by cultivar selection. Sets the genetic baseline for grain protein content.",
+            "related_domain_knowledge": [
+                "Low-protein cultivars are preferred for malting.",
+                "Protein potential is a key criterion in cultivar selection.",
+                "Actual protein is the result of genetic potential plus nitrogen environment."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "cultivar_protein_potential"
+        },
+        {
+            "name": "srtsize",
+            "display_name": "Cultivar Grain Size Class",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7"
+            ],
+            "role": "endogenous",
+            "category": "genetics",
+            "short_description": "Genetic grain size classification of the cultivar.",
+            "extended_description": "The inherent grain size class of the selected cultivar, representing the genetic potential for kernel dimensions. Affects all sieve fraction distributions and kernel size grading under given growing conditions.",
+            "sensitivity_hints": "Determined by cultivar selection. Major influence on kernel size distribution and sieve fractions.",
+            "related_domain_knowledge": [
+                "Larger-grained cultivars produce more uniform, plump kernels.",
+                "Grain size class is stable across environments for a given cultivar.",
+                "Size classification from variety trials guides cultivar choice."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "cultivar_grain_size_class"
+        },
+        {
+            "name": "tkv",
+            "display_name": "Thousand Kernel Weight",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8"
+            ],
+            "role": "endogenous",
+            "category": "yield_component",
+            "short_description": "Weight of one thousand harvested kernels.",
+            "extended_description": "The mass of 1000 kernels at harvest, a key yield component and quality indicator. Determined by ear density, kernels per ear, cultivar kernel weight class, and nitrogen uptake. Reflects grain filling success.",
+            "sensitivity_hints": "Third yield component alongside ear density and kernel number. Driven by competition effects, cultivar genetics, and N uptake.",
+            "related_domain_knowledge": [
+                "TKW for spring barley typically ranges 35–55g.",
+                "Drought during grain filling reduces TKW.",
+                "TKW = yield / (ears/m² × kernels/ear)."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "thousand_kernel_weight"
+        },
+        {
+            "name": "tkvs",
+            "display_name": "Seed Lot Thousand Kernel Weight",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9"
+            ],
+            "role": "exogenous",
+            "category": "crop_establishment",
+            "short_description": "Thousand kernel weight of the seed lot.",
+            "extended_description": "The weight of 1000 seeds in the lot used for sowing. An exogenous property of the seed batch that, together with seed rate, determines how many kernels are sown per unit area.",
+            "sensitivity_hints": "Exogenous seed property. Heavier seeds mean fewer kernels per kg of seed sown.",
+            "related_domain_knowledge": [
+                "Seed TKW is measured before sowing to calibrate the drill.",
+                "Typical seed TKW for spring barley is 35–55g.",
+                "Using seed count rather than seed weight ensures consistent plant density."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "seed_thousand_kernel_weight"
+        },
+        {
+            "name": "udb",
+            "display_name": "Crop Yield",
+            "type": "ordinal",
+            "states": [
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5",
+                "level_6",
+                "level_7",
+                "level_8",
+                "level_9"
+            ],
+            "role": "endogenous",
+            "category": "outcome",
+            "short_description": "Final harvested grain yield.",
+            "extended_description": "The total grain yield at harvest, the primary outcome variable of the model. Determined by ear density and ear weight (yield = ears/m² × ear weight). All upstream variables affect yield through their influence on these two components.",
+            "sensitivity_hints": "Terminal outcome variable. Directly determined by ear density and ear weight. All management and environmental factors act through these two paths.",
+            "related_domain_knowledge": [
+                "Danish spring barley yields typically range 40–80 dt/ha.",
+                "Yield = ears per m² × kernels per ear × kernel weight.",
+                "Optimising yield requires balancing all three yield components."
+            ],
+            "references": [
+                "Kristensen2002"
+            ],
+            "llm_name": "crop_yield"
+        }
+    ]
+}

@@ -1,0 +1,1413 @@
+{
+    "schema_version": "2.0",
+    "network": "hailfinder",
+    "domain": "severe_weather_forecasting",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a severe convective weather forecasting model, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "hailfinder",
+        "source_reference": "Abramson1996",
+        "source_url": "https://www.bnlearn.com/bnrepository/discrete-large.html#hailfinder",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "moderate",
+        "notes": "The Hailfinder network models severe convective weather forecasting for northeast Colorado, originally developed by Abramson, Finizza, and colleagues at the National Weather Service (1996). It captures relationships between atmospheric observations, synoptic weather patterns, convective parameters, mesoscale processes, and forecast outputs for hail and severe weather prediction. Contains 56 nodes and 66 edges. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a severe convective weather forecasting model for a mountainous region adjacent to plains.",
+            "The causal chain follows: atmospheric observations → combined assessments → scenario-conditioned parameters → forecast outputs.",
+            "Multiple observation sources (satellite, surface, numerical models, expert judgement) are combined into consensus fields for vertical motion, moisture, and cloud cover.",
+            "A central weather pattern scenario node captures the synoptic type and determines 14 downstream meteorological field variables.",
+            "Mountain convection and plains convection are modelled as separate but interacting processes. Mountain storms generate outflow boundaries that trigger plains convection.",
+            "Convective inhibition (CIN/cap) must be overcome for convection to initiate. The cap evolves through the day based on heating, moisture advection, and synoptic forcing.",
+            "Instability (CAPE) is assessed from sounding data, dewpoints, and scenario context, then modified by forecast tendency.",
+            "Low-level convergence boundaries (outflows, drylines, fronts, Denver Cyclone) provide the lifting mechanism to trigger storms.",
+            "Cloud shading from both non-convective (stratiform) and convective (anvil) clouds modulates surface heating and thus the convective environment.",
+            "Forecast outputs are severity classifications: nil/non-significant, significant, or severe, produced for mountain, plains, and regional areas.",
+            "The seasonal period determines the climatological frequency of different weather pattern scenarios.",
+            "Wind hodograph patterns control storm mode (supercell vs multicell), boundary interactions, and outflow propagation."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "AMCINInScen",
+            "display_name": "Morning CIN in Scenario Context",
+            "type": "ordinal",
+            "states": [
+                "below_average",
+                "average",
+                "above_average"
+            ],
+            "role": "endogenous",
+            "category": "scenario_parameters",
+            "short_description": "Morning CIN level relative to the scenario average.",
+            "extended_description": "The morning convective inhibition assessed relative to what is typical for the current weather scenario. Less-than-average CIN suggests easier convective initiation than usual for the pattern; more-than-average CIN makes initiation harder.",
+            "sensitivity_hints": "Driven by morning CIN and scenario classification. Affects cap-in-scenario together with cap change forecast.",
+            "related_domain_knowledge": [
+                "Same absolute CIN has different implications depending on the weather pattern.",
+                "Scenario-relative assessment improves forecast calibration."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "morning_cap_in_scenario"
+        },
+        {
+            "name": "AMDewptCalPl",
+            "display_name": "Morning Dewpoint on Plains",
+            "type": "ordinal",
+            "states": [
+                "instability",
+                "neutral",
+                "stability"
+            ],
+            "role": "exogenous",
+            "category": "moisture",
+            "short_description": "Morning dewpoint temperature on the plains relative to stability thresholds.",
+            "extended_description": "The morning dewpoint temperature observation categorised relative to thresholds that indicate whether the low-level moisture supports instability, is neutral, or suggests a stable environment. Higher dewpoints promote instability.",
+            "sensitivity_hints": "Exogenous moisture observation. Contributes to morning instability assessment.",
+            "related_domain_knowledge": [
+                "Dewpoints above 55°F typically support convective instability on the High Plains.",
+                "Morning dewpoint is a key predictor for afternoon severe weather potential."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "morning_dewpoint_plains"
+        },
+        {
+            "name": "AMInsWliScen",
+            "display_name": "Weighted Morning Instability",
+            "type": "ordinal",
+            "states": [
+                "less_unstable",
+                "average",
+                "more_unstable"
+            ],
+            "role": "endogenous",
+            "category": "instability",
+            "short_description": "Morning instability combining lifted index, dewpoint, and scenario.",
+            "extended_description": "A weighted morning instability assessment integrating the lifted index, morning dewpoint, and scenario-relative instability classification. Provides the baseline instability before daytime evolution.",
+            "sensitivity_hints": "Integrates sounding, dewpoint, and scenario. Together with instability change, determines effective instability for the plains forecast.",
+            "related_domain_knowledge": [
+                "Multiple instability indicators are combined because no single measure captures all aspects."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "morning_instability_weighted"
+        },
+        {
+            "name": "AMInstabMt",
+            "display_name": "Morning Mountain Instability",
+            "type": "ordinal",
+            "states": [
+                "none",
+                "weak",
+                "strong"
+            ],
+            "role": "exogenous",
+            "category": "instability",
+            "short_description": "Atmospheric instability over mountains in the morning.",
+            "extended_description": "The initial morning instability level over the mountain terrain. An exogenous observation that sets the baseline for mountain convective potential before daytime heating modifies it.",
+            "sensitivity_hints": "Exogenous observation. Affects mountain instability assessment alongside cloud shading effects.",
+            "related_domain_knowledge": [
+                "Morning instability reflects overnight radiative and advective processes.",
+                "Mountains typically have earlier convective initiation due to orographic lift."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "morning_mountain_instability"
+        },
+        {
+            "name": "AreaMeso_ALS",
+            "display_name": "Area Mesoscale Activity Level",
+            "type": "ordinal",
+            "states": [
+                "strong_upward",
+                "weak_upward",
+                "neutral",
+                "downward"
+            ],
+            "role": "endogenous",
+            "category": "mesoscale_processes",
+            "short_description": "Mesoscale convective activity level in the forecast area.",
+            "extended_description": "The overall level of mesoscale atmospheric activity (updrafts, convergence zones, outflow boundaries) driven by the combined vertical motion field. Determines drying patterns, cloud shading, and composite forecast changes.",
+            "sensitivity_hints": "Driven by combined vertical motion. Affects moisture distribution, cloud cover patterns, and forecast evolution.",
+            "related_domain_knowledge": [
+                "Active mesoscale environments enhance localised convergence and convective triggering.",
+                "Mesoscale processes modulate the larger-scale environment on short time scales."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "area_mesoscale_activity"
+        },
+        {
+            "name": "AreaMoDryAir",
+            "display_name": "Area Moisture / Dry Air Modification",
+            "type": "ordinal",
+            "states": [
+                "very_wet",
+                "wet",
+                "neutral",
+                "dry"
+            ],
+            "role": "endogenous",
+            "category": "moisture",
+            "short_description": "Local modification of moisture by mesoscale processes and dry air.",
+            "extended_description": "The degree to which mesoscale activity and combined moisture interact to modify the local moisture environment. Strong mesoscale activity in a moist environment can enhance local convergence; dry air intrusion inhibits convection.",
+            "sensitivity_hints": "Driven by area mesoscale activity and combined moisture. Affects cloud cover interpretation.",
+            "related_domain_knowledge": [
+                "Dry air mixing into storms reduces hail size by weakening updrafts.",
+                "Mesoscale convergence zones can locally enhance moisture."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "area_dry_air_modification"
+        },
+        {
+            "name": "Boundaries",
+            "display_name": "Convergence Boundary Strength",
+            "type": "ordinal",
+            "states": [
+                "none",
+                "weak",
+                "strong"
+            ],
+            "role": "endogenous",
+            "category": "mesoscale_processes",
+            "short_description": "Overall strength of convergence boundaries affecting the forecast area.",
+            "extended_description": "The combined assessment of all convergence boundaries including morning pre-existing boundaries, mountain outflow boundaries, and wind-hodograph-driven convergence zones. Strong boundaries provide the lifting mechanism needed to overcome convective inhibition.",
+            "sensitivity_hints": "Combined from morning boundaries, mountain outflow, and wind hodograph. Affects the composite plains forecast.",
+            "related_domain_knowledge": [
+                "Boundaries provide the low-level convergence needed to initiate storms.",
+                "Boundary strength interacts with CIN: stronger boundaries can break through higher CIN."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "boundary_strength"
+        },
+        {
+            "name": "CapChange",
+            "display_name": "Convective Cap Change",
+            "type": "ordinal",
+            "states": [
+                "decreasing",
+                "little_change",
+                "increasing"
+            ],
+            "role": "endogenous",
+            "category": "forecast_evolution",
+            "short_description": "Expected change in convective inhibition (CIN) strength.",
+            "extended_description": "The forecast tendency of the convective cap (CIN), derived from the composite plains forecast. Decreasing cap allows convective initiation; increasing cap suppresses storms.",
+            "sensitivity_hints": "Driven by composite plains forecast. Affects cap-in-scenario assessment.",
+            "related_domain_knowledge": [
+                "The cap is a warm layer aloft that inhibits surface-based convection.",
+                "Afternoon heating, moisture advection, and synoptic lift all erode the cap."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "cap_strength_change"
+        },
+        {
+            "name": "CapInScen",
+            "display_name": "Cap Strength in Scenario Context",
+            "type": "ordinal",
+            "states": [
+                "below_average",
+                "average",
+                "above_average"
+            ],
+            "role": "endogenous",
+            "category": "scenario_parameters",
+            "short_description": "Effective convective cap strength for the scenario.",
+            "extended_description": "The combined assessment of convective cap strength incorporating the morning CIN relative to scenario and the forecast cap change. Determines how easily convection can initiate in the current pattern.",
+            "sensitivity_hints": "Driven by morning-CIN-in-scenario and cap change. Directly affects the plains forecast.",
+            "related_domain_knowledge": [
+                "Cap strength is the primary control on whether convection initiates.",
+                "A scenario with decreasing cap and strong instability creates a volatile environment."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "cap_strength_in_scenario"
+        },
+        {
+            "name": "CldShadeConv",
+            "display_name": "Convective Cloud Shading",
+            "type": "ordinal",
+            "states": [
+                "none",
+                "some",
+                "marked"
+            ],
+            "role": "endogenous",
+            "category": "cloud_cover",
+            "short_description": "Surface shading from existing convective clouds and anvils.",
+            "extended_description": "The degree to which existing convective clouds and their anvil cirrus reduce surface insolation. Determined by mountain instability (as a proxy for ongoing convection) and wind hodograph (which controls anvil spread direction).",
+            "sensitivity_hints": "Driven by mountain instability and wind hodograph. Affects the composite plains forecast by modifying heating.",
+            "related_domain_knowledge": [
+                "Anvil cirrus from upstream storms can shade downstream areas for hours.",
+                "Strong upper-level winds spread anvils over large areas."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "convective_cloud_shading"
+        },
+        {
+            "name": "CldShadeOth",
+            "display_name": "Non-Convective Cloud Shading",
+            "type": "categorical",
+            "states": [
+                "cloudy",
+                "partly_cloudy",
+                "clear"
+            ],
+            "role": "endogenous",
+            "category": "cloud_cover",
+            "short_description": "Cloud shading from non-convective cloud types.",
+            "extended_description": "The degree of surface shading from stratiform, cirrus, and other non-convective clouds. Determined by combined cloud cover, mesoscale activity, and dry air modification. Heavy shading reduces surface heating and inhibits convection.",
+            "sensitivity_hints": "Driven by cloud cover, mesoscale activity, and dry air. Affects mountain instability and the composite plains forecast.",
+            "related_domain_knowledge": [
+                "Heavy stratiform cloud cover prevents surface destabilisation.",
+                "Clearing of non-convective clouds is often a trigger for afternoon convection."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "non_convective_cloud_shading"
+        },
+        {
+            "name": "CombClouds",
+            "display_name": "Combined Cloud Cover Assessment",
+            "type": "categorical",
+            "states": [
+                "cloudy",
+                "partly_cloudy",
+                "clear"
+            ],
+            "role": "endogenous",
+            "category": "cloud_cover",
+            "short_description": "Integrated cloud cover from visible and infrared satellite.",
+            "extended_description": "A combined cloud cover assessment merging visible and infrared satellite observations to produce the best estimate of sky conditions.",
+            "sensitivity_hints": "Combined from VIS and IR sources. Drives non-convective cloud shading assessment.",
+            "related_domain_knowledge": [
+                "Combined assessment handles daytime-only VIS limitation and IR cold-top ambiguity."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "combined_cloud_cover"
+        },
+        {
+            "name": "CombMoisture",
+            "display_name": "Combined Moisture Assessment",
+            "type": "ordinal",
+            "states": [
+                "very_wet",
+                "wet",
+                "neutral",
+                "dry"
+            ],
+            "role": "endogenous",
+            "category": "moisture",
+            "short_description": "Integrated moisture from satellite and surface sources.",
+            "extended_description": "A consensus moisture assessment combining satellite-derived and surface-observed moisture fields. Used to evaluate whether sufficient moisture exists to support deep convection.",
+            "sensitivity_hints": "Combined from satellite and surface observations. Feeds into area dry-air modification assessment.",
+            "related_domain_knowledge": [
+                "Adequate moisture through the tropospheric column is essential for sustained convection.",
+                "Dry air entrainment weakens updrafts and limits storm intensity."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "combined_moisture_field"
+        },
+        {
+            "name": "CombVerMo",
+            "display_name": "Combined Vertical Motion",
+            "type": "ordinal",
+            "states": [
+                "strong_upward",
+                "weak_upward",
+                "neutral",
+                "downward"
+            ],
+            "role": "endogenous",
+            "category": "upper_air_dynamics",
+            "short_description": "Integrated vertical motion from all three assessment methods.",
+            "extended_description": "A consensus vertical motion assessment combining numerical model output, subjective forecaster judgement, and quasi-geostrophic diagnosis. Provides the best overall estimate of large-scale vertical motion that drives convective potential.",
+            "sensitivity_hints": "Central vertical motion hub. Determined by all three vertical motion inputs. Drives area-scale mesoscale processes.",
+            "related_domain_knowledge": [
+                "Combining multiple assessment methods reduces individual source errors.",
+                "Strong combined upward motion greatly favours convective development."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "combined_vertical_motion"
+        },
+        {
+            "name": "CompPlFcst",
+            "display_name": "Composite Plains Forecast Change",
+            "type": "categorical",
+            "states": [
+                "increasing_cap_decreasing_instability",
+                "little_change",
+                "decreasing_cap_increasing_instability"
+            ],
+            "role": "endogenous",
+            "category": "forecast_evolution",
+            "short_description": "Expected change in convective parameters on the plains.",
+            "extended_description": "The composite forecast for how the convective environment will evolve on the plains, considering mesoscale activity, boundary strength, and cloud shading (both convective and non-convective). Indicates whether cap (CIN) will increase or decrease, and whether instability will change.",
+            "sensitivity_hints": "Integrates mesoscale activity, boundaries, and cloud shading into a forecast tendency. Drives both cap change and instability change.",
+            "related_domain_knowledge": [
+                "Composite forecast reflects the day-to-day evolution of the convective environment.",
+                "Decreasing cap with increasing instability is the classic 'loaded gun' severe weather pattern."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "composite_plains_forecast_change"
+        },
+        {
+            "name": "CurPropConv",
+            "display_name": "Current Propensity for Convection",
+            "type": "ordinal",
+            "states": [
+                "none",
+                "slight",
+                "moderate",
+                "strong"
+            ],
+            "role": "endogenous",
+            "category": "convective_potential",
+            "short_description": "Current likelihood of convective initiation.",
+            "extended_description": "The present tendency for deep moist convection to develop, based on the latest CIN and the low-level instability/wind index. High propensity indicates that storms are likely to form or are already forming.",
+            "sensitivity_hints": "Driven by latest CIN and LLIW. Feeds into the plains convective forecast.",
+            "related_domain_knowledge": [
+                "Convective propensity can change rapidly as CIN erodes.",
+                "High propensity without adequate instability produces only weak convection."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "current_convective_propensity"
+        },
+        {
+            "name": "Date",
+            "display_name": "Forecast Seasonal Period",
+            "type": "categorical",
+            "states": [
+                "mid_may_to_mid_june",
+                "mid_june_to_early_july",
+                "early_to_mid_july",
+                "mid_july_to_early_august",
+                "early_to_mid_august",
+                "late_august_to_mid_september"
+            ],
+            "role": "exogenous",
+            "category": "temporal",
+            "short_description": "Time period within the convective season.",
+            "extended_description": "The seasonal period of the forecast, spanning late spring through early autumn. Different periods have characteristic weather pattern frequencies, instability climatology, and convective mode preferences.",
+            "sensitivity_hints": "Exogenous temporal variable. Determines scenario distribution (weather pattern climatology by season).",
+            "related_domain_knowledge": [
+                "Peak hail season in northeast Colorado is June–July.",
+                "Late-season storms tend to produce more isolated supercells.",
+                "Early-season patterns have stronger synoptic forcing."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "seasonal_period"
+        },
+        {
+            "name": "Dewpoints",
+            "display_name": "Dewpoint Temperature Distribution",
+            "type": "categorical",
+            "states": [
+                "low_everywhere",
+                "low_at_station",
+                "low_south_high_north",
+                "low_north_high_south",
+                "low_mountains_high_plains",
+                "high_everywhere",
+                "other"
+            ],
+            "role": "endogenous",
+            "category": "surface_fields",
+            "short_description": "Spatial pattern of surface dewpoint temperatures.",
+            "extended_description": "The observed distribution of dewpoint temperatures across the forecast area, determined by the weather scenario. Captures north–south and mountain–plains moisture gradients that are characteristic of each pattern type.",
+            "sensitivity_hints": "Driven by weather scenario. Leaf node (observational output of the scenario).",
+            "related_domain_knowledge": [
+                "Dewpoint gradients indicate moisture boundaries and drylines.",
+                "Higher dewpoints indicate more available energy for convection."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "dewpoint_distribution"
+        },
+        {
+            "name": "IRCloudCover",
+            "display_name": "Infrared Satellite Cloud Cover",
+            "type": "categorical",
+            "states": [
+                "cloudy",
+                "partly_cloudy",
+                "clear"
+            ],
+            "role": "exogenous",
+            "category": "cloud_cover",
+            "short_description": "Cloud cover from infrared satellite channels.",
+            "extended_description": "Cloud coverage assessed from infrared satellite imagery, available day and night. Combined with visible imagery for a comprehensive cloud cover assessment.",
+            "sensitivity_hints": "Exogenous satellite observation. Combined with visible cloud cover for integrated cloud field.",
+            "related_domain_knowledge": [
+                "IR imagery detects high cold cloud tops including cirrus shields.",
+                "Cirrus from earlier convection can shade surfaces and inhibit new development."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "infrared_satellite_cloud_cover"
+        },
+        {
+            "name": "InsChange",
+            "display_name": "Instability Change Forecast",
+            "type": "ordinal",
+            "states": [
+                "decreasing",
+                "little_change",
+                "increasing"
+            ],
+            "role": "endogenous",
+            "category": "forecast_evolution",
+            "short_description": "Expected change in atmospheric instability.",
+            "extended_description": "The forecast tendency for instability, determined by the composite plains forecast and low-level moisture advection. Increasing instability favours stronger convection; decreasing instability suppresses activity.",
+            "sensitivity_hints": "Driven by composite forecast and moisture advection. Feeds into instability-scale-in-scenario assessment.",
+            "related_domain_knowledge": [
+                "Surface heating and moisture advection typically increase instability through the afternoon.",
+                "Cloud shading and cold-air advection decrease instability."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "instability_change"
+        },
+        {
+            "name": "InsInMt",
+            "display_name": "Mountain Instability Assessment",
+            "type": "ordinal",
+            "states": [
+                "none",
+                "weak",
+                "strong"
+            ],
+            "role": "endogenous",
+            "category": "instability",
+            "short_description": "Overall instability assessment over mountain terrain.",
+            "extended_description": "The effective instability over mountain areas, determined by the morning mountain instability baseline modified by cloud shading effects. Drives mountain convection forecast, outflow generation, and convective cloud shading.",
+            "sensitivity_hints": "Driven by morning mountain instability and cloud shading. Central node for mountain convection processes.",
+            "related_domain_knowledge": [
+                "Mountain instability is often realised through orographic lift and terrain-forced convergence.",
+                "Convection over mountains can propagate into adjacent plains via outflow boundaries."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "mountain_instability"
+        },
+        {
+            "name": "InsSclInScen",
+            "display_name": "Instability Scale in Scenario",
+            "type": "ordinal",
+            "states": [
+                "less_unstable",
+                "average",
+                "more_unstable"
+            ],
+            "role": "endogenous",
+            "category": "scenario_parameters",
+            "short_description": "Effective instability level in the context of the weather scenario.",
+            "extended_description": "The combined instability assessment incorporating the weighted morning instability and the forecast instability change. Provides the scenario-contextualised instability that drives the plains forecast.",
+            "sensitivity_hints": "Driven by weighted morning instability and instability change. Directly affects the plains forecast.",
+            "related_domain_knowledge": [
+                "Instability in context of the scenario matters more than absolute instability."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "instability_in_scenario"
+        },
+        {
+            "name": "LIfr12ZDENSd",
+            "display_name": "12Z Lifted Index from Sounding",
+            "type": "ordinal",
+            "states": [
+                "LI_above_zero",
+                "LI_minus_1_to_minus_4",
+                "LI_minus_5_to_minus_8",
+                "LI_below_minus_8"
+            ],
+            "role": "exogenous",
+            "category": "instability",
+            "short_description": "Lifted index derived from the morning radiosonde.",
+            "extended_description": "The lifted index (LI) calculated from the 12Z (morning) radiosonde sounding. A negative LI indicates instability; more negative values indicate stronger instability. Used alongside dewpoint and scenario classification to assess morning instability.",
+            "sensitivity_hints": "Exogenous sounding observation. Drives morning instability assessment with dewpoint and scenario.",
+            "related_domain_knowledge": [
+                "LI < 0 indicates surface-based instability.",
+                "LI < -6 indicates extreme instability favourable for severe storms.",
+                "The 12Z sounding captures morning conditions before significant daytime heating."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "lifted_index_sounding"
+        },
+        {
+            "name": "LLIW",
+            "display_name": "Low-Level Instability and Wind Index",
+            "type": "ordinal",
+            "states": [
+                "unfavourable",
+                "weak",
+                "moderate",
+                "strong"
+            ],
+            "role": "exogenous",
+            "category": "instability",
+            "short_description": "Composite index of low-level instability and wind conditions.",
+            "extended_description": "A combined low-level instability and wind assessment indicating the local convective potential. Favourable conditions indicate strong instability with wind shear supporting organised convection.",
+            "sensitivity_hints": "Exogenous composite observation. Together with latest CIN, drives current convective propensity.",
+            "related_domain_knowledge": [
+                "Low-level wind shear contributes to storm rotation and longevity.",
+                "Strong boundary-layer instability promotes rapid updraft acceleration."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "low_level_instability_wind"
+        },
+        {
+            "name": "LatestCIN",
+            "display_name": "Latest Observed Convective Inhibition",
+            "type": "ordinal",
+            "states": [
+                "none",
+                "partial_inhibition",
+                "stifling",
+                "total_inhibition"
+            ],
+            "role": "exogenous",
+            "category": "instability",
+            "short_description": "Most recent convective inhibition observation.",
+            "extended_description": "The most current observation or estimate of convective inhibition, updated from the morning value. Directly affects whether current convective propensity can be realised.",
+            "sensitivity_hints": "Exogenous updated observation. Drives current propensity for convection alongside LLIW.",
+            "related_domain_knowledge": [
+                "CIN erodes through the afternoon as surface heating deepens the boundary layer.",
+                "Sudden CIN removal can trigger explosive convective development."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "latest_convective_inhibition"
+        },
+        {
+            "name": "LoLevMoistAd",
+            "display_name": "Low-Level Moisture Advection",
+            "type": "ordinal",
+            "states": [
+                "strong_positive",
+                "weak_positive",
+                "neutral",
+                "negative"
+            ],
+            "role": "exogenous",
+            "category": "moisture",
+            "short_description": "Advection of moisture in the lower troposphere.",
+            "extended_description": "The transport of moisture into the forecast area by low-level winds. Positive moisture advection increases CAPE and reduces CIN over time; negative advection (dry air transport) inhibits convection.",
+            "sensitivity_hints": "Exogenous observation. Affects instability change by modifying the moisture environment.",
+            "related_domain_knowledge": [
+                "Southerly winds from the Gulf of Mexico bring moisture to the Great Plains.",
+                "Low-level jets can rapidly increase moisture and CAPE in the afternoon/evening."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "low_level_moisture_advection"
+        },
+        {
+            "name": "LowLLapse",
+            "display_name": "Low-Level Lapse Rate",
+            "type": "ordinal",
+            "states": [
+                "near_dry_adiabatic",
+                "steep",
+                "moderate_or_less",
+                "stable"
+            ],
+            "role": "endogenous",
+            "category": "surface_fields",
+            "short_description": "Temperature decrease rate in the lowest atmospheric layers.",
+            "extended_description": "The environmental lapse rate in the lowest portion of the troposphere, determined by the weather scenario. Steep lapse rates (close to dry adiabatic) indicate strong instability; stable inversions suppress convection.",
+            "sensitivity_hints": "Driven by weather scenario. Leaf node. Steep lapse rates favour convective development.",
+            "related_domain_knowledge": [
+                "Dry adiabatic lapse rate (~9.8°C/km) indicates a well-mixed boundary layer.",
+                "Superadiabatic layers near the surface promote thermals and convective initiation."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "low_level_lapse_rate"
+        },
+        {
+            "name": "MeanRH",
+            "display_name": "Mean Relative Humidity",
+            "type": "ordinal",
+            "states": [
+                "very_moist",
+                "average",
+                "dry"
+            ],
+            "role": "endogenous",
+            "category": "surface_fields",
+            "short_description": "Average relative humidity in the lower troposphere.",
+            "extended_description": "The mean relative humidity across the lower atmospheric column, determined by the weather scenario. Indicates the bulk moisture state of the atmosphere.",
+            "sensitivity_hints": "Driven by weather scenario. Leaf node.",
+            "related_domain_knowledge": [
+                "Low mean RH with high surface dewpoints indicates an 'inverted-V' sounding favourable for downburst-producing storms."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "mean_relative_humidity"
+        },
+        {
+            "name": "MidLLapse",
+            "display_name": "Mid-Level Lapse Rate",
+            "type": "ordinal",
+            "states": [
+                "near_dry_adiabatic",
+                "steep",
+                "moderate_or_less"
+            ],
+            "role": "endogenous",
+            "category": "surface_fields",
+            "short_description": "Temperature decrease rate at mid-tropospheric levels.",
+            "extended_description": "The environmental lapse rate in the mid-troposphere (approximately 500–700 mb), determined by the weather scenario. Steep mid-level lapse rates contribute to deep-layer instability.",
+            "sensitivity_hints": "Driven by weather scenario. Leaf node.",
+            "related_domain_knowledge": [
+                "Steep mid-level lapse rates increase CAPE and support large hail growth.",
+                "Cold-air advection aloft steepens mid-level lapse rates."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "mid_level_lapse_rate"
+        },
+        {
+            "name": "MorningBound",
+            "display_name": "Morning Boundary Strength",
+            "type": "ordinal",
+            "states": [
+                "none",
+                "weak",
+                "strong"
+            ],
+            "role": "exogenous",
+            "category": "mesoscale_processes",
+            "short_description": "Strength of pre-existing convergence boundaries in the morning.",
+            "extended_description": "The intensity of convergence boundaries present in the morning (e.g. old outflow boundaries, drylines, fronts). An exogenous observation that sets the initial boundary forcing for the day.",
+            "sensitivity_hints": "Exogenous boundary observation. Contributes to the overall boundary assessment alongside outflow and wind hodograph.",
+            "related_domain_knowledge": [
+                "Pre-existing boundaries from overnight convection can persist and serve as initiation points.",
+                "Boundary interactions greatly enhance convective potential."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "morning_boundary_strength"
+        },
+        {
+            "name": "MorningCIN",
+            "display_name": "Morning Convective Inhibition (CIN)",
+            "type": "ordinal",
+            "states": [
+                "none",
+                "partial_inhibition",
+                "stifling",
+                "total_inhibition"
+            ],
+            "role": "exogenous",
+            "category": "instability",
+            "short_description": "Convective inhibition measured in the morning.",
+            "extended_description": "The morning observation of convective inhibition (CIN), the energy barrier that must be overcome for surface parcels to reach free convection. Total inhibition prevents all convection; no inhibition allows immediate development.",
+            "sensitivity_hints": "Exogenous morning observation. Interacts with scenario classification to produce CIN-in-scenario assessment.",
+            "related_domain_knowledge": [
+                "CIN is the negative area on a sounding between the LFC and the surface parcel path.",
+                "Morning CIN is typically strongest and erodes through afternoon heating.",
+                "Strong CIN can prevent convection even with high instability (CAPE)."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "morning_convective_inhibition"
+        },
+        {
+            "name": "MountainFcst",
+            "display_name": "Mountain Convection Forecast",
+            "type": "categorical",
+            "states": [
+                "nil_or_nonsignificant",
+                "significant",
+                "severe"
+            ],
+            "role": "endogenous",
+            "category": "forecast_output",
+            "short_description": "Severe weather forecast for mountain areas.",
+            "extended_description": "The forecast output for convective severity over mountain terrain: nil/non-significant, significant, or severe. Determined by mountain instability assessment.",
+            "sensitivity_hints": "Directly driven by mountain instability. Affects the regional R5 forecast through downstream mountain convection effects.",
+            "related_domain_knowledge": [
+                "Mountain convection typically initiates 1–3 hours before plains storms.",
+                "Mountain storm severity is controlled by local instability and terrain forcing."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "mountain_convection_forecast"
+        },
+        {
+            "name": "MvmtFeatures",
+            "display_name": "Movement of Synoptic Features",
+            "type": "categorical",
+            "states": [
+                "strong_front",
+                "marked_upper_feature",
+                "other_rapid_movement",
+                "no_major_features"
+            ],
+            "role": "endogenous",
+            "category": "surface_fields",
+            "short_description": "Speed and type of synoptic feature movement.",
+            "extended_description": "The movement characteristics of major synoptic features (fronts, upper-level troughs, shortwave ridges) determined by the weather scenario. Rapid-moving features provide transient but strong forcing.",
+            "sensitivity_hints": "Driven by weather scenario. Leaf node.",
+            "related_domain_knowledge": [
+                "Fast-moving fronts can trigger squall lines.",
+                "Slow-moving features allow sustained convection in one area."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "synoptic_feature_movement"
+        },
+        {
+            "name": "N0_7muVerMo",
+            "display_name": "Numerical Model Vertical Motion",
+            "type": "ordinal",
+            "states": [
+                "strong_upward",
+                "weak_upward",
+                "neutral",
+                "downward"
+            ],
+            "role": "exogenous",
+            "category": "upper_air_dynamics",
+            "short_description": "Vertical motion from numerical weather prediction model output at 700 mb.",
+            "extended_description": "The 0–7 µm vertical motion field derived from numerical weather prediction (NWP) model output. Represents large-scale upward or downward air motion in the mid-troposphere as predicted by operational forecast models. Strong upward motion favours deep convection.",
+            "sensitivity_hints": "Exogenous observation from NWP models. One of three inputs to combined vertical motion assessment.",
+            "related_domain_knowledge": [
+                "Large-scale ascent promotes convective initiation.",
+                "NWP vertical motion has limited resolution for mesoscale processes.",
+                "Model output is used alongside subjective and QG assessments for a combined picture."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "numerical_vertical_motion"
+        },
+        {
+            "name": "N34StarFcst",
+            "display_name": "Forecast Sectors 3–4 Convective Severity",
+            "type": "categorical",
+            "states": [
+                "nil_or_nonsignificant",
+                "significant",
+                "severe"
+            ],
+            "role": "endogenous",
+            "category": "forecast_output",
+            "short_description": "Convective severity forecast for sub-regions 3 and 4.",
+            "extended_description": "The sector-specific severe weather forecast for areas 3 and 4, combining the overall plains forecast with the regional scenario sub-classification. Refines the broad forecast for specific geographic areas.",
+            "sensitivity_hints": "Driven by plains forecast and scenario regional classification. Together with mountain forecast, determines the R5 regional forecast.",
+            "related_domain_knowledge": [
+                "Sector-specific forecasts are needed because convection is spatially variable."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "sector_3_4_forecast"
+        },
+        {
+            "name": "OutflowFrMt",
+            "display_name": "Outflow from Mountain Convection",
+            "type": "ordinal",
+            "states": [
+                "none",
+                "weak",
+                "strong"
+            ],
+            "role": "endogenous",
+            "category": "mesoscale_processes",
+            "short_description": "Strength of outflow boundaries from mountain thunderstorms.",
+            "extended_description": "Cold-air outflow boundaries generated by thunderstorms over the mountains that propagate eastward onto the plains. Determined by mountain instability and wind hodograph pattern. These outflows act as lifting mechanisms for new convective initiation on the plains.",
+            "sensitivity_hints": "Driven by mountain instability and wind hodograph. Key trigger mechanism for plains convection through boundary enhancement.",
+            "related_domain_knowledge": [
+                "Mountain outflow boundaries are a primary trigger for plains storms in Colorado.",
+                "Outflow strength depends on storm intensity and ambient wind profile.",
+                "Intersection of outflows with other boundaries is a preferred initiation zone."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "mountain_outflow_strength"
+        },
+        {
+            "name": "PlainsFcst",
+            "display_name": "Plains Convective Weather Forecast",
+            "type": "categorical",
+            "states": [
+                "nil_or_nonsignificant",
+                "significant",
+                "severe"
+            ],
+            "role": "endogenous",
+            "category": "forecast_output",
+            "short_description": "Severe weather forecast for the plains region.",
+            "extended_description": "The forecast severity classification for convective weather on the plains: nil/non-significant, significant, or severe. Determined by cap strength in scenario, instability in scenario, scenario-relative class, and current convective propensity. The primary plains forecast output.",
+            "sensitivity_hints": "Key forecast output. Integrates cap, instability, scenario, and current propensity. Feeds into sector-specific forecasts.",
+            "related_domain_knowledge": [
+                "Plains severe weather is the primary forecast concern for northeast Colorado.",
+                "Significant and severe categories indicate potential for damaging hail and tornadoes."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "plains_convection_forecast"
+        },
+        {
+            "name": "QGVertMotion",
+            "display_name": "Quasi-Geostrophic Vertical Motion",
+            "type": "ordinal",
+            "states": [
+                "strong_upward",
+                "weak_upward",
+                "neutral",
+                "downward"
+            ],
+            "role": "exogenous",
+            "category": "upper_air_dynamics",
+            "short_description": "Vertical motion inferred from quasi-geostrophic theory.",
+            "extended_description": "Vertical motion diagnosed using quasi-geostrophic (QG) omega equation analysis of upper-air charts. Based on differential vorticity advection and thermal advection patterns. Provides a physically grounded estimate of synoptic-scale forcing.",
+            "sensitivity_hints": "Exogenous diagnostic. Part of the combined vertical motion assessment with numerical and subjective.",
+            "related_domain_knowledge": [
+                "QG theory links upper-level divergence patterns to mid-level ascent.",
+                "Differential positive vorticity advection indicates upward motion.",
+                "QG vertical motion has known limitations in strongly curved flow."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "quasigeostrophic_vertical_motion"
+        },
+        {
+            "name": "R5Fcst",
+            "display_name": "R5 Regional Forecast",
+            "type": "categorical",
+            "states": [
+                "nil_or_nonsignificant",
+                "significant",
+                "severe"
+            ],
+            "role": "endogenous",
+            "category": "forecast_output",
+            "short_description": "Final regional severe weather forecast (R5 area).",
+            "extended_description": "The terminal forecast output for the R5 forecast region, combining the mountain convection forecast and the sectors 3–4 plains forecast. This is the ultimate output of the forecasting system.",
+            "sensitivity_hints": "Terminal output node. Integrates mountain and plains forecasts. All upstream variables affect this through their respective chains.",
+            "related_domain_knowledge": [
+                "The R5 region encompasses both mountain and adjacent plains areas.",
+                "Final forecast must account for both mountain-initiated and plains-initiated storms."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "regional_severe_weather_forecast"
+        },
+        {
+            "name": "RHRatio",
+            "display_name": "Relative Humidity Vertical Ratio",
+            "type": "categorical",
+            "states": [
+                "moist_mid_dry_low",
+                "dry_mid_moist_low",
+                "other"
+            ],
+            "role": "endogenous",
+            "category": "surface_fields",
+            "short_description": "Ratio of mid-level to low-level relative humidity.",
+            "extended_description": "The vertical profile of relative humidity expressed as the ratio between mid-level and low-level moisture, determined by the weather scenario. Moist mid-levels with dry low-levels or vice versa have distinct convective implications.",
+            "sensitivity_hints": "Driven by weather scenario. Leaf node.",
+            "related_domain_knowledge": [
+                "Dry mid-levels with moist low-levels promote high-based storms and microbursts.",
+                "Moist mid-levels favour widespread stratiform precipitation."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "humidity_ratio_profile"
+        },
+        {
+            "name": "RaoContMoist",
+            "display_name": "Surface Moisture Observations",
+            "type": "ordinal",
+            "states": [
+                "very_wet",
+                "wet",
+                "neutral",
+                "dry"
+            ],
+            "role": "exogenous",
+            "category": "moisture",
+            "short_description": "Moisture content from surface observing network.",
+            "extended_description": "Atmospheric moisture measurements from surface weather stations and radiosondes. Provides ground-truth moisture information that is combined with satellite estimates for an overall moisture assessment.",
+            "sensitivity_hints": "Exogenous surface observation. Combined with satellite moisture to form integrated moisture field.",
+            "related_domain_knowledge": [
+                "Surface dewpoint observations are a key indicator of low-level moisture.",
+                "High surface moisture increases convective available potential energy (CAPE)."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "surface_moisture_observation"
+        },
+        {
+            "name": "SatContMoist",
+            "display_name": "Satellite-Derived Moisture Content",
+            "type": "ordinal",
+            "states": [
+                "very_wet",
+                "wet",
+                "neutral",
+                "dry"
+            ],
+            "role": "exogenous",
+            "category": "moisture",
+            "short_description": "Atmospheric moisture inferred from satellite imagery.",
+            "extended_description": "A moisture estimate derived from satellite water vapour and infrared channels. Provides broad-area moisture distribution that is combined with surface observations for an overall moisture assessment.",
+            "sensitivity_hints": "Exogenous satellite observation. Combined with surface moisture observations for overall moisture field.",
+            "related_domain_knowledge": [
+                "Satellite water vapour imagery reveals mid-to-upper-level moisture patterns.",
+                "Dry intrusions visible on satellite reduce convective potential."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "satellite_moisture_field"
+        },
+        {
+            "name": "ScenRel3_4",
+            "display_name": "Scenario Regional Sub-Classification",
+            "type": "categorical",
+            "states": [
+                "group_ACEFK",
+                "group_B",
+                "group_D",
+                "group_GJ",
+                "group_HI"
+            ],
+            "role": "endogenous",
+            "category": "scenario_parameters",
+            "short_description": "Regional sub-classification of scenarios for forecast areas 3 and 4.",
+            "extended_description": "A grouping of scenarios by their implications for specific forecast sub-regions (areas 3 and 4). Used to condition the sector-specific storm forecast on the broader weather pattern.",
+            "sensitivity_hints": "Derived from scenario. Conditions the N34 star forecast.",
+            "related_domain_knowledge": [
+                "Different scenarios produce convection preferentially in different sub-regions."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "scenario_regional_classification"
+        },
+        {
+            "name": "ScenRelAMCIN",
+            "display_name": "Scenario-Relative Cap Classification",
+            "type": "categorical",
+            "states": [
+                "group_AB",
+                "group_C_through_K"
+            ],
+            "role": "endogenous",
+            "category": "scenario_parameters",
+            "short_description": "Scenario grouping for morning convective inhibition behaviour.",
+            "extended_description": "A binary classification of the weather scenario into two groups with distinct morning CIN characteristics. Used to condition the morning CIN assessment on the scenario type.",
+            "sensitivity_hints": "Derived from scenario. Conditions the morning CIN–in-scenario relationship.",
+            "related_domain_knowledge": [
+                "Not all scenarios have the same CIN structure; grouping captures this."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "scenario_cap_classification"
+        },
+        {
+            "name": "ScenRelAMIns",
+            "display_name": "Scenario-Relative Instability Classification",
+            "type": "categorical",
+            "states": [
+                "group_ABI",
+                "group_CDEJ",
+                "group_F",
+                "group_G",
+                "group_H",
+                "group_K"
+            ],
+            "role": "endogenous",
+            "category": "scenario_parameters",
+            "short_description": "Scenario grouping for instability behaviour.",
+            "extended_description": "A multi-class grouping of weather scenarios by their characteristic instability profiles. Used to condition the morning instability assessment on the specific scenario type.",
+            "sensitivity_hints": "Derived from scenario. Conditions the instability-in-scenario relationship.",
+            "related_domain_knowledge": [
+                "Different weather patterns have characteristic instability distributions."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "scenario_instability_classification"
+        },
+        {
+            "name": "Scenario",
+            "display_name": "Synoptic Weather Pattern Scenario",
+            "type": "categorical",
+            "states": [
+                "pattern_A",
+                "pattern_B",
+                "pattern_C",
+                "pattern_D",
+                "pattern_E",
+                "pattern_F",
+                "pattern_G",
+                "pattern_H",
+                "pattern_I",
+                "pattern_J",
+                "pattern_K"
+            ],
+            "role": "endogenous",
+            "category": "synoptic",
+            "short_description": "Classified synoptic weather pattern type (A through K).",
+            "extended_description": "One of 11 archetypal synoptic weather patterns for northeast Colorado, determined by the seasonal period. Each scenario encodes characteristic wind fields, moisture patterns, lapse rates, and convective modes. The scenario is the central hub connecting temporal context to meteorological fields.",
+            "sensitivity_hints": "Major hub variable driven by seasonal period. Parent of 14 meteorological field variables. Determines baseline conditions for the day.",
+            "related_domain_knowledge": [
+                "Pattern classification reduces the high-dimensional weather state to manageable types.",
+                "Each scenario has distinct convective characteristics and favoured storm modes.",
+                "Forecasters learn to recognise these patterns from upper-air charts."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "weather_pattern_scenario"
+        },
+        {
+            "name": "ScnRelPlFcst",
+            "display_name": "Scenario-Relative Plains Forecast Class",
+            "type": "categorical",
+            "states": [
+                "pattern_A",
+                "pattern_B",
+                "pattern_C",
+                "pattern_D",
+                "pattern_E",
+                "pattern_F",
+                "pattern_G",
+                "pattern_H",
+                "pattern_I",
+                "pattern_J",
+                "pattern_K"
+            ],
+            "role": "endogenous",
+            "category": "scenario_parameters",
+            "short_description": "Scenario classification for the plains convective forecast.",
+            "extended_description": "A mapping from the weather scenario to a configuration class that conditions the plains convective forecast. Different scenarios produce distinctly different plains convective characteristics.",
+            "sensitivity_hints": "Derived from scenario. Conditions the plains forecast output.",
+            "related_domain_knowledge": [
+                "Each scenario implies different storm modes and coverage on the plains."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "scenario_plains_forecast_class"
+        },
+        {
+            "name": "SfcWndShfDis",
+            "display_name": "Surface Wind Shift and Discontinuity",
+            "type": "categorical",
+            "states": [
+                "denver_cyclone",
+                "east_west_north",
+                "east_west_south",
+                "moving_front_or_other",
+                "dryline",
+                "none",
+                "other"
+            ],
+            "role": "endogenous",
+            "category": "surface_fields",
+            "short_description": "Surface wind discontinuity pattern type.",
+            "extended_description": "The type and location of surface wind discontinuities (wind shift lines, convergence zones, drylines) determined by the weather scenario. Includes Denver Cyclone, east–west contrasts, and dryline positions.",
+            "sensitivity_hints": "Driven by weather scenario. Leaf node.",
+            "related_domain_knowledge": [
+                "The Denver Cyclone is a mesoscale vortex that forms along the Front Range.",
+                "Drylines are major convective initiation zones across the Great Plains."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "surface_wind_shift_discontinuity"
+        },
+        {
+            "name": "SubjVertMo",
+            "display_name": "Subjective Vertical Motion Assessment",
+            "type": "ordinal",
+            "states": [
+                "strong_upward",
+                "weak_upward",
+                "neutral",
+                "downward"
+            ],
+            "role": "exogenous",
+            "category": "upper_air_dynamics",
+            "short_description": "Forecaster’s subjective assessment of large-scale vertical motion.",
+            "extended_description": "The forecaster’s expert judgement on vertical motion based on pattern recognition, satellite imagery, and surface observations. Complements numerical and quasi-geostrophic assessments.",
+            "sensitivity_hints": "Exogenous expert input. Combined with numerical and QG vertical motion to form overall assessment.",
+            "related_domain_knowledge": [
+                "Experienced forecasters can identify subtle ascent signatures not captured by models.",
+                "Subjective assessment integrates satellite trends and surface observations."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "subjective_vertical_motion"
+        },
+        {
+            "name": "SynForcng",
+            "display_name": "Synoptic-Scale Forcing",
+            "type": "ordinal",
+            "states": [
+                "significant_negative",
+                "negative_to_positive",
+                "significant_positive",
+                "positive_to_negative",
+                "little_change"
+            ],
+            "role": "endogenous",
+            "category": "surface_fields",
+            "short_description": "Large-scale dynamical forcing for ascent.",
+            "extended_description": "The synoptic-scale dynamic forcing determined by the weather scenario. Categories range from significant negative (subsidence) through transitions to significant positive (ascent). Strong positive forcing supports widespread deep convection.",
+            "sensitivity_hints": "Driven by weather scenario. Leaf node.",
+            "related_domain_knowledge": [
+                "Positive synoptic forcing from upper-level troughs promotes broad ascent.",
+                "Transitions from negative to positive forcing can trigger rapid convective development."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "synoptic_forcing"
+        },
+        {
+            "name": "TempDis",
+            "display_name": "Temperature Discontinuity Pattern",
+            "type": "categorical",
+            "states": [
+                "quasi_stationary",
+                "moving",
+                "none",
+                "other"
+            ],
+            "role": "endogenous",
+            "category": "surface_fields",
+            "short_description": "Pattern of temperature discontinuities (fronts, outflow boundaries).",
+            "extended_description": "The type and behaviour of temperature discontinuities at the surface, determined by the weather scenario. Stationary discontinuities provide persistent convergence; moving ones produce transient forcing.",
+            "sensitivity_hints": "Driven by weather scenario. Leaf node.",
+            "related_domain_knowledge": [
+                "Temperature discontinuities at fronts provide baroclinic lifting.",
+                "Outflow boundary temperature contrasts drive secondary convection."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "temperature_discontinuity"
+        },
+        {
+            "name": "VISCloudCov",
+            "display_name": "Visible Satellite Cloud Cover",
+            "type": "categorical",
+            "states": [
+                "cloudy",
+                "partly_cloudy",
+                "clear"
+            ],
+            "role": "exogenous",
+            "category": "cloud_cover",
+            "short_description": "Cloud cover observed from visible satellite imagery.",
+            "extended_description": "Daytime cloud cover assessment from visible satellite imagery channels. Indicates the extent of cloud shielding that affects surface heating and thus instability generation.",
+            "sensitivity_hints": "Exogenous satellite observation. Combined with IR cloud cover for overall cloud assessment.",
+            "related_domain_knowledge": [
+                "Extensive cloud cover reduces surface insolation and inhibits afternoon destabilisation.",
+                "Clearing skies after morning clouds can trigger rapid destabilisation."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "visible_satellite_cloud_cover"
+        },
+        {
+            "name": "WindAloft",
+            "display_name": "Upper-Level Wind Pattern",
+            "type": "categorical",
+            "states": [
+                "light_variable",
+                "southwest_quadrant",
+                "northwest_quadrant",
+                "all_else"
+            ],
+            "role": "endogenous",
+            "category": "surface_fields",
+            "short_description": "Wind pattern at upper tropospheric levels.",
+            "extended_description": "The upper-level wind configuration determined by the weather scenario, categorised by quadrant and intensity. Affects storm motion, anvil spread, and interaction with low-level features.",
+            "sensitivity_hints": "Driven by weather scenario. Leaf node.",
+            "related_domain_knowledge": [
+                "Upper-level winds determine storm motion vector.",
+                "Southwest flow aloft with southeast surface flow creates favourable shear for supercells."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "upper_wind_pattern"
+        },
+        {
+            "name": "WindFieldMt",
+            "display_name": "Mountain Wind Field Pattern",
+            "type": "categorical",
+            "states": [
+                "westerly",
+                "light_variable_or_other"
+            ],
+            "role": "endogenous",
+            "category": "surface_fields",
+            "short_description": "Wind regime over mountain terrain.",
+            "extended_description": "The characteristic wind field over the mountain areas, determined by the weather scenario. Westerly flow promotes upslope convection on east-facing slopes.",
+            "sensitivity_hints": "Driven by weather scenario. Leaf node.",
+            "related_domain_knowledge": [
+                "Upslope flow on the east slopes of the Rockies is a primary trigger for mountain convection."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "mountain_wind_field"
+        },
+        {
+            "name": "WindFieldPln",
+            "display_name": "Plains Wind Field Pattern",
+            "type": "categorical",
+            "states": [
+                "light_variable",
+                "denver_cyclone",
+                "long_wave_anticyclonic",
+                "east_northeast",
+                "southeast_quadrant",
+                "widespread_downslope"
+            ],
+            "role": "endogenous",
+            "category": "surface_fields",
+            "short_description": "Wind circulation pattern over the plains.",
+            "extended_description": "The characteristic surface wind pattern over the plains region, determined by the weather scenario. Includes Denver Cyclone circulation, anticyclonic flow, and various directional regimes that affect convergence and moisture transport.",
+            "sensitivity_hints": "Driven by weather scenario. Leaf node.",
+            "related_domain_knowledge": [
+                "Denver Cyclone circulation produces convergence along the Front Range.",
+                "Southeast surface winds transport Gulf moisture into the region.",
+                "Widespread downslope winds (Chinook) suppress convection."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "plains_wind_field"
+        },
+        {
+            "name": "WndHodograph",
+            "display_name": "Wind Hodograph Configuration",
+            "type": "categorical",
+            "states": [
+                "dcvz_favourable",
+                "strong_westerly",
+                "westerly",
+                "other"
+            ],
+            "role": "exogenous",
+            "category": "wind_shear",
+            "short_description": "Wind shear pattern inferred from the hodograph.",
+            "extended_description": "The shape and orientation of the wind hodograph (vertical profile of wind vectors). Certain hodograph patterns, particularly those favouring Denver Convergence–Vorticity Zone (DCVZ) formation or strong westerly flow, promote organised convection, boundary interactions, and supercell development.",
+            "sensitivity_hints": "Exogenous wind shear observation. Affects boundary strength, convective cloud shading, and outflow from mountain convection.",
+            "related_domain_knowledge": [
+                "Clockwise-turning hodographs favour right-moving supercells.",
+                "The DCVZ is a frequent convergence zone along the Colorado Front Range.",
+                "Strong low-level shear promotes storm organisation and longevity."
+            ],
+            "references": [
+                "Abramson1996"
+            ],
+            "llm_name": "wind_hodograph_pattern"
+        }
+    ]
+}

@@ -1,0 +1,959 @@
+{
+    "schema_version": "2.0",
+    "network": "mildew",
+    "domain": "crop_disease_modelling",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a crop disease progression model, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "mildew",
+        "source_reference": "Rasmussen1995",
+        "source_url": "https://www.bnlearn.com/bnrepository/discrete-medium.html#mildew",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "moderate",
+        "notes": "The Mildew network models the progression of powdery mildew (Erysiphe graminis) in spring barley over a growing season, originally developed at the Danish Institute of Agricultural Sciences. It is a dynamic Bayesian network with 4 time slices representing fortnightly intervals during the growing season. LLMs may recognise the domain. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a dynamic crop disease model tracking powdery mildew infection in cereal crops over 4 fortnightly time periods during the growing season.",
+            "The causal chain follows: weather conditions → microclimate → fungal infection → crop damage → yield loss.",
+            "Solar radiation and temperature drive photosynthesis, which produces dry matter (biomass).",
+            "Leaf area index (LAI) determines light interception and thus photosynthesis rate. Higher LAI means more photosynthesis but also denser canopy favouring disease.",
+            "Mildew severity depends on: previous mildew level (autoregressive), microclimate conditions, and fungicide treatment.",
+            "Microclimate for fungal growth is determined by leaf area (canopy density), temperature, and precipitation.",
+            "Fungicide application reduces mildew severity in the following period.",
+            "Variables at each time step depend on the same variables at the previous time step (temporal persistence).",
+            "Final crop yield depends on accumulated dry matter at harvest (period 4).",
+            "Initial leaf area (period 0) is an exogenous starting condition.",
+            "Weather variables (radiation, temperature, precipitation) are exogenous at each time step."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "lai_0",
+            "display_name": "Initial Leaf Area Index",
+            "type": "categorical",
+            "states": [
+                "very_low",
+                "low",
+                "below_average",
+                "average",
+                "above_average",
+                "high",
+                "very_high",
+                "extremely_high"
+            ],
+            "role": "exogenous",
+            "category": "crop_state",
+            "short_description": "Leaf area index at the start of the growing season (initial condition).",
+            "extended_description": "The leaf area index (LAI) at the beginning of the modelled period, representing the starting canopy density of the crop. This is an exogenous initial condition that determines early-season light interception and microclimate.",
+            "sensitivity_hints": "Higher initial LAI leads to greater early photosynthesis but also denser canopy conditions that may favour fungal growth.",
+            "related_domain_knowledge": [
+                "LAI measures total one-sided leaf area per unit ground area.",
+                "Typical spring barley LAI ranges from 0 to 6+ during the growing season.",
+                "Early-season LAI is determined by sowing density, soil fertility, and emergence conditions."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "initial_canopy_density"
+        },
+        {
+            "name": "straaling_1",
+            "display_name": "Solar Radiation (Period 1)",
+            "type": "categorical",
+            "states": [
+                "below_150_MJ_m2",
+                "150_to_199_MJ_m2",
+                "200_to_249_MJ_m2",
+                "above_250_MJ_m2"
+            ],
+            "role": "exogenous",
+            "category": "weather",
+            "short_description": "Total solar radiation received during the first fortnight.",
+            "extended_description": "Cumulative solar radiation (MJ/m²) over the first two-week period. Drives photosynthesis rate directly. Higher radiation increases potential dry matter production.",
+            "sensitivity_hints": "Radiation is the primary energy input for photosynthesis. Low radiation limits growth regardless of other conditions.",
+            "related_domain_knowledge": [
+                "Solar radiation provides the energy for photosynthesis.",
+                "Typical values in northern European growing seasons range from 100-300 MJ/m² per fortnight.",
+                "Radiation interacts with leaf area: more leaves intercept more light."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "solar_radiation_p1"
+        },
+        {
+            "name": "straaling_2",
+            "display_name": "Solar Radiation (Period 2)",
+            "type": "categorical",
+            "states": [
+                "below_150_MJ_m2",
+                "150_to_199_MJ_m2",
+                "200_to_249_MJ_m2",
+                "above_250_MJ_m2"
+            ],
+            "role": "exogenous",
+            "category": "weather",
+            "short_description": "Total solar radiation received during the second fortnight.",
+            "extended_description": "Cumulative solar radiation (MJ/m²) over the second two-week period.",
+            "sensitivity_hints": "Same role as period 1 radiation but influences mid-season growth.",
+            "related_domain_knowledge": [
+                "Solar radiation provides the energy for photosynthesis.",
+                "Mid-season radiation affects peak biomass accumulation."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "solar_radiation_p2"
+        },
+        {
+            "name": "straaling_3",
+            "display_name": "Solar Radiation (Period 3)",
+            "type": "categorical",
+            "states": [
+                "below_150_MJ_m2",
+                "150_to_199_MJ_m2",
+                "200_to_249_MJ_m2",
+                "above_250_MJ_m2"
+            ],
+            "role": "exogenous",
+            "category": "weather",
+            "short_description": "Total solar radiation received during the third fortnight.",
+            "extended_description": "Cumulative solar radiation (MJ/m²) over the third two-week period.",
+            "sensitivity_hints": "Late-season radiation affects grain filling and final yield.",
+            "related_domain_knowledge": [
+                "Solar radiation provides the energy for photosynthesis.",
+                "Late-season radiation is critical during grain-filling."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "solar_radiation_p3"
+        },
+        {
+            "name": "straaling_4",
+            "display_name": "Solar Radiation (Period 4)",
+            "type": "categorical",
+            "states": [
+                "below_150_MJ_m2",
+                "150_to_199_MJ_m2",
+                "200_to_249_MJ_m2",
+                "above_250_MJ_m2"
+            ],
+            "role": "exogenous",
+            "category": "weather",
+            "short_description": "Total solar radiation received during the fourth fortnight.",
+            "extended_description": "Cumulative solar radiation (MJ/m²) over the final two-week period before harvest.",
+            "sensitivity_hints": "Final period radiation affects late biomass accumulation and harvest yield.",
+            "related_domain_knowledge": [
+                "Solar radiation provides the energy for photosynthesis.",
+                "Radiation in the final period contributes to grain filling."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "solar_radiation_p4"
+        },
+        {
+            "name": "temp_1",
+            "display_name": "Mean Temperature (Period 1)",
+            "type": "categorical",
+            "states": [
+                "below_13C",
+                "13_to_15C",
+                "15_to_17C",
+                "above_17C"
+            ],
+            "role": "exogenous",
+            "category": "weather",
+            "short_description": "Average air temperature during the first fortnight.",
+            "extended_description": "Mean air temperature (°C) over the first two-week period. Affects both photosynthesis rate and conditions for fungal growth. Temperature influences the microclimate within the crop canopy.",
+            "sensitivity_hints": "Temperature affects both crop growth rate and fungal infection risk. Warm humid conditions favour mildew.",
+            "related_domain_knowledge": [
+                "Optimal temperature for barley growth is around 15-20°C.",
+                "Powdery mildew thrives at moderate temperatures (15-25°C).",
+                "Temperature interacts with humidity to create microclimate conditions."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "temperature_p1"
+        },
+        {
+            "name": "temp_2",
+            "display_name": "Mean Temperature (Period 2)",
+            "type": "categorical",
+            "states": [
+                "below_13C",
+                "13_to_15C",
+                "15_to_17C",
+                "above_17C"
+            ],
+            "role": "exogenous",
+            "category": "weather",
+            "short_description": "Average air temperature during the second fortnight.",
+            "extended_description": "Mean air temperature (°C) over the second two-week period.",
+            "sensitivity_hints": "Mid-season temperature affects both peak growth and disease pressure.",
+            "related_domain_knowledge": [
+                "Mid-season temperatures determine peak growth rates.",
+                "Temperature interacts with leaf area to determine canopy microclimate."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "temperature_p2"
+        },
+        {
+            "name": "temp_3",
+            "display_name": "Mean Temperature (Period 3)",
+            "type": "categorical",
+            "states": [
+                "below_13C",
+                "13_to_15C",
+                "15_to_17C",
+                "above_17C"
+            ],
+            "role": "exogenous",
+            "category": "weather",
+            "short_description": "Average air temperature during the third fortnight.",
+            "extended_description": "Mean air temperature (°C) over the third two-week period.",
+            "sensitivity_hints": "Late-season temperature affects disease progression and grain development.",
+            "related_domain_knowledge": [
+                "Late-season temperature affects grain filling and maturation.",
+                "Mildew infection at this stage causes the most yield damage."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "temperature_p3"
+        },
+        {
+            "name": "temp_4",
+            "display_name": "Mean Temperature (Period 4)",
+            "type": "categorical",
+            "states": [
+                "below_13C",
+                "13_to_15C",
+                "15_to_17C",
+                "above_17C"
+            ],
+            "role": "exogenous",
+            "category": "weather",
+            "short_description": "Average air temperature during the fourth fortnight.",
+            "extended_description": "Mean air temperature (°C) over the final two-week period before harvest.",
+            "sensitivity_hints": "Harvest-period temperature affects final grain weight and moisture content.",
+            "related_domain_knowledge": [
+                "Temperature in the final period affects grain drying and harvest timing."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "temperature_p4"
+        },
+        {
+            "name": "nedboer_1",
+            "display_name": "Precipitation (Period 1)",
+            "type": "categorical",
+            "states": [
+                "dry",
+                "light",
+                "moderate",
+                "heavy"
+            ],
+            "role": "exogenous",
+            "category": "weather",
+            "short_description": "Total precipitation during the first fortnight.",
+            "extended_description": "Accumulated rainfall during the first two-week period. Precipitation creates humid conditions in the crop canopy that favour fungal spore germination and infection.",
+            "sensitivity_hints": "Wet conditions promote mildew spore germination. Rain also affects soil moisture and crop water status.",
+            "related_domain_knowledge": [
+                "Moisture on leaf surfaces is essential for mildew spore germination.",
+                "Rainfall creates a humid microclimate within dense canopies.",
+                "Excessive rain can suppress some fungal growth by washing off spores."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "rainfall_p1"
+        },
+        {
+            "name": "nedboer_2",
+            "display_name": "Precipitation (Period 2)",
+            "type": "categorical",
+            "states": [
+                "dry",
+                "light",
+                "moderate",
+                "heavy"
+            ],
+            "role": "exogenous",
+            "category": "weather",
+            "short_description": "Total precipitation during the second fortnight.",
+            "extended_description": "Accumulated rainfall during the second two-week period.",
+            "sensitivity_hints": "Mid-season precipitation is critical for disease development in established canopies.",
+            "related_domain_knowledge": [
+                "Mid-season rainfall interacts with a denser canopy to create more favourable conditions for disease.",
+                "Precipitation affects the crop microclimate more strongly as the canopy grows."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "rainfall_p2"
+        },
+        {
+            "name": "nedboer_3",
+            "display_name": "Precipitation (Period 3)",
+            "type": "categorical",
+            "states": [
+                "dry",
+                "light",
+                "moderate",
+                "heavy"
+            ],
+            "role": "exogenous",
+            "category": "weather",
+            "short_description": "Total precipitation during the third fortnight.",
+            "extended_description": "Accumulated rainfall during the third two-week period.",
+            "sensitivity_hints": "Late-season precipitation can trigger severe mildew outbreaks in susceptible crops.",
+            "related_domain_knowledge": [
+                "Late-season rainfall promotes rapid mildew spread on mature leaves.",
+                "Rainfall at this stage is the most damaging for yield."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "rainfall_p3"
+        },
+        {
+            "name": "foto_1",
+            "display_name": "Photosynthesis Rate (Period 1)",
+            "type": "categorical",
+            "states": [
+                "very_low",
+                "low",
+                "below_average",
+                "average",
+                "above_average",
+                "high",
+                "very_high",
+                "extremely_high"
+            ],
+            "role": "endogenous",
+            "category": "crop_physiology",
+            "short_description": "Net photosynthesis rate of the crop during the first fortnight.",
+            "extended_description": "The rate of carbon fixation through photosynthesis during the first period. Determined by the amount of light intercepted (function of leaf area and solar radiation) and temperature. Directly produces dry matter (biomass).",
+            "sensitivity_hints": "Photosynthesis depends on radiation × leaf area interaction, modulated by temperature. It is the primary driver of dry matter accumulation.",
+            "related_domain_knowledge": [
+                "Photosynthesis rate = f(radiation, leaf area index, temperature).",
+                "Light interception follows Beer's law based on LAI.",
+                "Temperature affects enzyme kinetics in photosynthesis."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "photosynthesis_rate_p1"
+        },
+        {
+            "name": "foto_2",
+            "display_name": "Photosynthesis Rate (Period 2)",
+            "type": "categorical",
+            "states": [
+                "very_low",
+                "low",
+                "below_average",
+                "average",
+                "above_average",
+                "high",
+                "very_high",
+                "extremely_high"
+            ],
+            "role": "endogenous",
+            "category": "crop_physiology",
+            "short_description": "Net photosynthesis rate during the second fortnight.",
+            "extended_description": "The rate of carbon fixation during the second period. Same drivers as period 1.",
+            "sensitivity_hints": "Mid-season photosynthesis is typically at peak due to maximum leaf area.",
+            "related_domain_knowledge": [
+                "Peak photosynthesis usually occurs in mid-season when LAI is highest.",
+                "Disease damage to leaves reduces effective LAI and thus photosynthesis."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "photosynthesis_rate_p2"
+        },
+        {
+            "name": "foto_3",
+            "display_name": "Photosynthesis Rate (Period 3)",
+            "type": "categorical",
+            "states": [
+                "very_low",
+                "low",
+                "below_average",
+                "average",
+                "above_average",
+                "high",
+                "very_high",
+                "extremely_high"
+            ],
+            "role": "endogenous",
+            "category": "crop_physiology",
+            "short_description": "Net photosynthesis rate during the third fortnight.",
+            "extended_description": "The rate of carbon fixation during the third period.",
+            "sensitivity_hints": "Late-season photosynthesis is critical for grain filling.",
+            "related_domain_knowledge": [
+                "Photosynthesis during grain filling determines final grain weight.",
+                "Mildew damage at this stage directly reduces yield."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "photosynthesis_rate_p3"
+        },
+        {
+            "name": "foto_4",
+            "display_name": "Photosynthesis Rate (Period 4)",
+            "type": "categorical",
+            "states": [
+                "very_low",
+                "low",
+                "below_average",
+                "average",
+                "above_average",
+                "high",
+                "very_high",
+                "extremely_high"
+            ],
+            "role": "endogenous",
+            "category": "crop_physiology",
+            "short_description": "Net photosynthesis rate during the fourth fortnight.",
+            "extended_description": "The rate of carbon fixation during the final period before harvest.",
+            "sensitivity_hints": "Final period photosynthesis contributes to late grain filling.",
+            "related_domain_knowledge": [
+                "Post-anthesis photosynthesis is the main source of grain carbohydrate."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "photosynthesis_rate_p4"
+        },
+        {
+            "name": "dm_1",
+            "display_name": "Dry Matter (Period 1)",
+            "type": "categorical",
+            "states_description": "Discretised biomass in kg/m² (32 bins from 0.00 to 0.62)",
+            "role": "endogenous",
+            "category": "crop_state",
+            "short_description": "Total accumulated dry matter (biomass) at the end of the first fortnight.",
+            "extended_description": "Cumulative aboveground crop biomass at the end of the first period. Produced by photosynthesis. Dry matter accumulation is the primary determinant of final yield.",
+            "sensitivity_hints": "Dry matter is the integral of photosynthesis rate minus respiration losses.",
+            "related_domain_knowledge": [
+                "Dry matter = accumulated photosynthate minus respiration.",
+                "Early-season biomass sets the foundation for the crop canopy.",
+                "Dry matter accumulation rate depends on photosynthesis efficiency."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "crop_biomass_p1"
+        },
+        {
+            "name": "dm_2",
+            "display_name": "Dry Matter (Period 2)",
+            "type": "categorical",
+            "states_description": "Discretised biomass in kg/m² (61 bins from 0.00 to 1.20)",
+            "role": "endogenous",
+            "category": "crop_state",
+            "short_description": "Total accumulated dry matter at the end of the second fortnight.",
+            "extended_description": "Cumulative crop biomass at the end of the second period. Depends on period 1 biomass plus period 2 photosynthesis.",
+            "sensitivity_hints": "Depends on previous dry matter (carry-over) plus current-period photosynthesis.",
+            "related_domain_knowledge": [
+                "Biomass accumulates: dm_t = dm_{t-1} + photosynthesis_t - respiration.",
+                "Mid-season biomass is the most rapid growth phase."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "crop_biomass_p2"
+        },
+        {
+            "name": "dm_3",
+            "display_name": "Dry Matter (Period 3)",
+            "type": "categorical",
+            "states_description": "Discretised biomass in kg/m²",
+            "role": "endogenous",
+            "category": "crop_state",
+            "short_description": "Total accumulated dry matter at the end of the third fortnight.",
+            "extended_description": "Cumulative crop biomass at the end of the third period. Depends on period 2 biomass plus period 3 photosynthesis.",
+            "sensitivity_hints": "Late-season biomass growth slows as crop approaches maturity.",
+            "related_domain_knowledge": [
+                "Late biomass gains are primarily directed to grain filling.",
+                "Disease damage at this stage directly reduces harvestable biomass."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "crop_biomass_p3"
+        },
+        {
+            "name": "dm_4",
+            "display_name": "Dry Matter (Period 4)",
+            "type": "categorical",
+            "states_description": "Discretised biomass in kg/m²",
+            "role": "endogenous",
+            "category": "crop_state",
+            "short_description": "Total accumulated dry matter at harvest (end of fourth fortnight).",
+            "extended_description": "Final cumulative crop biomass at harvest. This is the direct determinant of crop yield. Depends on period 3 biomass plus period 4 photosynthesis.",
+            "sensitivity_hints": "Harvest biomass is the most direct predictor of grain yield.",
+            "related_domain_knowledge": [
+                "Harvest index (grain:total biomass ratio) converts total dry matter to grain yield.",
+                "Final biomass integrates all seasonal growth and disease effects."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "crop_biomass_p4"
+        },
+        {
+            "name": "lai_1",
+            "display_name": "Leaf Area Index (Period 1)",
+            "type": "categorical",
+            "states": [
+                "very_low",
+                "low",
+                "below_average",
+                "average",
+                "above_average",
+                "high",
+                "very_high",
+                "extremely_high"
+            ],
+            "role": "endogenous",
+            "category": "crop_state",
+            "short_description": "Leaf area index at the end of the first fortnight.",
+            "extended_description": "The ratio of total one-sided leaf area to ground area at the end of period 1. Depends on the initial leaf area and disease severity (mildew destroys leaf tissue). LAI determines light interception for photosynthesis and canopy density for microclimate.",
+            "sensitivity_hints": "LAI is reduced by mildew infection which destroys leaf tissue. Higher LAI increases both photosynthesis and disease-favourable microclimate.",
+            "related_domain_knowledge": [
+                "LAI is the key link between crop growth and disease: it drives both photosynthesis and disease risk.",
+                "Mildew-damaged leaves have reduced effective LAI.",
+                "LAI typically peaks around 4-6 in healthy spring barley."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "canopy_density_p1"
+        },
+        {
+            "name": "lai_2",
+            "display_name": "Leaf Area Index (Period 2)",
+            "type": "categorical",
+            "states": [
+                "very_low",
+                "low",
+                "below_average",
+                "average",
+                "above_average",
+                "high",
+                "very_high",
+                "extremely_high"
+            ],
+            "role": "endogenous",
+            "category": "crop_state",
+            "short_description": "Leaf area index at the end of the second fortnight.",
+            "extended_description": "Leaf area index at the end of period 2. Depends on previous LAI and current mildew severity.",
+            "sensitivity_hints": "Peak LAI typically occurs around period 2-3.",
+            "related_domain_knowledge": [
+                "New leaf growth adds to LAI while mildew and senescence reduce it.",
+                "The balance between growth and damage determines LAI trajectory."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "canopy_density_p2"
+        },
+        {
+            "name": "lai_3",
+            "display_name": "Leaf Area Index (Period 3)",
+            "type": "categorical",
+            "states": [
+                "very_low",
+                "low",
+                "below_average",
+                "average",
+                "above_average",
+                "high",
+                "very_high",
+                "extremely_high"
+            ],
+            "role": "endogenous",
+            "category": "crop_state",
+            "short_description": "Leaf area index at the end of the third fortnight.",
+            "extended_description": "Leaf area index at the end of period 3. Natural senescence begins reducing LAI even without disease.",
+            "sensitivity_hints": "LAI begins declining from senescence; mildew accelerates this decline.",
+            "related_domain_knowledge": [
+                "Leaf senescence naturally reduces LAI in late season.",
+                "Severe mildew can cause premature canopy collapse."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "canopy_density_p3"
+        },
+        {
+            "name": "lai_4",
+            "display_name": "Leaf Area Index (Period 4)",
+            "type": "categorical",
+            "states": [
+                "very_low",
+                "low",
+                "below_average",
+                "average",
+                "above_average",
+                "high",
+                "very_high",
+                "extremely_high"
+            ],
+            "role": "endogenous",
+            "category": "crop_state",
+            "short_description": "Leaf area index at the end of the fourth fortnight.",
+            "extended_description": "Leaf area index at harvest. Depends on period 3 LAI and period 4 mildew severity. Low harvest LAI indicates severe disease damage or advanced senescence.",
+            "sensitivity_hints": "Remaining green leaf area at harvest determines late photosynthetic capacity.",
+            "related_domain_knowledge": [
+                "Green leaf retention at harvest is a key indicator of crop health.",
+                "Stay-green traits are associated with higher yields."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "canopy_density_p4"
+        },
+        {
+            "name": "meldug_1",
+            "display_name": "Mildew Severity (Period 1)",
+            "type": "categorical",
+            "states": [
+                "none",
+                "trace",
+                "light",
+                "moderate",
+                "severe",
+                "very_severe",
+                "epidemic_low",
+                "epidemic_mid",
+                "epidemic_high"
+            ],
+            "role": "endogenous",
+            "category": "disease",
+            "short_description": "Severity of powdery mildew infection at the end of the first fortnight.",
+            "extended_description": "The extent of powdery mildew (Erysiphe graminis) infection on the crop at the end of period 1. Initial mildew inoculum is exogenous. Mildew damages leaf tissue, reducing effective leaf area index.",
+            "sensitivity_hints": "Early mildew establishes the inoculum base for the rest of the season. Control at this stage is most effective.",
+            "related_domain_knowledge": [
+                "Powdery mildew produces white fungal colonies on leaf surfaces.",
+                "Infected leaf area is no longer photosynthetically active.",
+                "Mildew spores spread from infected to healthy tissue."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "fungal_infection_p1"
+        },
+        {
+            "name": "meldug_2",
+            "display_name": "Mildew Severity (Period 2)",
+            "type": "categorical",
+            "states": [
+                "none",
+                "trace",
+                "light",
+                "moderate",
+                "severe",
+                "very_severe",
+                "epidemic_low",
+                "epidemic_mid",
+                "epidemic_high"
+            ],
+            "role": "endogenous",
+            "category": "disease",
+            "short_description": "Severity of powdery mildew infection at the end of the second fortnight.",
+            "extended_description": "Mildew severity at end of period 2. Depends on previous mildew level, microclimate conditions, and whether fungicide was applied.",
+            "sensitivity_hints": "Period 2 mildew is the first point where fungicide treatment can intervene.",
+            "related_domain_knowledge": [
+                "Mildew progression: previous severity + favourable microclimate - fungicide effect.",
+                "Secondary infection spreads from existing colonies.",
+                "Fungicide applied in period 1 reduces period 2 severity."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "fungal_infection_p2"
+        },
+        {
+            "name": "meldug_3",
+            "display_name": "Mildew Severity (Period 3)",
+            "type": "categorical",
+            "states": [
+                "none",
+                "trace",
+                "light",
+                "moderate",
+                "severe",
+                "very_severe",
+                "epidemic_low",
+                "epidemic_mid",
+                "epidemic_high"
+            ],
+            "role": "endogenous",
+            "category": "disease",
+            "short_description": "Severity of powdery mildew infection at the end of the third fortnight.",
+            "extended_description": "Mildew severity at end of period 3. This is often the critical period for yield-damaging infection.",
+            "sensitivity_hints": "Period 3 mildew causes the most yield loss as it coincides with grain filling.",
+            "related_domain_knowledge": [
+                "Late-season mildew is hard to control as fungicide efficacy decreases.",
+                "Mildew at grain filling directly competes for assimilates."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "fungal_infection_p3"
+        },
+        {
+            "name": "meldug_4",
+            "display_name": "Mildew Severity (Period 4)",
+            "type": "categorical",
+            "states": [
+                "none",
+                "trace",
+                "light",
+                "moderate",
+                "severe",
+                "very_severe",
+                "epidemic_low",
+                "epidemic_mid",
+                "epidemic_high"
+            ],
+            "role": "endogenous",
+            "category": "disease",
+            "short_description": "Severity of powdery mildew infection at the end of the fourth fortnight.",
+            "extended_description": "Mildew severity at harvest. Final severity determines the extent of late-season leaf destruction.",
+            "sensitivity_hints": "Harvest mildew severity reflects the cumulative disease trajectory over the season.",
+            "related_domain_knowledge": [
+                "Harvest-time disease assessment indicates overall seasonal disease pressure.",
+                "Severe mildew at harvest indicates poor disease management."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "fungal_infection_p4"
+        },
+        {
+            "name": "mikro_1",
+            "display_name": "Microclimate (Period 1)",
+            "type": "categorical",
+            "states": [
+                "unfavourable",
+                "slightly_unfavourable",
+                "neutral",
+                "slightly_favourable",
+                "favourable",
+                "very_favourable",
+                "highly_favourable",
+                "optimal_for_disease"
+            ],
+            "role": "endogenous",
+            "category": "environment",
+            "short_description": "Microclimate conditions within the crop canopy favouring fungal growth during period 1.",
+            "extended_description": "A composite index of canopy-level conditions (humidity, temperature, leaf wetness) that determine the favourability for powdery mildew development. Determined by leaf area (canopy density), temperature, and precipitation.",
+            "sensitivity_hints": "Microclimate is the bridge between weather and disease: dense canopy + warm + wet = disease-favourable.",
+            "related_domain_knowledge": [
+                "Dense canopies trap humidity, creating conditions for fungal growth.",
+                "Temperature affects both crop growth and fungal sporulation rates.",
+                "Rainfall creates leaf wetness required for spore germination.",
+                "Microclimate = f(leaf area index, temperature, precipitation)."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "canopy_microclimate_p1"
+        },
+        {
+            "name": "mikro_2",
+            "display_name": "Microclimate (Period 2)",
+            "type": "categorical",
+            "states": [
+                "unfavourable",
+                "slightly_unfavourable",
+                "neutral",
+                "slightly_favourable",
+                "favourable",
+                "very_favourable",
+                "highly_favourable",
+                "optimal_for_disease"
+            ],
+            "role": "endogenous",
+            "category": "environment",
+            "short_description": "Microclimate conditions favouring fungal growth during period 2.",
+            "extended_description": "Canopy-level environment favourability for disease in the second period. Denser mid-season canopy typically creates more favourable conditions.",
+            "sensitivity_hints": "Peak canopy density in mid-season often creates the most disease-favourable microclimate.",
+            "related_domain_knowledge": [
+                "Mid-season microclimate is typically most favourable for disease due to peak LAI.",
+                "Fungal reproduction rate increases exponentially with favourable conditions."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "canopy_microclimate_p2"
+        },
+        {
+            "name": "mikro_3",
+            "display_name": "Microclimate (Period 3)",
+            "type": "categorical",
+            "states": [
+                "unfavourable",
+                "slightly_unfavourable",
+                "neutral",
+                "slightly_favourable",
+                "favourable",
+                "very_favourable",
+                "highly_favourable",
+                "optimal_for_disease"
+            ],
+            "role": "endogenous",
+            "category": "environment",
+            "short_description": "Microclimate conditions favouring fungal growth during period 3.",
+            "extended_description": "Canopy-level environment favourability for disease in the third period.",
+            "sensitivity_hints": "Late-season microclimate may become less favourable as LAI declines from senescence.",
+            "related_domain_knowledge": [
+                "Declining LAI reduces canopy humidity, potentially lessening disease pressure.",
+                "However, existing infections continue to spread if conditions remain warm."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "canopy_microclimate_p3"
+        },
+        {
+            "name": "middel_1",
+            "display_name": "Fungicide Treatment (Period 1)",
+            "type": "categorical",
+            "states": [
+                "no_treatment",
+                "treatment"
+            ],
+            "role": "exogenous",
+            "category": "management",
+            "short_description": "Whether fungicide was applied during the first fortnight.",
+            "extended_description": "Binary indicator of fungicide application in period 1. Fungicide reduces mildew severity in the following period. This is a management decision variable (intervention).",
+            "sensitivity_hints": "Fungicide is a direct intervention that breaks the disease cycle. Its effect appears in the next period's mildew severity.",
+            "related_domain_knowledge": [
+                "Fungicide application is the primary control measure for powdery mildew.",
+                "Timing of application is critical: early treatment prevents inoculum build-up.",
+                "Fungicide effect is on next period's disease, not concurrent."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "antifungal_treatment_p1"
+        },
+        {
+            "name": "middel_2",
+            "display_name": "Fungicide Treatment (Period 2)",
+            "type": "categorical",
+            "states": [
+                "no_treatment",
+                "treatment"
+            ],
+            "role": "exogenous",
+            "category": "management",
+            "short_description": "Whether fungicide was applied during the second fortnight.",
+            "extended_description": "Binary indicator of fungicide application in period 2. Affects period 3 mildew severity.",
+            "sensitivity_hints": "Mid-season treatment targets the rapid disease expansion phase.",
+            "related_domain_knowledge": [
+                "A second fungicide application may be needed if disease pressure is high.",
+                "Some fungicides have residual activity protecting for 2-3 weeks."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "antifungal_treatment_p2"
+        },
+        {
+            "name": "middel_3",
+            "display_name": "Fungicide Treatment (Period 3)",
+            "type": "categorical",
+            "states": [
+                "no_treatment",
+                "treatment"
+            ],
+            "role": "exogenous",
+            "category": "management",
+            "short_description": "Whether fungicide was applied during the third fortnight.",
+            "extended_description": "Binary indicator of fungicide application in period 3. Affects period 4 mildew severity. Late-season treatment has limited benefit as disease is already established.",
+            "sensitivity_hints": "Late treatment has diminishing returns but can protect remaining green leaf area.",
+            "related_domain_knowledge": [
+                "Late fungicide application protects flag leaf during grain filling.",
+                "Cost-benefit of late treatment depends on disease severity and expected yield."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "antifungal_treatment_p3"
+        },
+        {
+            "name": "udbytte",
+            "display_name": "Crop Yield",
+            "type": "categorical",
+            "states_description": "Discretised yield in kg/m²",
+            "role": "endogenous",
+            "category": "outcome",
+            "short_description": "Final harvested crop yield.",
+            "extended_description": "The grain yield at harvest, determined primarily by accumulated dry matter at the end of the growing season (period 4). This is the target outcome variable. All other processes in the network ultimately affect yield through their impact on biomass accumulation and disease damage.",
+            "sensitivity_hints": "Yield is primarily determined by final-period dry matter. All other variables affect yield indirectly through the biomass accumulation chain.",
+            "related_domain_knowledge": [
+                "Yield = harvest biomass × harvest index.",
+                "Harvest index (grain:total biomass ratio) is relatively stable for a given variety.",
+                "Disease reduces yield by reducing photosynthetic leaf area and thus biomass.",
+                "The main yield-determination period is around anthesis to late grain filling."
+            ],
+            "references": [
+                "Rasmussen1995"
+            ],
+            "llm_name": "grain_yield"
+        }
+    ]
+}

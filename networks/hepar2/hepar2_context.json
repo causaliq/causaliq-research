@@ -1,0 +1,1718 @@
+{
+    "schema_version": "2.0",
+    "network": "hepar2",
+    "domain": "hepatological_diagnosis",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a liver disease diagnostic model, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "hepar2",
+        "source_reference": "Onisko2001",
+        "source_url": "https://www.bnlearn.com/bnrepository/discrete-large.html#hepar2",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "moderate",
+        "notes": "The HEPAR II network models diagnostic reasoning for liver disorders, originally developed by Agnieszka Onisko at the Institute of Biocybernetics and Biomedical Engineering, Polish Academy of Sciences (2001). It captures relationships between patient history, risk factors, liver diseases, laboratory tests, serological markers, and clinical signs/symptoms. Contains 70 nodes and 123 edges. LLMs may recognise the medical domain. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a diagnostic reasoning model for liver and hepatobiliary disorders.",
+            "The causal chain follows: risk factors/history → disease processes → laboratory findings + clinical signs/symptoms.",
+            "Patient demographics (age, sex) and exposure history (alcohol, viral, toxic substances, medical procedures) are root causes.",
+            "Exposure to infected blood through transfusions, injections, or surgery increases risk of viral hepatitis.",
+            "Chronic hepatitis can be caused by viral infection and may progress to fibrosis and cirrhosis.",
+            "Primary biliary cholangitis is influenced by patient sex and age, and produces characteristic autoimmune markers.",
+            "Cirrhosis is a late-stage liver disease resulting from fibrosis and/or fatty liver, producing widespread systemic effects.",
+            "Cirrhosis causes portal hypertension leading to splenomegaly, ascites, oedema, and bleeding tendency.",
+            "Liver enzyme levels (transaminases, GGT, alkaline phosphatase) are elevated by active hepatitis, toxic injury, and cirrhosis.",
+            "Bilirubin elevation is influenced by multiple disease processes and causes jaundice, itching, and skin changes.",
+            "Coagulation abnormalities (INR) result from hepatic synthetic dysfunction in cirrhosis and hepatitis.",
+            "Viral hepatitis serological markers (HBsAg, anti-HBs, anti-HBc, anti-HCV, HBeAg) indicate infection status.",
+            "Hepatic encephalopathy from cirrhosis causes altered consciousness, elevated urea, and brain density changes.",
+            "Gallstones independently cause biliary symptoms (pain, flatulence, fat intolerance) and elevate bilirubin.",
+            "Fatty liver (steatosis) is caused by obesity and alcohol use, and contributes to elevated triglycerides and liver enzymes.",
+            "Hepatocellular carcinoma can develop as a complication of cirrhosis or primary biliary cholangitis."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "alcoholism",
+            "display_name": "Chronic Alcohol Abuse",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "exogenous",
+            "category": "risk_factor",
+            "short_description": "History of chronic alcohol abuse.",
+            "extended_description": "Whether the patient has a documented history of chronic excessive alcohol consumption, a major risk factor for toxic hepatitis, fatty liver disease, and progression to cirrhosis.",
+            "sensitivity_hints": "Alcohol abuse is a leading cause of liver disease worldwide and increases risk of both toxic hepatitis and steatosis.",
+            "related_domain_knowledge": [
+                "Chronic alcohol consumption causes direct hepatocyte damage.",
+                "Alcoholic liver disease progresses through steatosis, hepatitis, fibrosis, and cirrhosis.",
+                "Prevalence approximately 14% in hepatology patient populations."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "chronic_alcohol_use"
+        },
+        {
+            "name": "vh_amn",
+            "display_name": "Viral Hepatitis History",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "exogenous",
+            "category": "risk_factor",
+            "short_description": "History of viral hepatitis in medical records.",
+            "extended_description": "Whether the patient has a prior documented episode of viral hepatitis (hepatitis B or C) in their medical history. This is distinct from current chronic hepatitis status and indicates past exposure.",
+            "sensitivity_hints": "Past viral hepatitis strongly predicts chronic hepatitis carriage and positive serological markers.",
+            "related_domain_knowledge": [
+                "Viral hepatitis B and C are the most common causes of chronic hepatitis worldwide.",
+                "Past infection may lead to chronic carrier state with ongoing liver damage.",
+                "Approximately 17% of hepatology patients have documented viral hepatitis history."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "viral_hepatitis_history"
+        },
+        {
+            "name": "hepatotoxic",
+            "display_name": "Hepatotoxin Exposure",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "exogenous",
+            "category": "risk_factor",
+            "short_description": "Exposure to hepatotoxic substances (drugs or chemicals).",
+            "extended_description": "Whether the patient has been exposed to substances known to cause liver damage, including certain medications (e.g. paracetamol, methotrexate, isoniazid), industrial chemicals, or herbal remedies.",
+            "sensitivity_hints": "Hepatotoxin exposure can cause both acute toxic hepatitis and reactive hepatitis.",
+            "related_domain_knowledge": [
+                "Drug-induced liver injury is a leading cause of acute liver failure.",
+                "Approximately 8% of hepatology patients have significant hepatotoxin exposure.",
+                "Both dose-dependent and idiosyncratic reactions can cause liver damage."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "hepatotoxin_exposure"
+        },
+        {
+            "name": "THepatitis",
+            "display_name": "Toxic Hepatitis",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "disease_process",
+            "short_description": "Toxic hepatitis caused by hepatotoxic substances or alcohol.",
+            "extended_description": "Liver inflammation caused by exposure to hepatotoxic substances and/or chronic alcohol abuse. Toxic hepatitis manifests through elevated liver enzymes, fatigue, nausea, and may contribute to progressive liver damage.",
+            "sensitivity_hints": "Caused by hepatotoxin exposure and alcohol abuse. Contributes to fatigue, liver enzyme elevation, and coagulation abnormalities.",
+            "related_domain_knowledge": [
+                "Toxic hepatitis can be acute or chronic depending on the agent and duration.",
+                "Alcohol and hepatotoxic drugs are the two main causes.",
+                "Presents with elevated transaminases, fatigue, and hepatomegaly."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "toxic_liver_inflammation"
+        },
+        {
+            "name": "hospital",
+            "display_name": "Recent Hospitalisation",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "exogenous",
+            "category": "medical_history",
+            "short_description": "Recent hospitalisation in the patient's history.",
+            "extended_description": "Whether the patient has been recently hospitalised, which increases the likelihood of exposure to blood products (transfusions) and invasive procedures (injections), both risk factors for viral hepatitis transmission.",
+            "sensitivity_hints": "Hospitalisation increases exposure risk through blood transfusions and needle-based procedures.",
+            "related_domain_knowledge": [
+                "Hospital stays involve blood draws, intravenous lines, and potential transfusions.",
+                "Historical blood product contamination was a major source of hepatitis B and C.",
+                "Approximately 54% of hepatology patients have recent hospitalisation."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "recent_hospitalisation"
+        },
+        {
+            "name": "surgery",
+            "display_name": "Recent Surgery",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "exogenous",
+            "category": "medical_history",
+            "short_description": "Recent surgical procedure in the patient's history.",
+            "extended_description": "Whether the patient has undergone recent surgery, which increases exposure risk through blood transfusions and invasive needle procedures during the perioperative period.",
+            "sensitivity_hints": "Surgery increases risk of blood-borne infection transmission through transfusions and injections.",
+            "related_domain_knowledge": [
+                "Surgical patients frequently receive blood transfusions.",
+                "Perioperative care involves multiple needle-based procedures.",
+                "Approximately 42% of hepatology patients have had recent surgery."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "recent_surgical_procedure"
+        },
+        {
+            "name": "gallstones",
+            "display_name": "Gallstones",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "exogenous",
+            "category": "biliary_condition",
+            "short_description": "Presence of gallstones (cholelithiasis).",
+            "extended_description": "Whether the patient has gallstones, which can obstruct bile flow causing elevated bilirubin, abdominal pain, flatulence, and fat intolerance. Gallstones may also lead to bile duct surgery (choledocholithotomy).",
+            "sensitivity_hints": "Gallstones cause biliary obstruction symptoms and may elevate bilirubin. They also lead to surgical interventions that increase blood-borne infection risk.",
+            "related_domain_knowledge": [
+                "Gallstones affect approximately 15% of hepatology patients.",
+                "Biliary obstruction from gallstones elevates conjugated bilirubin and alkaline phosphatase.",
+                "Gallstone complications include cholecystitis, cholangitis, and pancreatitis."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "biliary_calculi"
+        },
+        {
+            "name": "choledocholithotomy",
+            "display_name": "Bile Duct Surgery",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "medical_history",
+            "short_description": "History of bile duct surgery (choledocholithotomy).",
+            "extended_description": "Whether the patient has undergone surgical removal of stones from the common bile duct. This procedure is typically performed for gallstone complications and increases exposure to blood transfusions and injections.",
+            "sensitivity_hints": "Bile duct surgery is a consequence of gallstones and increases the risk of blood-borne pathogen exposure through the procedure itself.",
+            "related_domain_knowledge": [
+                "Choledocholithotomy is performed for common bile duct stones.",
+                "The procedure involves significant blood exposure risk.",
+                "It is a direct consequence of gallstone disease."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "bile_duct_surgery"
+        },
+        {
+            "name": "injections",
+            "display_name": "Needle Exposure History",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "transmission_route",
+            "short_description": "History of significant needle/injection exposure.",
+            "extended_description": "Whether the patient has had significant exposure to needles and injections, influenced by hospitalisation, surgery, and bile duct procedures. A key transmission route for blood-borne viral hepatitis.",
+            "sensitivity_hints": "Needle exposure is a major transmission route for hepatitis B and C viruses.",
+            "related_domain_knowledge": [
+                "Contaminated needles were historically a major source of viral hepatitis.",
+                "Risk increases with hospitalisation, surgery, and biliary procedures.",
+                "Modern screening has reduced but not eliminated this risk."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "needle_exposure_history"
+        },
+        {
+            "name": "transfusion",
+            "display_name": "Blood Transfusion History",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "transmission_route",
+            "short_description": "History of blood transfusion.",
+            "extended_description": "Whether the patient has received blood transfusions, influenced by hospitalisation, surgery, and bile duct procedures. Blood transfusion is a key transmission route for viral hepatitis B and C.",
+            "sensitivity_hints": "Blood transfusions are a major historical transmission route for hepatitis B and C.",
+            "related_domain_knowledge": [
+                "Pre-screening era transfusions carried high hepatitis transmission risk.",
+                "Risk increases with hospitalisation, surgery, and biliary procedures.",
+                "Modern blood screening has greatly reduced transmission risk."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "blood_transfusion_history"
+        },
+        {
+            "name": "ChHepatitis",
+            "display_name": "Chronic Hepatitis",
+            "type": "categorical",
+            "states": [
+                "active",
+                "persistent",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "disease_process",
+            "short_description": "Chronic hepatitis status (active, persistent, or absent).",
+            "extended_description": "The current status of chronic hepatitis, which can be active (ongoing liver cell destruction), persistent (stable low-grade inflammation), or absent. Chronic hepatitis is caused by viral infection transmitted through blood products and needle exposure, combined with viral hepatitis history.",
+            "sensitivity_hints": "Chronic hepatitis is a central disease node with widespread downstream effects on liver function tests, serological markers, and disease progression to fibrosis.",
+            "related_domain_knowledge": [
+                "Chronic hepatitis B and C are the most common forms.",
+                "Active chronic hepatitis has worse prognosis than persistent.",
+                "Chronic hepatitis drives fibrosis progression and eventual cirrhosis."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "chronic_liver_inflammation"
+        },
+        {
+            "name": "sex",
+            "display_name": "Patient Sex",
+            "type": "binary",
+            "states": [
+                "female",
+                "male"
+            ],
+            "role": "exogenous",
+            "category": "demographics",
+            "short_description": "Biological sex of the patient.",
+            "extended_description": "The biological sex of the patient, which influences the prevalence of certain liver diseases. Primary biliary cholangitis is strongly sex-linked (predominantly affects females). Sex also affects baseline bilirubin levels.",
+            "sensitivity_hints": "Female sex is a strong risk factor for primary biliary cholangitis. Males tend to have higher baseline bilirubin.",
+            "related_domain_knowledge": [
+                "Primary biliary cholangitis affects women approximately 9:1 compared to men.",
+                "Sex-based differences exist in liver enzyme reference ranges.",
+                "Approximately 60% of hepatology patients in this cohort are female."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "patient_sex"
+        },
+        {
+            "name": "age",
+            "display_name": "Patient Age Group",
+            "type": "categorical",
+            "states": [
+                "65_to_100",
+                "51_to_65",
+                "31_to_50",
+                "0_to_30"
+            ],
+            "role": "exogenous",
+            "category": "demographics",
+            "short_description": "Age group of the patient.",
+            "extended_description": "The age category of the patient, which influences disease prevalence. Primary biliary cholangitis is more common in middle-aged and older patients. Age also affects baseline bilirubin metabolism and neonatal hyperbilirubinemia risk.",
+            "sensitivity_hints": "Older age increases risk of primary biliary cholangitis and neonatal/senile hyperbilirubinemia.",
+            "related_domain_knowledge": [
+                "Primary biliary cholangitis typically presents in middle age (40-60 years).",
+                "Liver function and regenerative capacity decline with age.",
+                "Age distribution affects disease prevalence patterns."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "patient_age_group"
+        },
+        {
+            "name": "PBC",
+            "display_name": "Primary Biliary Cholangitis",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "disease_process",
+            "short_description": "Primary biliary cholangitis (autoimmune bile duct destruction).",
+            "extended_description": "An autoimmune liver disease characterised by progressive destruction of small intrahepatic bile ducts (formerly called primary biliary cirrhosis). Influenced by patient sex and age. Causes elevated bilirubin, characteristic autoimmune markers (AMA), joint symptoms, and can progress to cirrhosis.",
+            "sensitivity_hints": "PBC is a key disease node with many downstream effects including cholestatic liver enzymes, autoimmune markers, and biliary symptoms.",
+            "related_domain_knowledge": [
+                "PBC predominantly affects middle-aged women.",
+                "Anti-mitochondrial antibodies (AMA) are the hallmark serological marker.",
+                "PBC causes cholestatic pattern of liver enzyme abnormalities.",
+                "Can progress to biliary cirrhosis and hepatocellular carcinoma."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "primary_biliary_cholangitis"
+        },
+        {
+            "name": "fibrosis",
+            "display_name": "Hepatic Fibrosis",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "disease_process",
+            "short_description": "Hepatic fibrosis (scarring of liver tissue).",
+            "extended_description": "The presence of fibrous scar tissue replacing normal liver parenchyma, caused by chronic hepatitis. Fibrosis is the intermediate stage between chronic inflammation and cirrhosis.",
+            "sensitivity_hints": "Fibrosis is caused by chronic hepatitis and is a precursor to cirrhosis. Active chronic hepatitis causes more fibrosis than persistent.",
+            "related_domain_knowledge": [
+                "Fibrosis results from chronic liver cell injury and repair.",
+                "The progression from chronic hepatitis through fibrosis to cirrhosis takes years to decades.",
+                "Fibrosis stage is a key prognostic indicator in chronic liver disease."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "hepatic_fibrosis"
+        },
+        {
+            "name": "diabetes",
+            "display_name": "Diabetes Mellitus",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "exogenous",
+            "category": "comorbidity",
+            "short_description": "Presence of diabetes mellitus.",
+            "extended_description": "Whether the patient has diabetes mellitus, which increases the risk of obesity and consequently fatty liver disease (steatosis). Diabetes is a component of the metabolic syndrome.",
+            "sensitivity_hints": "Diabetes promotes obesity, which in turn promotes hepatic steatosis.",
+            "related_domain_knowledge": [
+                "Type 2 diabetes is strongly associated with non-alcoholic fatty liver disease.",
+                "Approximately 4% of hepatology patients have diabetes.",
+                "Insulin resistance drives hepatic fat accumulation."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "diabetes_mellitus"
+        },
+        {
+            "name": "obesity",
+            "display_name": "Obesity",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "comorbidity",
+            "short_description": "Presence of obesity.",
+            "extended_description": "Whether the patient is obese, which is promoted by diabetes and directly causes hepatic steatosis (fatty liver disease) through increased hepatic fat deposition.",
+            "sensitivity_hints": "Obesity is caused by diabetes and causes fatty liver disease.",
+            "related_domain_knowledge": [
+                "Obesity is the most common cause of non-alcoholic fatty liver disease.",
+                "BMI > 30 significantly increases risk of hepatic steatosis.",
+                "Approximately 24% of diabetic hepatology patients are obese."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "body_mass_excess"
+        },
+        {
+            "name": "Steatosis",
+            "display_name": "Fatty Liver Disease",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "disease_process",
+            "short_description": "Hepatic steatosis (fatty liver disease).",
+            "extended_description": "Accumulation of excess fat in liver cells, caused by obesity and chronic alcohol use. Steatosis contributes to cirrhosis progression, elevated triglycerides, and abnormal liver enzymes. It also causes hepatomegaly and right upper quadrant discomfort.",
+            "sensitivity_hints": "Steatosis is caused by obesity and alcohol, and contributes to cirrhosis, elevated triglycerides, and liver enzyme abnormalities.",
+            "related_domain_knowledge": [
+                "Non-alcoholic and alcoholic steatosis share similar pathological features.",
+                "Steatosis can progress to steatohepatitis and fibrosis.",
+                "Ultrasound shows characteristic increased liver echogenicity."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "fatty_liver_disease"
+        },
+        {
+            "name": "Cirrhosis",
+            "display_name": "Hepatic Cirrhosis",
+            "type": "categorical",
+            "states": [
+                "decompensated",
+                "compensated",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "disease_process",
+            "short_description": "Liver cirrhosis status (decompensated, compensated, or absent).",
+            "extended_description": "End-stage liver disease characterised by extensive fibrosis and nodular regeneration. Caused by hepatic fibrosis and steatosis. Cirrhosis has widespread systemic effects including portal hypertension, synthetic dysfunction, and risk of hepatocellular carcinoma. Decompensated cirrhosis has more severe complications.",
+            "sensitivity_hints": "Cirrhosis is the most connected disease node, causing effects on bilirubin, coagulation, portal hypertension signs, liver enzymes, albumin, and cancer risk.",
+            "related_domain_knowledge": [
+                "Cirrhosis is irreversible and the end stage of chronic liver disease.",
+                "Compensated cirrhosis may be clinically silent.",
+                "Decompensated cirrhosis presents with jaundice, ascites, variceal bleeding, and encephalopathy.",
+                "Five-year survival drops significantly with decompensation."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "hepatic_cirrhosis"
+        },
+        {
+            "name": "Hyperbilirubinemia",
+            "display_name": "Elevated Bilirubin Status",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "biochemical_status",
+            "short_description": "Non-hepatic hyperbilirubinemia (age/sex-related).",
+            "extended_description": "Elevated bilirubin levels not directly caused by liver disease, but influenced by age and sex. This represents constitutional or physiological hyperbilirubinemia (e.g. Gilbert syndrome, neonatal jaundice) that contributes to overall bilirubin levels.",
+            "sensitivity_hints": "This represents non-hepatic bilirubin elevation influenced by demographics. It contributes to overall serum bilirubin alongside hepatic causes.",
+            "related_domain_knowledge": [
+                "Gilbert syndrome causes mild unconjugated hyperbilirubinemia, more common in males.",
+                "Neonatal hyperbilirubinemia is common in young infants.",
+                "Constitutional hyperbilirubinemia is usually benign."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "constitutional_bilirubin_elevation"
+        },
+        {
+            "name": "triglycerides",
+            "display_name": "Serum Triglycerides",
+            "type": "categorical",
+            "states": [
+                "high_17_to_4",
+                "moderate_3_to_2",
+                "normal_1_to_0"
+            ],
+            "role": "endogenous",
+            "category": "laboratory_test",
+            "short_description": "Serum triglyceride level (mmol/L ranges).",
+            "extended_description": "Blood triglyceride concentration, elevated by hepatic steatosis (fatty liver). Higher levels indicate more severe fat metabolism derangement.",
+            "sensitivity_hints": "Triglycerides are elevated by fatty liver disease. They are a metabolic marker rather than a direct liver function test.",
+            "related_domain_knowledge": [
+                "Normal triglycerides are below 1.7 mmol/L.",
+                "Hepatic steatosis impairs lipid metabolism causing hypertriglyceridaemia.",
+                "Very high levels may indicate severe metabolic derangement."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "serum_triglyceride_level"
+        },
+        {
+            "name": "RHepatitis",
+            "display_name": "Reactive Hepatitis",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "disease_process",
+            "short_description": "Reactive (non-specific) hepatitis.",
+            "extended_description": "Non-specific liver inflammation occurring as a reaction to hepatotoxic substance exposure. Reactive hepatitis causes mild liver enzyme elevation, fatigue, nausea, and hepatomegaly but is generally less severe than toxic or chronic hepatitis.",
+            "sensitivity_hints": "Reactive hepatitis is caused by hepatotoxin exposure and produces milder effects than toxic hepatitis.",
+            "related_domain_knowledge": [
+                "Reactive hepatitis is a non-specific inflammatory response.",
+                "It is distinguished from toxic hepatitis by severity and mechanism.",
+                "Usually resolves when the causative agent is removed."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "reactive_liver_inflammation"
+        },
+        {
+            "name": "fatigue",
+            "display_name": "Fatigue",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Patient reports fatigue or tiredness.",
+            "extended_description": "Subjective feeling of tiredness and lack of energy, a common non-specific symptom of liver disease. Caused by chronic hepatitis, toxic hepatitis, and reactive hepatitis.",
+            "sensitivity_hints": "Fatigue is a non-specific symptom caused by all three types of hepatitis in this model.",
+            "related_domain_knowledge": [
+                "Fatigue is the most common symptom of chronic liver disease.",
+                "The mechanism involves impaired hepatic metabolism and cytokine release.",
+                "Present in approximately 60% of patients with active liver disease."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "chronic_fatigue"
+        },
+        {
+            "name": "bilirubin",
+            "display_name": "Serum Bilirubin Level",
+            "type": "categorical",
+            "states": [
+                "very_high_88_to_20",
+                "high_19_to_7",
+                "mild_6_to_2",
+                "normal_1_to_0"
+            ],
+            "role": "endogenous",
+            "category": "laboratory_test",
+            "short_description": "Serum total bilirubin level (micromol/L ranges).",
+            "extended_description": "Blood bilirubin concentration, a key marker of liver function and biliary obstruction. Elevated by constitutional hyperbilirubinemia, primary biliary cholangitis, cirrhosis, gallstones, and chronic hepatitis. Bilirubin elevation causes jaundice, itching, and skin changes.",
+            "sensitivity_hints": "Bilirubin is one of the most connected laboratory nodes, influenced by 5 disease processes and causing 3 downstream clinical signs.",
+            "related_domain_knowledge": [
+                "Normal total bilirubin is below 21 micromol/L.",
+                "Bilirubin is a breakdown product of haemoglobin.",
+                "Elevated bilirubin can be conjugated (hepatic/obstructive) or unconjugated (haemolytic/constitutional).",
+                "Very high levels (>85 micromol/L) indicate severe hepatic or biliary dysfunction."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "serum_bilirubin_level"
+        },
+        {
+            "name": "itching",
+            "display_name": "Pruritus",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Generalised itching (pruritus).",
+            "extended_description": "Generalised skin itching caused by elevated serum bilirubin and bile salt deposition in the skin. A characteristic symptom of cholestatic liver disease.",
+            "sensitivity_hints": "Pruritus is directly caused by elevated bilirubin. Severity correlates with bilirubin level.",
+            "related_domain_knowledge": [
+                "Cholestatic pruritus is caused by bile salt deposition in skin.",
+                "More common with higher bilirubin levels.",
+                "A hallmark symptom of primary biliary cholangitis."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "generalised_itching"
+        },
+        {
+            "name": "upper_pain",
+            "display_name": "Upper Abdominal Pain",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Pain in the upper abdomen.",
+            "extended_description": "Upper abdominal pain, typically caused by gallstones. Biliary colic presents as episodic pain in the right upper quadrant or epigastrium.",
+            "sensitivity_hints": "Upper abdominal pain is caused by gallstones in this model.",
+            "related_domain_knowledge": [
+                "Biliary colic is the classic presentation of symptomatic gallstones.",
+                "Pain is typically postprandial, especially after fatty meals.",
+                "Duration usually 30 minutes to several hours."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "upper_abdominal_pain"
+        },
+        {
+            "name": "fat",
+            "display_name": "Fat Intolerance",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Intolerance to fatty foods.",
+            "extended_description": "Difficulty digesting fatty foods, typically caused by gallstones that impair bile flow needed for fat digestion.",
+            "sensitivity_hints": "Fat intolerance is caused by gallstones through impaired bile secretion.",
+            "related_domain_knowledge": [
+                "Bile salts are essential for fat emulsification and absorption.",
+                "Gallstone obstruction reduces bile flow to the duodenum.",
+                "Patients report nausea and discomfort after fatty meals."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "fat_intolerance"
+        },
+        {
+            "name": "pain_ruq",
+            "display_name": "Right Upper Quadrant Pain",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Pain in the right upper quadrant of the abdomen.",
+            "extended_description": "Localised pain in the right upper quadrant, caused by hepatic steatosis and hyperbilirubinemia. Distinct from the more generalised upper abdominal pain caused by gallstones.",
+            "sensitivity_hints": "RUQ pain is caused by fatty liver disease and constitutional bilirubin elevation in this model.",
+            "related_domain_knowledge": [
+                "The liver occupies the right upper quadrant.",
+                "Hepatic capsule distension from steatosis causes pain.",
+                "Distinct from biliary colic which is more colicky and episodic."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "right_upper_quadrant_pain"
+        },
+        {
+            "name": "pressure_ruq",
+            "display_name": "Right Upper Quadrant Pressure",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Sensation of pressure in the right upper quadrant.",
+            "extended_description": "A feeling of fullness or pressure in the right upper quadrant, distinct from sharp pain. Caused by gallstones, primary biliary cholangitis, and chronic hepatitis through hepatic capsule distension.",
+            "sensitivity_hints": "RUQ pressure is caused by gallstones, PBC, and chronic hepatitis.",
+            "related_domain_knowledge": [
+                "Pressure sensation differs from acute pain in character and duration.",
+                "Hepatomegaly from any cause can produce this sensation.",
+                "Often described as a dull ache or heaviness."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "right_upper_quadrant_pressure"
+        },
+        {
+            "name": "phosphatase",
+            "display_name": "Alkaline Phosphatase",
+            "type": "categorical",
+            "states": [
+                "very_high_4000_to_700",
+                "high_699_to_240",
+                "normal_239_to_0"
+            ],
+            "role": "endogenous",
+            "category": "laboratory_test",
+            "short_description": "Serum alkaline phosphatase level (U/L ranges).",
+            "extended_description": "Blood alkaline phosphatase concentration, a marker of cholestasis and biliary damage. Elevated by reactive hepatitis, toxic hepatitis, cirrhosis, and chronic hepatitis.",
+            "sensitivity_hints": "Alkaline phosphatase is elevated by all hepatitis types and cirrhosis. It indicates cholestatic damage.",
+            "related_domain_knowledge": [
+                "ALP is found in bile duct epithelium and hepatocyte canalicular membrane.",
+                "Cholestatic pattern shows disproportionate ALP elevation relative to transaminases.",
+                "Normal range approximately 30-120 U/L in adults."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "alkaline_phosphatase_level"
+        },
+        {
+            "name": "skin",
+            "display_name": "Skin Lesions",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Skin changes related to liver disease.",
+            "extended_description": "Visible skin changes (xanthomas, xanthelasma, or excoriations from scratching) caused by elevated bilirubin and cholestasis.",
+            "sensitivity_hints": "Skin lesions are directly caused by elevated serum bilirubin.",
+            "related_domain_knowledge": [
+                "Cholestatic skin changes include xanthomas from lipid deposition.",
+                "Excoriations result from chronic pruritus.",
+                "Severity correlates with bilirubin level."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "cholestatic_skin_changes"
+        },
+        {
+            "name": "ama",
+            "display_name": "Anti-Mitochondrial Antibodies",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "serological_marker",
+            "short_description": "Anti-mitochondrial antibodies (AMA) detected.",
+            "extended_description": "Presence of anti-mitochondrial antibodies in serum, the hallmark serological marker for primary biliary cholangitis. AMA are found in approximately 95% of PBC patients.",
+            "sensitivity_hints": "AMA is the most specific marker for primary biliary cholangitis.",
+            "related_domain_knowledge": [
+                "AMA targets the E2 subunit of pyruvate dehydrogenase complex.",
+                "Sensitivity for PBC is approximately 95%.",
+                "Can be present years before clinical disease onset."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "antimitochondrial_antibodies"
+        },
+        {
+            "name": "le_cells",
+            "display_name": "Lupus Erythematosus Cells",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "serological_marker",
+            "short_description": "Lupus erythematosus (LE) cells detected.",
+            "extended_description": "Presence of LE cells, an autoimmune marker sometimes associated with primary biliary cholangitis and autoimmune overlap syndromes.",
+            "sensitivity_hints": "LE cells are caused by primary biliary cholangitis in this model, reflecting autoimmune overlap.",
+            "related_domain_knowledge": [
+                "LE cells are formed when anti-nuclear antibodies opsonise cell nuclei.",
+                "Their presence suggests autoimmune activity.",
+                "Found in some PBC patients with autoimmune overlap features."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "lupus_erythematosus_cells"
+        },
+        {
+            "name": "joints",
+            "display_name": "Joint Symptoms",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Joint pain or arthralgia.",
+            "extended_description": "Presence of joint symptoms (arthralgia or arthritis), associated with primary biliary cholangitis as an autoimmune manifestation.",
+            "sensitivity_hints": "Joint symptoms are caused by PBC and also contribute to overall pain experience.",
+            "related_domain_knowledge": [
+                "Arthralgia is common in autoimmune liver diseases.",
+                "PBC can be associated with other autoimmune conditions.",
+                "Joint involvement may precede liver disease diagnosis."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "joint_symptoms"
+        },
+        {
+            "name": "pain",
+            "display_name": "Generalised Pain",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Generalised pain reported by the patient.",
+            "extended_description": "Overall pain experience, influenced by both primary biliary cholangitis (through disease activity) and joint symptoms (as a contributing pain source).",
+            "sensitivity_hints": "Pain is caused by both PBC directly and by joint symptoms.",
+            "related_domain_knowledge": [
+                "Pain perception in liver disease is multifactorial.",
+                "Autoimmune conditions cause both hepatic and extrahepatic pain.",
+                "Joint pain and abdominal pain may coexist."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "generalised_pain"
+        },
+        {
+            "name": "proteins",
+            "display_name": "Serum Total Protein",
+            "type": "categorical",
+            "states": [
+                "high_10_to_6",
+                "normal_5_to_2"
+            ],
+            "role": "endogenous",
+            "category": "laboratory_test",
+            "short_description": "Serum total protein level (g/dL ranges).",
+            "extended_description": "Blood total protein concentration. In cirrhosis, protein levels may be paradoxically elevated due to increased immunoglobulin production despite impaired albumin synthesis. Low protein causes ascites through reduced oncotic pressure.",
+            "sensitivity_hints": "Protein levels are affected by cirrhosis and influence ascites development through oncotic pressure.",
+            "related_domain_knowledge": [
+                "Total protein includes albumin and globulins.",
+                "Cirrhosis causes hyperglobulinaemia despite hypoalbuminaemia.",
+                "Low oncotic pressure from hypoproteinaemia contributes to ascites."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "serum_total_protein"
+        },
+        {
+            "name": "edema",
+            "display_name": "Peripheral Oedema",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Peripheral oedema (fluid retention in extremities).",
+            "extended_description": "Accumulation of fluid in peripheral tissues (typically lower limbs), caused by cirrhosis through portal hypertension and reduced albumin synthesis leading to decreased oncotic pressure.",
+            "sensitivity_hints": "Oedema is caused by cirrhosis, particularly in decompensated disease.",
+            "related_domain_knowledge": [
+                "Peripheral oedema in liver disease results from hypoalbuminaemia.",
+                "Portal hypertension and sodium retention contribute.",
+                "Often accompanies ascites in decompensated cirrhosis."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "peripheral_oedema"
+        },
+        {
+            "name": "platelet",
+            "display_name": "Platelet Count",
+            "type": "categorical",
+            "states": [
+                "high_597_to_300",
+                "normal_299_to_150",
+                "low_149_to_100",
+                "very_low_99_to_0"
+            ],
+            "role": "endogenous",
+            "category": "laboratory_test",
+            "short_description": "Blood platelet count (x10^9/L ranges).",
+            "extended_description": "Blood platelet count, affected by cirrhosis and primary biliary cholangitis. Thrombocytopenia (low platelets) results from portal hypertension causing splenic sequestration and reduced thrombopoietin production.",
+            "sensitivity_hints": "Platelet count is affected by cirrhosis and PBC. Low platelets contribute to bleeding tendency.",
+            "related_domain_knowledge": [
+                "Thrombocytopenia is common in advanced liver disease.",
+                "Splenic sequestration from portal hypertension is the main mechanism.",
+                "Platelet count below 150 x10^9/L suggests significant portal hypertension."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "blood_platelet_count"
+        },
+        {
+            "name": "inr",
+            "display_name": "Coagulation Ratio (INR)",
+            "type": "categorical",
+            "states": [
+                "high_200_to_110",
+                "normal_109_to_70",
+                "low_69_to_0"
+            ],
+            "role": "endogenous",
+            "category": "laboratory_test",
+            "short_description": "International normalised ratio for coagulation.",
+            "extended_description": "A measure of blood clotting function (INR × 100 in this encoding). Elevated by chronic hepatitis, cirrhosis, toxic hepatitis, and hyperbilirubinemia through impaired hepatic synthesis of clotting factors.",
+            "sensitivity_hints": "INR is affected by four disease processes reflecting hepatic synthetic dysfunction. Elevated INR increases bleeding risk.",
+            "related_domain_knowledge": [
+                "The liver synthesises most clotting factors.",
+                "Elevated INR indicates coagulopathy.",
+                "INR is a component of the MELD score for liver disease severity.",
+                "Normal INR is approximately 0.8-1.2."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "coagulation_ratio"
+        },
+        {
+            "name": "bleeding",
+            "display_name": "Bleeding Tendency",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Clinical evidence of bleeding tendency.",
+            "extended_description": "Easy bruising, prolonged bleeding, or spontaneous haemorrhage, caused by the combination of low platelet count and elevated INR (impaired coagulation).",
+            "sensitivity_hints": "Bleeding is caused by both low platelets and elevated INR. The combination of both greatly increases risk.",
+            "related_domain_knowledge": [
+                "Bleeding tendency reflects both platelet and coagulation factor deficiencies.",
+                "Variceal bleeding is a major cause of mortality in cirrhosis.",
+                "Clinical signs include easy bruising, gingival bleeding, and epistaxis."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "bleeding_tendency"
+        },
+        {
+            "name": "flatulence",
+            "display_name": "Abdominal Bloating",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Flatulence and abdominal bloating.",
+            "extended_description": "Excessive gas and abdominal distension, caused by gallstones through impaired bile flow and fat maldigestion.",
+            "sensitivity_hints": "Flatulence is directly caused by gallstones in this model.",
+            "related_domain_knowledge": [
+                "Impaired bile flow leads to fat maldigestion and bacterial fermentation.",
+                "A common symptom of gallstone disease.",
+                "Often accompanies fat intolerance."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "abdominal_bloating"
+        },
+        {
+            "name": "alcohol",
+            "display_name": "Alcohol Consumption Signs",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Clinical signs of ongoing alcohol consumption.",
+            "extended_description": "Observable evidence of alcohol consumption on clinical assessment, influenced by liver cirrhosis status. In this model, cirrhosis status modifies the clinical presentation of alcohol-related signs.",
+            "sensitivity_hints": "Alcohol consumption signs are influenced by cirrhosis in this model.",
+            "related_domain_knowledge": [
+                "Clinical signs include alcohol on breath, tremor, and withdrawal symptoms.",
+                "Patients with cirrhosis may modify drinking behaviour.",
+                "Assessment of alcohol use is critical in liver disease evaluation."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "alcohol_consumption_evidence"
+        },
+        {
+            "name": "encephalopathy",
+            "display_name": "Hepatic Encephalopathy",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "disease_process",
+            "short_description": "Hepatic encephalopathy (brain dysfunction from liver failure).",
+            "extended_description": "Brain dysfunction caused by the liver's inability to clear toxins (particularly ammonia) from the blood. Results from cirrhosis and primary biliary cholangitis. Causes altered consciousness, elevated urea, and brain density changes.",
+            "sensitivity_hints": "Encephalopathy is caused by cirrhosis and PBC, and produces neurological symptoms and metabolic derangements.",
+            "related_domain_knowledge": [
+                "Hepatic encephalopathy ranges from subtle cognitive impairment to coma.",
+                "Ammonia accumulation is the primary mechanism.",
+                "Precipitants include GI bleeding, infection, and constipation.",
+                "Present in approximately 5% of cirrhosis patients."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "hepatic_encephalopathy"
+        },
+        {
+            "name": "urea",
+            "display_name": "Blood Urea Level",
+            "type": "categorical",
+            "states": [
+                "high_165_to_50",
+                "normal_49_to_40",
+                "low_39_to_0"
+            ],
+            "role": "endogenous",
+            "category": "laboratory_test",
+            "short_description": "Blood urea nitrogen level (mg/dL ranges).",
+            "extended_description": "Blood urea concentration, elevated in hepatic encephalopathy due to impaired urea cycle function and ammonia accumulation.",
+            "sensitivity_hints": "Urea is elevated by hepatic encephalopathy, reflecting impaired ammonia metabolism.",
+            "related_domain_knowledge": [
+                "The urea cycle in the liver converts ammonia to urea for excretion.",
+                "Hepatic failure impairs this conversion.",
+                "Elevated urea may also indicate renal impairment (hepatorenal syndrome)."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "blood_urea_level"
+        },
+        {
+            "name": "ascites",
+            "display_name": "Abdominal Fluid",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Ascites (fluid accumulation in the abdomen).",
+            "extended_description": "Accumulation of free fluid in the peritoneal cavity, caused by low serum protein levels (hypoproteinaemia) which reduce oncotic pressure. A hallmark of decompensated liver disease.",
+            "sensitivity_hints": "Ascites is caused by low serum protein in this model, reflecting the role of oncotic pressure.",
+            "related_domain_knowledge": [
+                "Ascites is the most common complication of cirrhosis.",
+                "Portal hypertension and hypoalbuminaemia are the main mechanisms.",
+                "Development of ascites marks transition to decompensated cirrhosis.",
+                "Managed with sodium restriction, diuretics, and paracentesis."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "abdominal_fluid_accumulation"
+        },
+        {
+            "name": "hepatomegaly",
+            "display_name": "Liver Enlargement",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Enlarged liver on physical examination.",
+            "extended_description": "Palpably enlarged liver, caused by reactive hepatitis, toxic hepatitis, hepatic steatosis, and hyperbilirubinemia. The liver enlarges due to inflammation, fat infiltration, or congestion.",
+            "sensitivity_hints": "Hepatomegaly is caused by four conditions: reactive hepatitis, toxic hepatitis, steatosis, and hyperbilirubinemia.",
+            "related_domain_knowledge": [
+                "Normal liver span is 6-12 cm in the midclavicular line.",
+                "Hepatomegaly is detected by percussion and palpation.",
+                "In advanced cirrhosis, the liver may actually shrink."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "liver_enlargement"
+        },
+        {
+            "name": "hepatalgia",
+            "display_name": "Liver Tenderness",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Tenderness on liver palpation.",
+            "extended_description": "Pain elicited by palpation of the liver, caused by hepatomegaly. An enlarged liver stretches the hepatic capsule (Glisson's capsule), which contains pain nerve fibres.",
+            "sensitivity_hints": "Liver tenderness is directly caused by hepatomegaly through capsule distension.",
+            "related_domain_knowledge": [
+                "The liver parenchyma itself has no pain receptors.",
+                "Pain comes from stretching of the hepatic capsule.",
+                "Tenderness is more common with acute enlargement than chronic."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "liver_tenderness"
+        },
+        {
+            "name": "density",
+            "display_name": "Brain Density Changes",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "imaging_finding",
+            "short_description": "Brain density changes on imaging.",
+            "extended_description": "Abnormal brain tissue density detected on CT or MRI imaging, caused by hepatic encephalopathy. Cerebral oedema and astrocyte swelling from ammonia toxicity produce characteristic imaging changes.",
+            "sensitivity_hints": "Brain density changes are caused by hepatic encephalopathy.",
+            "related_domain_knowledge": [
+                "Cerebral oedema is a complication of acute hepatic encephalopathy.",
+                "MRI may show T1 hyperintensity in the globus pallidus.",
+                "CT may show diffuse cerebral oedema in severe cases."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "brain_density_changes"
+        },
+        {
+            "name": "ESR",
+            "display_name": "Erythrocyte Sedimentation Rate",
+            "type": "categorical",
+            "states": [
+                "high_200_to_50",
+                "moderate_49_to_15",
+                "normal_14_to_0"
+            ],
+            "role": "endogenous",
+            "category": "laboratory_test",
+            "short_description": "Erythrocyte sedimentation rate (mm/hr ranges).",
+            "extended_description": "A non-specific inflammatory marker measuring the rate at which red blood cells settle. Elevated by primary biliary cholangitis, chronic hepatitis, steatosis, and hyperbilirubinemia.",
+            "sensitivity_hints": "ESR is elevated by four conditions: PBC, chronic hepatitis, steatosis, and hyperbilirubinemia.",
+            "related_domain_knowledge": [
+                "ESR is a non-specific marker of inflammation.",
+                "Elevated in autoimmune conditions and chronic infections.",
+                "Normal values increase with age and are higher in women."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "erythrocyte_sedimentation_rate"
+        },
+        {
+            "name": "alt",
+            "display_name": "Alanine Transaminase",
+            "type": "categorical",
+            "states": [
+                "very_high_850_to_200",
+                "high_199_to_100",
+                "mild_99_to_35",
+                "normal_34_to_0"
+            ],
+            "role": "endogenous",
+            "category": "laboratory_test",
+            "short_description": "Serum ALT level (U/L ranges).",
+            "extended_description": "Alanine aminotransferase, a liver enzyme released when hepatocytes are damaged. Elevated by chronic hepatitis, reactive hepatitis, toxic hepatitis, steatosis, and cirrhosis.",
+            "sensitivity_hints": "ALT is the most specific liver enzyme, elevated by all five hepatic conditions in this model.",
+            "related_domain_knowledge": [
+                "ALT is more specific for liver damage than AST.",
+                "Normal range approximately 7-35 U/L.",
+                "Very high levels (>200) suggest acute hepatocellular injury.",
+                "The ALT/AST ratio helps distinguish different liver diseases."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "alanine_transaminase_level"
+        },
+        {
+            "name": "ast",
+            "display_name": "Aspartate Transaminase",
+            "type": "categorical",
+            "states": [
+                "very_high_700_to_400",
+                "high_399_to_150",
+                "mild_149_to_40",
+                "normal_39_to_0"
+            ],
+            "role": "endogenous",
+            "category": "laboratory_test",
+            "short_description": "Serum AST level (U/L ranges).",
+            "extended_description": "Aspartate aminotransferase, a liver enzyme released during hepatocyte damage. Elevated by the same five conditions as ALT: chronic hepatitis, reactive hepatitis, toxic hepatitis, steatosis, and cirrhosis.",
+            "sensitivity_hints": "AST shares the same five causes as ALT. AST/ALT ratio >2 suggests alcoholic liver disease.",
+            "related_domain_knowledge": [
+                "AST is found in liver, heart, muscle, and other tissues.",
+                "Less specific for liver damage than ALT.",
+                "Normal range approximately 8-40 U/L.",
+                "Elevated AST:ALT ratio (>2) is characteristic of alcoholic hepatitis."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "aspartate_transaminase_level"
+        },
+        {
+            "name": "amylase",
+            "display_name": "Serum Amylase",
+            "type": "categorical",
+            "states": [
+                "very_high_1400_to_500",
+                "high_499_to_300",
+                "normal_299_to_0"
+            ],
+            "role": "endogenous",
+            "category": "laboratory_test",
+            "short_description": "Serum amylase level (U/L ranges).",
+            "extended_description": "Blood amylase concentration, elevated by gallstones when they obstruct the pancreatic duct causing pancreatitis.",
+            "sensitivity_hints": "Amylase is elevated by gallstones through gallstone-induced pancreatitis.",
+            "related_domain_knowledge": [
+                "Amylase is primarily a pancreatic enzyme.",
+                "Gallstone pancreatitis is the most common cause of acute pancreatitis.",
+                "Levels >3x normal strongly suggest acute pancreatitis."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "serum_amylase_level"
+        },
+        {
+            "name": "ggtp",
+            "display_name": "Gamma-Glutamyl Transferase",
+            "type": "categorical",
+            "states": [
+                "very_high_640_to_70",
+                "high_69_to_30",
+                "mild_29_to_10",
+                "normal_9_to_0"
+            ],
+            "role": "endogenous",
+            "category": "laboratory_test",
+            "short_description": "Serum GGT level (U/L ranges).",
+            "extended_description": "Gamma-glutamyl transferase, a liver enzyme particularly sensitive to cholestasis and alcohol use. Elevated by primary biliary cholangitis, toxic hepatitis, reactive hepatitis, steatosis, chronic hepatitis, and hyperbilirubinemia.",
+            "sensitivity_hints": "GGT is the most broadly influenced liver enzyme, affected by six conditions. It is particularly sensitive to alcohol and cholestasis.",
+            "related_domain_knowledge": [
+                "GGT is the most sensitive marker for biliary disease.",
+                "Strongly induced by alcohol consumption.",
+                "Normal range approximately 5-36 U/L.",
+                "Used to confirm hepatic origin of elevated alkaline phosphatase."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "gamma_glutamyl_transferase_level"
+        },
+        {
+            "name": "cholesterol",
+            "display_name": "Serum Cholesterol",
+            "type": "categorical",
+            "states": [
+                "high_999_to_350",
+                "normal_349_to_240",
+                "low_239_to_0"
+            ],
+            "role": "endogenous",
+            "category": "laboratory_test",
+            "short_description": "Serum cholesterol level (mg/dL ranges).",
+            "extended_description": "Blood cholesterol concentration, affected by primary biliary cholangitis, steatosis, and chronic hepatitis. Cholestatic diseases cause hypercholesterolaemia, while advanced liver disease may cause low cholesterol.",
+            "sensitivity_hints": "Cholesterol is elevated in cholestatic disease (PBC) and fatty liver, but may be low in severe hepatic dysfunction.",
+            "related_domain_knowledge": [
+                "Cholestasis impairs bile excretion of cholesterol, causing elevation.",
+                "The liver is the primary site of cholesterol synthesis and excretion.",
+                "Very high cholesterol in PBC can cause xanthomas."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "serum_cholesterol_level"
+        },
+        {
+            "name": "hbsag",
+            "display_name": "Hepatitis B Surface Antigen",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "serological_marker",
+            "short_description": "Hepatitis B surface antigen (HBsAg) detected.",
+            "extended_description": "Presence of hepatitis B surface antigen in serum, indicating active hepatitis B infection. Influenced by viral hepatitis history and chronic hepatitis status.",
+            "sensitivity_hints": "HBsAg indicates active hepatitis B infection. Caused by viral hepatitis history and chronic hepatitis.",
+            "related_domain_knowledge": [
+                "HBsAg is the first marker to appear in acute hepatitis B.",
+                "Persistence beyond 6 months defines chronic hepatitis B.",
+                "Present in active carriers and chronic hepatitis B patients."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "hepatitis_b_surface_antigen"
+        },
+        {
+            "name": "hbsag_anti",
+            "display_name": "Hepatitis B Surface Antibody",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "serological_marker",
+            "short_description": "Hepatitis B surface antibody (anti-HBs) detected.",
+            "extended_description": "Presence of antibodies against hepatitis B surface antigen, indicating immunity (from vaccination or resolved infection). Influenced by viral hepatitis history, chronic hepatitis status, and HBsAg status.",
+            "sensitivity_hints": "Anti-HBs indicates immunity. Its presence is influenced by viral hepatitis history, chronic hepatitis, and current HBsAg status (usually mutually exclusive with HBsAg).",
+            "related_domain_knowledge": [
+                "Anti-HBs appears after HBsAg clearance or vaccination.",
+                "Indicates protective immunity against hepatitis B.",
+                "Usually mutually exclusive with HBsAg (seroconversion)."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "hepatitis_b_surface_antibody"
+        },
+        {
+            "name": "anorexia",
+            "display_name": "Appetite Loss",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Loss of appetite (anorexia).",
+            "extended_description": "Reduced appetite, a common symptom of hepatic inflammation caused by reactive hepatitis and toxic hepatitis.",
+            "sensitivity_hints": "Appetite loss is caused by reactive and toxic hepatitis.",
+            "related_domain_knowledge": [
+                "Anorexia is common in acute hepatitis.",
+                "Mediated by inflammatory cytokines affecting the hypothalamus.",
+                "Often accompanied by nausea."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "appetite_loss"
+        },
+        {
+            "name": "nausea",
+            "display_name": "Nausea",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Nausea or feeling of sickness.",
+            "extended_description": "Feeling of sickness or urge to vomit, caused by reactive hepatitis and toxic hepatitis.",
+            "sensitivity_hints": "Nausea is caused by reactive and toxic hepatitis.",
+            "related_domain_knowledge": [
+                "Nausea is a common prodromal symptom of hepatitis.",
+                "Often precedes jaundice in acute hepatitis.",
+                "Mediated by hepatic inflammation and cytokine release."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "nausea_symptom"
+        },
+        {
+            "name": "spleen",
+            "display_name": "Spleen Enlargement",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Splenomegaly (enlarged spleen).",
+            "extended_description": "Palpably enlarged spleen, caused by cirrhosis (through portal hypertension causing splenic congestion), reactive hepatitis, and toxic hepatitis.",
+            "sensitivity_hints": "Splenomegaly is caused by cirrhosis (portal hypertension), reactive hepatitis, and toxic hepatitis.",
+            "related_domain_knowledge": [
+                "Portal hypertension causes congestive splenomegaly.",
+                "Splenomegaly contributes to thrombocytopenia (platelet sequestration).",
+                "Normal spleen is not palpable; palpability indicates enlargement."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "spleen_enlargement"
+        },
+        {
+            "name": "consciousness",
+            "display_name": "Altered Consciousness",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Altered level of consciousness.",
+            "extended_description": "Reduced or altered level of consciousness, ranging from confusion to coma, caused by hepatic encephalopathy.",
+            "sensitivity_hints": "Altered consciousness is a direct consequence of hepatic encephalopathy.",
+            "related_domain_knowledge": [
+                "Hepatic encephalopathy is graded from grade I (subtle changes) to grade IV (coma).",
+                "Ammonia toxicity causes astrocyte swelling and cerebral oedema.",
+                "A medical emergency requiring urgent treatment."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "altered_consciousness"
+        },
+        {
+            "name": "spiders",
+            "display_name": "Spider Naevi",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Spider naevi (spider angiomas) on the skin.",
+            "extended_description": "Small vascular lesions on the skin with a central arteriole and radiating capillaries, resembling a spider. Caused by cirrhosis through hyperoestrogenaemia due to impaired hepatic oestrogen metabolism.",
+            "sensitivity_hints": "Spider naevi are caused by cirrhosis through oestrogen excess.",
+            "related_domain_knowledge": [
+                "Spider naevi are found in the distribution of the superior vena cava.",
+                "More than 5 spider naevi is considered pathological.",
+                "Result from increased circulating oestrogens not cleared by the liver."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "spider_naevi"
+        },
+        {
+            "name": "jaundice",
+            "display_name": "Jaundice",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Yellow discolouration of skin and eyes.",
+            "extended_description": "Visible yellowing of the skin and sclerae caused by elevated serum bilirubin levels. Clinically apparent when bilirubin exceeds approximately 35 micromol/L.",
+            "sensitivity_hints": "Jaundice is directly caused by elevated serum bilirubin.",
+            "related_domain_knowledge": [
+                "Jaundice becomes clinically apparent at bilirubin >35 micromol/L.",
+                "Scleral icterus is often the first sign noticed.",
+                "Can be pre-hepatic, hepatic, or post-hepatic in origin."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "skin_yellowing"
+        },
+        {
+            "name": "albumin",
+            "display_name": "Serum Albumin",
+            "type": "categorical",
+            "states": [
+                "normal_70_to_50",
+                "low_49_to_30",
+                "very_low_29_to_0"
+            ],
+            "role": "endogenous",
+            "category": "laboratory_test",
+            "short_description": "Serum albumin level (g/L ranges).",
+            "extended_description": "Blood albumin concentration, a marker of hepatic synthetic function. Reduced by cirrhosis due to impaired albumin production by damaged hepatocytes.",
+            "sensitivity_hints": "Albumin is reduced by cirrhosis, reflecting impaired hepatic synthetic function.",
+            "related_domain_knowledge": [
+                "Albumin has a half-life of approximately 20 days.",
+                "Low albumin indicates chronic rather than acute liver disease.",
+                "Albumin is a component of the Child-Pugh score.",
+                "Hypoalbuminaemia contributes to oedema and ascites."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "serum_albumin_level"
+        },
+        {
+            "name": "edge",
+            "display_name": "Liver Edge Character",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Abnormal liver edge on palpation (sharp or firm).",
+            "extended_description": "The character of the liver edge on physical examination. In cirrhosis, the liver edge becomes firm and sharp rather than the normal soft, rounded edge.",
+            "sensitivity_hints": "Abnormal liver edge is caused by cirrhosis.",
+            "related_domain_knowledge": [
+                "Normal liver edge is soft and smooth.",
+                "Cirrhotic liver has a firm, sharp, and sometimes nodular edge.",
+                "Liver edge character helps distinguish cirrhosis from other causes of hepatomegaly."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "liver_edge_palpation"
+        },
+        {
+            "name": "irregular_liver",
+            "display_name": "Liver Surface Irregularity",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Irregular liver surface on palpation or imaging.",
+            "extended_description": "Nodularity or irregularity of the liver surface, detected by palpation or imaging. Caused by cirrhosis through regenerative nodule formation.",
+            "sensitivity_hints": "Irregular liver surface is caused by cirrhosis (regenerative nodules).",
+            "related_domain_knowledge": [
+                "Macronodular and micronodular patterns occur in cirrhosis.",
+                "Ultrasound can detect surface irregularity.",
+                "A specific sign of cirrhosis on physical examination."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "liver_surface_irregularity"
+        },
+        {
+            "name": "hbc_anti",
+            "display_name": "Hepatitis B Core Antibody",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "serological_marker",
+            "short_description": "Hepatitis B core antibody (anti-HBc) detected.",
+            "extended_description": "Presence of antibodies against hepatitis B core antigen, indicating previous or ongoing hepatitis B infection. Influenced by viral hepatitis history and chronic hepatitis status.",
+            "sensitivity_hints": "Anti-HBc indicates past or present hepatitis B exposure. Caused by viral hepatitis history and chronic hepatitis.",
+            "related_domain_knowledge": [
+                "Anti-HBc appears early in infection and persists for life.",
+                "IgM anti-HBc indicates acute infection; IgG indicates past exposure.",
+                "Present in both resolved and chronic hepatitis B."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "hepatitis_b_core_antibody"
+        },
+        {
+            "name": "hcv_anti",
+            "display_name": "Hepatitis C Antibody",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "serological_marker",
+            "short_description": "Hepatitis C antibody (anti-HCV) detected.",
+            "extended_description": "Presence of antibodies against hepatitis C virus, indicating previous or ongoing hepatitis C infection. Influenced by viral hepatitis history and chronic hepatitis status.",
+            "sensitivity_hints": "Anti-HCV indicates hepatitis C exposure. Caused by viral hepatitis history and chronic hepatitis.",
+            "related_domain_knowledge": [
+                "Anti-HCV appears 4-10 weeks after infection.",
+                "Does not distinguish between active and resolved infection.",
+                "HCV RNA testing is needed to confirm active infection."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "hepatitis_c_antibody"
+        },
+        {
+            "name": "palms",
+            "display_name": "Palmar Erythema",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Redness of the palms (palmar erythema).",
+            "extended_description": "Reddening of the palms, particularly the thenar and hypothenar eminences, caused by cirrhosis through hyperoestrogenaemia and altered vascular tone.",
+            "sensitivity_hints": "Palmar erythema is caused by cirrhosis through oestrogen excess.",
+            "related_domain_knowledge": [
+                "Palmar erythema results from increased circulating oestrogens.",
+                "Found in approximately 25% of cirrhosis patients.",
+                "Also seen in pregnancy and thyrotoxicosis."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "palmar_erythema"
+        },
+        {
+            "name": "hbeag",
+            "display_name": "Hepatitis B e Antigen",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "serological_marker",
+            "short_description": "Hepatitis B e antigen (HBeAg) detected.",
+            "extended_description": "Presence of hepatitis B e antigen in serum, indicating high viral replication and infectivity. Influenced by viral hepatitis history and chronic hepatitis status.",
+            "sensitivity_hints": "HBeAg indicates active viral replication. Caused by viral hepatitis history and chronic hepatitis.",
+            "related_domain_knowledge": [
+                "HBeAg positivity indicates active viral replication.",
+                "HBeAg seroconversion to anti-HBe marks reduced replication.",
+                "HBeAg-positive chronic hepatitis B has higher viral loads."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "hepatitis_b_e_antigen"
+        },
+        {
+            "name": "carcinoma",
+            "display_name": "Hepatocellular Carcinoma",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "endogenous",
+            "category": "disease_process",
+            "short_description": "Hepatocellular carcinoma (liver cancer).",
+            "extended_description": "Primary liver cancer (hepatocellular carcinoma), a serious complication of cirrhosis and primary biliary cholangitis. Develops in the setting of chronic liver damage and regenerative nodule formation.",
+            "sensitivity_hints": "Hepatocellular carcinoma is caused by cirrhosis and primary biliary cholangitis.",
+            "related_domain_knowledge": [
+                "HCC is the fifth most common cancer worldwide.",
+                "Major risk factors include cirrhosis, chronic hepatitis B and C.",
+                "Surveillance with ultrasound and AFP is recommended in cirrhosis.",
+                "Prognosis depends on tumour stage and liver function."
+            ],
+            "references": [
+                "Onisko2001"
+            ],
+            "llm_name": "liver_cancer"
+        }
+    ]
+}
