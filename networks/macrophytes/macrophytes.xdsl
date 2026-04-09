@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<smile version="1.0" id="macrophytes">
+  <nodes>
+    <cpt id="Ecosystem">
+      <state id="Standing_floating" />
+      <state id="Standing_submerged" />
+      <state id="Flowing_submerged" />
+      <probabilities>0.333333 0.333333 0.333333</probabilities>
+    </cpt>
+    <cpt id="EcosystemServices">
+      <state id="Flooding" />
+      <state id="Birds" />
+      <state id="Nutrient_retention" />
+      <state id="Angling" />
+      <state id="Swimming" />
+      <state id="Boating" />
+      <state id="Hydropower" />
+      <state id="Irrigation" />
+      <state id="Invasive_species" />
+      <probabilities>0.1 0 0.1 0.4 0.1 0 0.2 0.1 0</probabilities>
+    </cpt>
+    <cpt id="PlantRemoval">
+      <state id="None" />
+      <state id="Partial" />
+      <state id="Full" />
+      <probabilities>0 0.25 0.75 1 0 0 0.75 0.25 0 0 1 0 0 0.25 0.75 0 0 1 0 0.25 0.75 0 0.5 0.5 0 0 1</probabilities>
+      <parents>EcosystemServices</parents>
+    </cpt>
+    <cpt id="EpiphyticInvertebrates">
+      <state id="Low" />
+      <state id="Medium" />
+      <state id="High" />
+      <probabilities>0.75 0.25 0 0 0.25 0.75 0 0.25 0.75 0.5 0.5 0 0 0.25 0.75 0 0.25 0.75 0.25 0.5 0.25 1 0 0 1 0 0</probabilities>
+      <parents>Ecosystem PlantRemoval</parents>
+    </cpt>
+    <cpt id="BenthicFishForaging">
+      <state id="Low" />
+      <state id="Medium" />
+      <state id="High" />
+      <probabilities>0 0 1 0 1 0 1 0 0</probabilities>
+      <parents>EpiphyticInvertebrates</parents>
+    </cpt>
+    <cpt id="Flow">
+      <state id="Low" />
+      <state id="Medium" />
+      <state id="High" />
+      <probabilities>1 0 0 1 0 0 0.75 0.25 0 1 0 0 1 0 0 0 0.5 0.5 1 0 0 1 0 0 0 0 1</probabilities>
+      <parents>Ecosystem PlantRemoval</parents>
+    </cpt>
+    <cpt id="PiscivorousFish">
+      <state id="Absent" />
+      <state id="Present" />
+      <probabilities>0.5 0.5</probabilities>
+    </cpt>
+    <cpt id="PiscivorousFishPredation">
+      <state id="Low" />
+      <state id="High" />
+      <probabilities>1 0 1 0 1 0 0.5 0.5 1 0 0 1</probabilities>
+      <parents>PiscivorousFish PlantRemoval</parents>
+    </cpt>
+    <cpt id="PlanktivorousFish">
+      <state id="Low" />
+      <state id="High" />
+      <probabilities>0 1 1 0</probabilities>
+      <parents>PiscivorousFishPredation</parents>
+    </cpt>
+    <cpt id="Zooplankton">
+      <state id="Low" />
+      <state id="Medium" />
+      <state id="High" />
+      <probabilities>0 0 1 0 1 0 1 0 0 0.5 0.5 0 0.75 0.25 0 1 0 0</probabilities>
+      <parents>Flow PlanktivorousFish</parents>
+    </cpt>
+    <cpt id="Disturbance">
+      <state id="Low" />
+      <state id="Medium" />
+      <state id="High" />
+      <probabilities>1 0 0 0 1 0 0 0 1 0 1 0 0 0.5 0.5 0.333333 0.333333 0.333333 0 0.75 0.25 0.333333 0.333333 0.333333 0.333333 0.333333 0.333333</probabilities>
+      <parents>Flow Zooplankton</parents>
+    </cpt>
+    <cpt id="Light">
+      <state id="Low" />
+      <state id="High" />
+      <probabilities>1 0 0.5 0.5 0.5 0.5 0.5 0.5 0.25 0.75 0.25 0.75 0 1 0 1 0 1</probabilities>
+      <parents>Ecosystem PlantRemoval</parents>
+    </cpt>
+    <cpt id="NutrientLoading">
+      <state id="Low" />
+      <state id="Medium" />
+      <state id="High" />
+      <probabilities>0.525 0.275 0.2</probabilities>
+    </cpt>
+    <cpt id="Resources">
+      <state id="Low" />
+      <state id="Medium" />
+      <state id="High" />
+      <probabilities>1 0 0 0.9 0.1 0 0.8 0.2 0 0.75 0.25 0 0.5 0.5 0 0.25 0.75 0 0.75 0.25 0 0.7 0.3 0 0.65 0.35 0 0 0.75 0.25 0 0.65 0.35 0 0.55 0.45 0.5 0.5 0 0.5 0.5 0 0.5 0.5 0 0 0 1 0 0 1 0 0 1</probabilities>
+      <parents>BenthicFishForaging Light NutrientLoading</parents>
+    </cpt>
+    <cpt id="Phytoplankton">
+      <state id="Low" />
+      <state id="Medium" />
+      <state id="High" />
+      <probabilities>0.5 0.5 0 0.75 0.25 0 1 0 0 0 0.5 0.5 0 1 0 0.5 0.5 0 0 0 1 0 0.5 0.5 0 1 0</probabilities>
+      <parents>Disturbance Resources</parents>
+    </cpt>
+  </nodes>
+</smile>

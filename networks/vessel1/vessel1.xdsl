@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This network was created in BNBENCH -->
+<smile version="1.0" id="bnbench" numsamples="100000" discsamples="100000">
+    <nodes>
+        <cpt id="DesignDefect">
+            <state id="No" />
+            <state id="Yes" />
+            <probabilities>0.96 0.04</probabilities>
+        </cpt>
+        <cpt id="UsedHuntingEquipment">
+            <state id="Improper" />
+            <state id="Proper" />
+            <probabilities>0.07 0.93</probabilities>
+        </cpt>
+        <cpt id="PlannedMaintenance">
+            <state id="Completed" />
+            <state id="Uncompleted" />
+            <probabilities>0.9 0.1</probabilities>
+        </cpt>
+        <cpt id="UnstableLoading">
+            <state id="No" />
+            <state id="Yes" />
+            <probabilities>0.87 0.13</probabilities>
+        </cpt>
+        <cpt id="WeatherAndSeaConditions">
+            <state id="Bad" />
+            <state id="Good" />
+            <probabilities>0.33 0.67</probabilities>
+        </cpt>
+        <cpt id="VesselAge">
+            <state id="New" />
+            <state id="Old" />
+            <probabilities>0.26 0.74</probabilities>
+        </cpt>
+        <cpt id="Overload">
+            <state id="No" />
+            <state id="Yes" />
+            <probabilities>0.84 0.16</probabilities>
+        </cpt>
+        <cpt id="CarryingLoadAboveTransportLimits">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>Overload</parents>
+            <probabilities>1.0 0.0 0.0 1.0</probabilities>
+        </cpt>
+        <cpt id="LossOfWaterTightness">
+            <state id="Absent" />
+            <state id="Present" />
+            <parents>VesselAge</parents>
+            <probabilities>1.0 0.0 0.91 0.09</probabilities>
+        </cpt>
+        <cpt id="VesselStructure">
+            <state id="Normal" />
+            <state id="Worn" />
+            <parents>VesselAge</parents>
+            <probabilities>0.625 0.375 0.28 0.72</probabilities>
+        </cpt>
+        <cpt id="VesselPipelines">
+            <state id="Corroded" />
+            <state id="Normal" />
+            <parents>PlannedMaintenance VesselAge</parents>
+            <probabilities>0.0 1.0 0.9 0.1 0.08 0.92 0.96 0.04</probabilities>
+        </cpt>
+        <cpt id="HuntingEquipmentOverload">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>UsedHuntingEquipment</parents>
+            <probabilities>0.0 1.0 0.87 0.13</probabilities>
+        </cpt>
+        <cpt id="LossOfStability">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>DesignDefect HuntingEquipmentOverload UnstableLoading</parents>
+            <probabilities>1.0 0.0 0.6 0.4 0.5 0.5 0.0 1.0 0.9 0.1 0.5 0.5 0.25 0.75 0.0 1.0</probabilities>
+        </cpt>
+        <cpt id="WaterIntake">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>LossOfWaterTightness VesselPipelines VesselStructure</parents>
+            <probabilities>0.9 0.1 0.26 0.74 1.0 0.0 0.4 0.6 0.57 0.43 0.0 1.0 0.7 0.3 0.06 0.94</probabilities>
+        </cpt>
+        <cpt id="LossOfBuoyancy">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>WaterIntake</parents>
+            <probabilities>0.96 0.04 0.0 1.0</probabilities>
+        </cpt>
+        <cpt id="Sinking">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>CarryingLoadAboveTransportLimits LossOfBuoyancy LossOfStability WeatherAndSeaConditions</parents>
+            <probabilities>0.67 0.33 1.0 0.0 0.0 1.0 0.77 0.23 0.0 1.0 0.65 0.35 0.0 1.0 0.37 0.63 0.0 1.0 0.9 0.1 0.0 1.0 0.62 0.38 0.0 1.0 0.5 0.5 0.0 1.0 0.0 1.0</probabilities>
+        </cpt>
+    </nodes>
+    <extensions>
+        <genie version="1.0" app="GeNIe 4.0.1922.0 ACADEMIC" name="Network1">
+            <node id="DesignDefect">
+                <name>DesignDefect</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 100 100 140</position>
+            </node>
+            <node id="UsedHuntingEquipment">
+                <name>UsedHuntingEquipment</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 100 200 140</position>
+            </node>
+            <node id="PlannedMaintenance">
+                <name>PlannedMaintenance</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 100 300 140</position>
+            </node>
+            <node id="UnstableLoading">
+                <name>UnstableLoading</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 100 400 140</position>
+            </node>
+            <node id="WeatherAndSeaConditions">
+                <name>WeatherAndSeaConditions</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 100 500 140</position>
+            </node>
+            <node id="VesselAge">
+                <name>VesselAge</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>520 100 600 140</position>
+            </node>
+            <node id="Overload">
+                <name>Overload</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>620 100 700 140</position>
+            </node>
+            <node id="CarryingLoadAboveTransportLimits">
+                <name>CarryingLoadAboveTransportLimits</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 200 100 240</position>
+            </node>
+            <node id="LossOfWaterTightness">
+                <name>LossOfWaterTightness</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 200 200 240</position>
+            </node>
+            <node id="VesselStructure">
+                <name>VesselStructure</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 200 300 240</position>
+            </node>
+            <node id="VesselPipelines">
+                <name>VesselPipelines</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 200 400 240</position>
+            </node>
+            <node id="HuntingEquipmentOverload">
+                <name>HuntingEquipmentOverload</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 200 500 240</position>
+            </node>
+            <node id="LossOfStability">
+                <name>LossOfStability</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 300 100 340</position>
+            </node>
+            <node id="WaterIntake">
+                <name>WaterIntake</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 300 200 340</position>
+            </node>
+            <node id="LossOfBuoyancy">
+                <name>LossOfBuoyancy</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 400 100 440</position>
+            </node>
+            <node id="Sinking">
+                <name>Sinking</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 500 100 540</position>
+            </node>
+        </genie>
+    </extensions>
+</smile>

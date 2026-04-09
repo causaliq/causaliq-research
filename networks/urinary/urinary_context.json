@@ -1,0 +1,2225 @@
+{
+    "schema_version": "2.0",
+    "network": "urinary",
+    "domain": "paediatric_urology",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a paediatric urinary tract infection diagnostic model, with disguised variable names to prevent memorisation.",
+    "provenance": {
+        "source_network": "urinary",
+        "source_reference": "Ramsay, J. A., Mascaro, S., Campbell, A. J., Foley, D. A., Mace, A. O., Ingram, P., ... & Wu, Y. (2022). Urinary tract infections in children: building a causal model-based decision support tool for diagnosis with domain knowledge and prospective data. BMC Medical Research Methodology, 22(1), 218.",
+        "source_url": null,
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "Network derived from a paediatric UTI diagnostic study at a children's hospital. 36 variables and 109 edges. Low memorisation risk as this is a domain-specific clinical model from a recent publication. The network integrates clinical presentation, laboratory findings, microbiology results, and treatment decisions for diagnosing urinary tract infections in children."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a diagnostic network for urinary tract infections in paediatric patients.",
+            "Consider causal ordering: patient demographics → predisposing conditions → pathogen presence → infection status → clinical manifestations and laboratory findings.",
+            "Age is the primary hub variable influencing nearly all other variables through different mechanisms.",
+            "The central diagnostic variable is the underlying cause of infection (bacterial species or none).",
+            "Pathogen presence in the urinary tract is distinct from whether that pathogen causes a UTI.",
+            "Laboratory tests (urine dipstick, microscopy, culture) are downstream effects of infection status, not causes.",
+            "Clinical symptoms (fever, pain, irritability) are manifestations caused by infection, not vice versa.",
+            "Sample collection method and prior antibiotic use affect test sensitivity and contamination risk.",
+            "There are three pathogen groups: gram-negative rods (E. coli being dominant), other gram-negative organisms, and gram-positive organisms.",
+            "Contamination of urine samples can produce false-positive culture results even without true infection."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original variable names from the source publication.",
+            "Any hint about the specific academic paper or hospital context.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, conditional rates, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "base_rate",
+                "conditional_rates",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "AgeGroup",
+            "display_name": "Patient Age Category",
+            "aliases": [
+                "AgeGroup",
+                "age",
+                "patient_age"
+            ],
+            "type": "ordinal",
+            "states": [
+                "Above5Yr",
+                "Btw2And5Yr",
+                "Btw6MonAnd2Yr",
+                "LessThan6Mon"
+            ],
+            "role": "exogenous",
+            "category": "demographic",
+            "short_description": "Age category of the paediatric patient.",
+            "extended_description": "Ordinal variable representing the child's age group in clinically meaningful bands: above 5 years, 2-5 years, 6 months to 2 years, and under 6 months. Age is the primary hub variable in this network, influencing nearly every other variable including symptom presentation, pathogen prevalence, specimen collection approach, laboratory reference ranges, and treatment decisions. Neonates and infants present very differently from older children.",
+            "base_rate": {
+                "Above5Yr": 0.357,
+                "Btw2And5Yr": 0.226,
+                "Btw6MonAnd2Yr": 0.237,
+                "LessThan6Mon": 0.18
+            },
+            "sensitivity_hints": "Age is the DOMINANT hub variable with direct influence on almost every other node. It affects symptom presentation, pathogen epidemiology, laboratory interpretation, and management decisions. Consider it as a potential parent for virtually all downstream variables.",
+            "related_domain_knowledge": [
+                "Neonates and young infants present with non-specific symptoms (fever, irritability, poor feeding) rather than classic urinary symptoms.",
+                "Older children can report urinary symptoms (dysuria, frequency) which younger children cannot.",
+                "Male predominance in UTI occurs only in the neonatal period; females predominate thereafter.",
+                "Age determines urine collection method feasibility (suprapubic aspiration in neonates, clean-catch in older children).",
+                "Normal laboratory ranges differ substantially by age group."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "child_age_band"
+        },
+        {
+            "name": "PrevUriKidProbs",
+            "display_name": "Previous Urinary or Kidney Problems",
+            "aliases": [
+                "PrevUriKidProbs",
+                "urinary_history",
+                "prior_kidney_problems"
+            ],
+            "type": "binary",
+            "states": [
+                "Reported",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "medical_history",
+            "short_description": "Whether the child has a reported history of prior urinary or kidney problems.",
+            "extended_description": "Binary indicator of known previous urinary tract or kidney conditions. History rates vary by age group—older children are more likely to have a documented history of prior UTIs or structural abnormalities (vesicoureteral reflux, hydronephrosis). Prior urinary problems influence antibiotic prescribing, specimen collection decisions, pathogen profiles, and clinical phenotype presentation.",
+            "conditional_rates": {
+                "above_5yr": 0.605,
+                "btw_2_5yr": 0.587,
+                "btw_6mo_2yr": 0.386,
+                "less_6mo": 0.307
+            },
+            "sensitivity_hints": "Previous urinary history is influenced by age (older children have more time to accumulate diagnoses). It affects downstream clinical decisions (antibiotic choice, collection method) and pathogen profiles.",
+            "related_domain_knowledge": [
+                "Children with prior UTIs have higher recurrence rates and different pathogen profiles.",
+                "Structural urinary tract abnormalities increase susceptibility to infection.",
+                "Prior history influences empiric antibiotic selection (broader spectrum for recurrent UTIs).",
+                "History documentation depends on age—neonates rarely have prior urinary history."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "prior_urinary_history"
+        },
+        {
+            "name": "Sex",
+            "display_name": "Patient Biological Sex",
+            "aliases": [
+                "Sex",
+                "gender",
+                "biological_sex"
+            ],
+            "type": "binary",
+            "states": [
+                "Female",
+                "Male"
+            ],
+            "role": "endogenous",
+            "category": "demographic",
+            "short_description": "Biological sex of the paediatric patient, with distribution varying by age group.",
+            "extended_description": "Binary indicator of patient sex. In this model, sex distribution depends on age group because the sex ratio of UTI patients reverses with age: males predominate in the neonatal period (~67% male) while females strongly predominate in older children (~82% female). Sex influences pathogen presence, contamination risk, and urine specimen characteristics.",
+            "conditional_rates": {
+                "above_5yr_female": 0.824,
+                "btw_2_5yr_female": 0.841,
+                "btw_6mo_2yr_female": 0.732,
+                "less_6mo_female": 0.333
+            },
+            "sensitivity_hints": "Sex distribution depends on age (reversal of male/female predominance by age). Sex influences contamination risk, pathogen profiles, and epithelial cell counts in urine. It does NOT directly cause infection.",
+            "related_domain_knowledge": [
+                "UTI is much more common in females after the neonatal period due to shorter urethra.",
+                "Male neonates have higher UTI rates, possibly related to lack of circumcision.",
+                "Female urine specimens have higher contamination risk from perineal flora.",
+                "Sex affects which pathogens are more likely to cause infection."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "patient_sex"
+        },
+        {
+            "name": "Diarrhea",
+            "display_name": "Concurrent Diarrhoea",
+            "aliases": [
+                "Diarrhea",
+                "diarrhoea",
+                "loose_stools"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "comorbid_symptom",
+            "short_description": "Whether the child has concurrent diarrhoea.",
+            "extended_description": "Binary indicator of concurrent diarrhoeal illness. Diarrhoea rates vary by age group. The presence of diarrhoea has important implications: it increases faecal contamination risk of urine specimens, affects pathogen exposure (enteric organisms), and may contribute to abdominal symptoms that overlap with UTI presentation.",
+            "conditional_rates": {
+                "above_5yr": 0.099,
+                "btw_2_5yr": 0.138,
+                "btw_6mo_2yr": 0.092,
+                "less_6mo": 0.114
+            },
+            "sensitivity_hints": "Diarrhoea is a comorbid condition influenced by age. It increases specimen contamination risk and affects pathogen presence through faecal-perineal exposure. It is NOT caused by UTI.",
+            "related_domain_knowledge": [
+                "Diarrhoea increases faecal contamination of urine specimens, especially in young children.",
+                "Enteric pathogens from diarrhoea can colonise the periurethral area and cause ascending UTI.",
+                "Diarrhoea may co-occur with UTI but through separate mechanisms.",
+                "Abdominal pain from diarrhoea can mimic UTI symptoms."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "concurrent_diarrhoea"
+        },
+        {
+            "name": "RespSymp",
+            "display_name": "Concurrent Respiratory Symptoms",
+            "aliases": [
+                "RespSymp",
+                "respiratory_symptoms",
+                "cough_cold"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "comorbid_symptom",
+            "short_description": "Whether the child has concurrent respiratory symptoms (cough, rhinorrhoea, wheeze).",
+            "extended_description": "Binary indicator of concurrent upper or lower respiratory tract symptoms. Respiratory symptoms occur in 24-32% of patients depending on age. Respiratory illness can cause fever independently of UTI, complicating diagnostic assessment. The presence of respiratory symptoms modulates the interpretation of fever and presentation phenotype.",
+            "conditional_rates": {
+                "above_5yr": 0.242,
+                "btw_2_5yr": 0.239,
+                "btw_6mo_2yr": 0.322,
+                "less_6mo": 0.287
+            },
+            "sensitivity_hints": "Respiratory symptoms are a concurrent illness indicator influenced by age. They affect fever interpretation and clinical presentation but do NOT influence pathogen presence or laboratory results directly.",
+            "related_domain_knowledge": [
+                "Viral respiratory illness is the most common alternative cause of fever in children.",
+                "Co-occurring respiratory infection can complicate UTI diagnosis by providing an alternative explanation for fever.",
+                "Respiratory symptoms do not cause UTI but may co-occur, creating diagnostic confusion.",
+                "Younger children have higher rates of respiratory infections."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "respiratory_illness"
+        },
+        {
+            "name": "OnAbxEDGroup3",
+            "display_name": "Pre-existing Antibiotic Therapy",
+            "aliases": [
+                "OnAbxEDGroup3",
+                "prior_antibiotics",
+                "current_antibiotics"
+            ],
+            "type": "categorical",
+            "states": [
+                "Broader",
+                "Narrow",
+                "No"
+            ],
+            "role": "endogenous",
+            "category": "treatment",
+            "short_description": "Whether the child is already receiving antibiotics at presentation, and their spectrum.",
+            "extended_description": "Categorical variable indicating whether the child was on antibiotics at the time of emergency department presentation: broad-spectrum, narrow-spectrum, or none. Prior antibiotic use depends on age and urinary history (children with recurrent UTIs are more likely to be on prophylactic antibiotics). Antibiotics affect urine culture results by suppressing bacterial growth, potentially causing false-negative cultures and altering the apparent pathogen profile.",
+            "sensitivity_hints": "Prior antibiotic use is determined by age and urinary history. It has broad downstream effects on laboratory results (cultures, microscopy) by suppressing bacterial growth. It does NOT affect the true infection status but affects TEST results.",
+            "related_domain_knowledge": [
+                "Prior antibiotic exposure reduces culture sensitivity (false negatives).",
+                "Children with recurrent UTIs may be on prophylactic antibiotics.",
+                "Broad-spectrum antibiotics suppress more organisms than narrow-spectrum.",
+                "Antibiotic exposure affects pathogen detection but not the true underlying infection."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "prior_antibiotic_therapy"
+        },
+        {
+            "name": "CollMethod",
+            "display_name": "Urine Collection Method",
+            "aliases": [
+                "CollMethod",
+                "collection_method",
+                "specimen_type"
+            ],
+            "type": "categorical",
+            "states": [
+                "Catheter",
+                "CleanCatch",
+                "SupraAsp"
+            ],
+            "role": "endogenous",
+            "category": "clinical_procedure",
+            "short_description": "Method used to collect the urine specimen (catheter, clean catch, or suprapubic aspiration).",
+            "extended_description": "Categorical variable indicating the urine specimen collection method. Choice depends on patient age and urinary history: suprapubic aspiration is used more in neonates, catheterisation in infants, and clean-catch in older children. Collection method directly affects specimen contamination risk and epithelial cell counts—suprapubic aspiration has the lowest contamination risk, while clean-catch has the highest.",
+            "sensitivity_hints": "Collection method is determined by age and clinical history. It affects specimen quality (contamination risk, epithelial cells) but NOT the true infection status. Consider it a confounder of test results.",
+            "related_domain_knowledge": [
+                "Suprapubic aspiration is the gold standard with lowest contamination but is invasive.",
+                "Clean-catch specimens have higher contamination rates, especially in young children.",
+                "Catheter specimens are intermediate in contamination risk.",
+                "Collection method choice is influenced by patient age and cooperativeness.",
+                "Contamination affects culture interpretation and can cause false-positive diagnoses."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "specimen_collection_technique"
+        },
+        {
+            "name": "EcoliPresence",
+            "display_name": "E. coli Colonisation Level",
+            "aliases": [
+                "EcoliPresence",
+                "ecoli",
+                "ecoli_colonisation"
+            ],
+            "type": "binary",
+            "states": [
+                "High",
+                "Low"
+            ],
+            "role": "endogenous",
+            "category": "microbiology",
+            "short_description": "Level of E. coli presence in the urinary tract.",
+            "extended_description": "Binary indicator of E. coli colonisation level in the urinary tract (high versus low). E. coli presence depends on age, sex, diarrhoea (faecal source of E. coli), prior antibiotics (may suppress E. coli), and urinary history. E. coli is the dominant uropathogen in children, causing the majority of paediatric UTIs. High E. coli presence increases the probability of E. coli as the causative agent.",
+            "sensitivity_hints": "E. coli presence is a pathogen colonisation variable influenced by multiple upstream factors. It feeds into both the causal diagnosis (what causes the UTI) and laboratory detection (culture results, nitrite tests). E. coli is the DOMINANT pathogen in paediatric UTI.",
+            "related_domain_knowledge": [
+                "E. coli causes approximately 80% of paediatric UTIs.",
+                "E. coli originates from faecal flora and ascends via the periurethral route.",
+                "Diarrhoea increases periurethral E. coli colonisation.",
+                "Prior antibiotics may reduce E. coli colonisation levels.",
+                "Female anatomy facilitates E. coli ascending infection."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "primary_uropathogen_colonisation"
+        },
+        {
+            "name": "GramPosPresence",
+            "display_name": "Gram-Positive Organism Colonisation Level",
+            "aliases": [
+                "GramPosPresence",
+                "gram_positive",
+                "gp_colonisation"
+            ],
+            "type": "binary",
+            "states": [
+                "High",
+                "Low"
+            ],
+            "role": "endogenous",
+            "category": "microbiology",
+            "short_description": "Level of gram-positive organism presence in the urinary tract.",
+            "extended_description": "Binary indicator of gram-positive bacterial colonisation in the urinary tract. Gram-positive organisms (Enterococcus, Staphylococcus) are less common uropathogens than E. coli but may cause UTI, particularly in patients with structural abnormalities or prior antibiotic exposure. Presence depends on age, sex, diarrhoea, prior antibiotics, and urinary history.",
+            "sensitivity_hints": "Gram-positive colonisation is influenced by the same upstream factors as E. coli but represents a different pathogen group. Gram-positive UTIs are less common and associated with different clinical profiles.",
+            "related_domain_knowledge": [
+                "Enterococcus species are the most common gram-positive uropathogens in children.",
+                "Gram-positive UTIs are more common in children with urinary tract abnormalities.",
+                "Prior broad-spectrum antibiotics may select for gram-positive organisms.",
+                "Gram-positive organisms do not produce nitrite (important for dipstick interpretation)."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "gram_positive_colonisation"
+        },
+        {
+            "name": "OtherGramNegPresence",
+            "display_name": "Other Gram-Negative Organism Colonisation Level",
+            "aliases": [
+                "OtherGramNegPresence",
+                "other_gram_neg",
+                "non_ecoli_gn"
+            ],
+            "type": "binary",
+            "states": [
+                "High",
+                "Low"
+            ],
+            "role": "endogenous",
+            "category": "microbiology",
+            "short_description": "Level of non-E. coli gram-negative organism presence in the urinary tract.",
+            "extended_description": "Binary indicator of colonisation by gram-negative organisms other than E. coli (Klebsiella, Proteus, Pseudomonas, etc.). These organisms are secondary uropathogens, more common in children with structural abnormalities, prior antibiotic exposure, or healthcare-associated infections. Presence depends on the same upstream factors as other pathogen groups.",
+            "sensitivity_hints": "Other gram-negative presence covers a heterogeneous group of secondary uropathogens. Like E. coli, gram-negative organisms produce nitrite, which aids dipstick diagnosis.",
+            "related_domain_knowledge": [
+                "Klebsiella and Proteus are the most common non-E. coli gram-negative uropathogens.",
+                "These organisms are more common in complicated UTIs and recurrent infections.",
+                "Most gram-negative organisms produce nitrite, aiding dipstick diagnosis.",
+                "Proteus infections are more common in males, particularly uncircumcised infants."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "secondary_gramneg_colonisation"
+        },
+        {
+            "name": "Epithelials",
+            "display_name": "Epithelial Cell Count in Urine",
+            "aliases": [
+                "Epithelials",
+                "epithelial_cells",
+                "squamous_cells"
+            ],
+            "type": "ordinal",
+            "states": [
+                "Low",
+                "Moderate"
+            ],
+            "role": "endogenous",
+            "category": "laboratory",
+            "short_description": "Level of epithelial cells present in the urine specimen.",
+            "extended_description": "Ordinal indicator of epithelial cell count in the urine specimen. Epithelial cells indicate contamination from periurethral skin—their presence suggests the specimen may not accurately represent bladder urine. Epithelial counts depend on age, collection method (clean-catch has more contamination), and sex (females have more periurethral epithelial shedding).",
+            "sensitivity_hints": "Epithelial cells are a specimen quality indicator, NOT a disease marker. They are determined by collection method, age, and sex. High counts indicate contamination risk.",
+            "related_domain_knowledge": [
+                "Squamous epithelial cells originate from periurethral skin, not the bladder.",
+                "High epithelial cell counts suggest specimen contamination.",
+                "Clean-catch specimens have higher epithelial counts than catheter or suprapubic specimens.",
+                "Females have higher epithelial contamination than males."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "specimen_epithelial_cells"
+        },
+        {
+            "name": "ContaminationRisk",
+            "display_name": "Specimen Contamination Risk",
+            "aliases": [
+                "ContaminationRisk",
+                "contamination",
+                "specimen_quality"
+            ],
+            "type": "binary",
+            "states": [
+                "High",
+                "Low"
+            ],
+            "role": "endogenous",
+            "category": "specimen_quality",
+            "short_description": "Overall risk of urine specimen contamination.",
+            "extended_description": "Binary indicator of the overall contamination risk for the urine specimen. Contamination risk integrates multiple factors: collection method (suprapubic < catheter < clean-catch), patient age (younger children harder to collect from), sex (females higher risk), and concurrent diarrhoea (faecal contamination). High contamination risk increases the chance of false-positive culture results.",
+            "sensitivity_hints": "Contamination risk is a convergence node summarising specimen quality. It directly affects culture result interpretation—contaminated specimens may show bacterial growth even without true infection. It does NOT indicate true infection.",
+            "related_domain_knowledge": [
+                "Contamination is the primary cause of false-positive urine cultures in children.",
+                "Multiple factors contribute independently to contamination risk.",
+                "Contamination causes bacterial growth on culture that mimics true infection.",
+                "Clinical guidelines recommend repeating contaminated specimens before diagnosing UTI."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "specimen_contamination_level"
+        },
+        {
+            "name": "CauseUTI",
+            "display_name": "Causative Organism of UTI",
+            "aliases": [
+                "CauseUTI",
+                "uti_cause",
+                "uti_diagnosis"
+            ],
+            "type": "categorical",
+            "states": [
+                "EColi",
+                "GramPos",
+                "None",
+                "OtherGramNeg"
+            ],
+            "role": "endogenous",
+            "category": "diagnosis",
+            "short_description": "The causative organism of the urinary tract infection, or none if no UTI present.",
+            "extended_description": "Categorical variable representing the true underlying cause of urinary symptoms: E. coli UTI, gram-positive organism UTI, other gram-negative organism UTI, or no UTI. This is the CENTRAL diagnostic variable in the network. The causative agent depends on the colonisation levels of each pathogen group, patient age, and urinary history. All downstream clinical manifestations and laboratory findings are effects of this variable. E. coli is the most common cause.",
+            "sensitivity_hints": "CauseUTI is the CENTRAL hub variable for the diagnostic portion of the network. All laboratory results (dipstick, microscopy, culture) and clinical symptoms are CAUSED by this variable. It is determined by pathogen colonisation levels, age, and urinary history. Do not reverse the direction—tests detect disease, disease does not follow from tests.",
+            "related_domain_knowledge": [
+                "E. coli causes ~80% of paediatric UTIs; gram-positive and other gram-negative cause the remainder.",
+                "Many children presenting with suspected UTI do NOT have a UTI (CauseUTI = None).",
+                "The causative organism determines the clinical presentation pattern.",
+                "Different organisms have different virulence factors affecting symptom severity.",
+                "This is the target variable for clinical decision support."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "infection_aetiology"
+        },
+        {
+            "name": "Urin_Nitrite",
+            "display_name": "Urine Nitrite Dipstick Result",
+            "aliases": [
+                "Urin_Nitrite",
+                "nitrite",
+                "dipstick_nitrite"
+            ],
+            "type": "binary",
+            "states": [
+                "Detected",
+                "NotDetected"
+            ],
+            "role": "endogenous",
+            "category": "laboratory",
+            "short_description": "Whether nitrite is detected on urine dipstick testing.",
+            "extended_description": "Binary indicator of urine nitrite detection by dipstick. Nitrite is produced by bacterial reduction of urinary nitrate and is specific for gram-negative bacteria (E. coli and other gram-negative organisms). Gram-positive organisms do NOT produce nitrite. Nitrite detection depends on the true cause of UTI and on the colonisation levels of nitrite-producing organisms. Sensitivity is imperfect—brief bladder dwell time in children reduces detection.",
+            "conditional_rates": {
+                "notes": "Positive in gram-negative UTI, negative in gram-positive UTI and no UTI"
+            },
+            "sensitivity_hints": "Nitrite is CAUSED by gram-negative bacterial presence. It is specific for gram-negative infection but has poor sensitivity (many true gram-negative UTIs are nitrite-negative). Gram-positive UTIs are always nitrite-negative.",
+            "related_domain_knowledge": [
+                "Nitrite requires several hours of bladder dwell time for bacterial conversion.",
+                "Children void frequently, reducing nitrite sensitivity to ~50% for UTI.",
+                "Nitrite is highly specific—a positive result strongly suggests gram-negative UTI.",
+                "Gram-positive organisms cannot produce nitrite (different metabolic pathway)."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "urine_nitrite_test"
+        },
+        {
+            "name": "Urin_LeucEst",
+            "display_name": "Urine Leucocyte Esterase Dipstick Result",
+            "aliases": [
+                "Urin_LeucEst",
+                "leucocyte_esterase",
+                "dipstick_le"
+            ],
+            "type": "ordinal",
+            "states": [
+                "High",
+                "Low",
+                "Moderate",
+                "NotDetected"
+            ],
+            "role": "endogenous",
+            "category": "laboratory",
+            "short_description": "Leucocyte esterase level detected on urine dipstick.",
+            "extended_description": "Ordinal indicator of leucocyte esterase detection on urine dipstick. Leucocyte esterase is an enzyme released by white blood cells and indicates pyuria (white cells in urine). It is a marker of urinary tract inflammation caused by infection. Results depend on the cause of UTI (present → inflammation → leucocyte esterase) and age (which affects normal ranges).",
+            "sensitivity_hints": "Leucocyte esterase is CAUSED by urinary inflammation from infection. It is less specific than nitrite but more sensitive. It can be positive in any type of UTI (E. coli, gram-positive, other gram-negative).",
+            "related_domain_knowledge": [
+                "Leucocyte esterase detects white blood cell enzymes indicating inflammation.",
+                "Sensitivity for UTI is approximately 83%, specificity approximately 78%.",
+                "Can be positive from non-UTI causes of urinary inflammation (vulvovaginitis, balanitis).",
+                "Interpretation thresholds vary by age group."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "urine_leucocyte_esterase"
+        },
+        {
+            "name": "Urin_Leuc",
+            "display_name": "Urine Leucocyte Count (Microscopy)",
+            "aliases": [
+                "Urin_Leuc",
+                "urine_wbc",
+                "pyuria"
+            ],
+            "type": "ordinal",
+            "states": [
+                "High",
+                "Low",
+                "Moderate"
+            ],
+            "role": "endogenous",
+            "category": "laboratory",
+            "short_description": "White blood cell count in urine on microscopy examination.",
+            "extended_description": "Ordinal indicator of urinary white blood cell (leucocyte) count on microscopy. Pyuria (elevated urinary WBC) is a hallmark of urinary tract infection, caused by the inflammatory response to bacterial invasion. The degree of pyuria depends on infection status and patient age (which affects reference ranges). Microscopy leucocyte count is the gold-standard measure of urinary inflammation.",
+            "sensitivity_hints": "Urine leucocytes are CAUSED by UTI (inflammatory response). They are a more reliable indicator than dipstick leucocyte esterase. Age affects interpretation of normal ranges.",
+            "related_domain_knowledge": [
+                "Pyuria is the most consistent finding in UTI but is not perfectly sensitive.",
+                "Absence of pyuria makes UTI unlikely but does not exclude it.",
+                "Neonates may have lower pyuria levels even with true infection.",
+                "Leucocyte count is determined by microscopy of centrifuged or uncentrifuged urine."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "urine_white_cell_count"
+        },
+        {
+            "name": "Microscopy_bacts",
+            "display_name": "Bacteria on Urine Microscopy",
+            "aliases": [
+                "Microscopy_bacts",
+                "microscopy_bacteria",
+                "gram_stain"
+            ],
+            "type": "ordinal",
+            "states": [
+                "Few",
+                "Many",
+                "Moderate",
+                "NotSeen"
+            ],
+            "role": "endogenous",
+            "category": "laboratory",
+            "short_description": "Quantity of bacteria seen on urine microscopy (gram stain).",
+            "extended_description": "Ordinal indicator of bacterial quantity observed on urine microscopy or gram stain. Bacterial detection depends on the true infection status (CauseUTI), specimen contamination risk (contaminated specimens show bacteria without true infection), specific pathogen colonisation levels, and antibiotic exposure (which suppresses bacterial counts). This test has the most complex parent structure in the network.",
+            "sensitivity_hints": "Bacteria on microscopy is influenced by BOTH true infection AND contamination. This dual causation makes interpretation complex. Prior antibiotics can suppress counts even in true infection. Six parent variables converge here.",
+            "related_domain_knowledge": [
+                "Gram stain can differentiate gram-positive from gram-negative organisms.",
+                "Contamination causes false-positive bacterial detection on microscopy.",
+                "Antibiotics may suppress bacterial counts even in true infection.",
+                "Many bacteria on microscopy strongly suggests UTI but contamination must be excluded.",
+                "This test has the most parent variables, reflecting its dependence on multiple factors."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "microscopy_bacteria_count"
+        },
+        {
+            "name": "EColi",
+            "display_name": "E. coli Culture Result",
+            "aliases": [
+                "EColi",
+                "ecoli_culture",
+                "ecoli_growth"
+            ],
+            "type": "binary",
+            "states": [
+                "Negative",
+                "Positive"
+            ],
+            "role": "endogenous",
+            "category": "laboratory",
+            "short_description": "Whether E. coli is isolated on urine culture.",
+            "extended_description": "Binary indicator of E. coli growth on urine culture. Culture results depend on true infection status (E. coli UTI), specimen contamination (false positives from periurethral flora), E. coli colonisation level, and prior antibiotic exposure (false negatives from growth suppression). Culture is the reference standard for UTI diagnosis but interpretation requires clinical context.",
+            "sensitivity_hints": "E. coli culture is an OBSERVABLE consequence of true E. coli infection, contamination, and antibiotic suppression. It is NOT the cause of infection—it detects infection. Contamination can produce a positive culture without true UTI.",
+            "related_domain_knowledge": [
+                "Urine culture is the reference standard for UTI diagnosis.",
+                "Significant bacteriuria thresholds differ by collection method.",
+                "Prior antibiotics can cause false-negative cultures.",
+                "Contamination from periurethral E. coli can cause false-positive cultures.",
+                "Colony count and pure versus mixed growth aid interpretation."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "primary_pathogen_culture"
+        },
+        {
+            "name": "GramPos",
+            "display_name": "Gram-Positive Culture Result",
+            "aliases": [
+                "GramPos",
+                "gram_pos_culture",
+                "gp_growth"
+            ],
+            "type": "binary",
+            "states": [
+                "Negative",
+                "Positive"
+            ],
+            "role": "endogenous",
+            "category": "laboratory",
+            "short_description": "Whether gram-positive organisms are isolated on urine culture.",
+            "extended_description": "Binary indicator of gram-positive bacterial growth on urine culture. Results depend on true infection status, contamination risk, gram-positive colonisation level, and prior antibiotic exposure. Gram-positive culture isolates include Enterococcus, Staphylococcus, and Streptococcus species.",
+            "sensitivity_hints": "Gram-positive culture is an OBSERVABLE consequence of true gram-positive infection and specimen quality factors. Same causal structure as E. coli culture but for a different pathogen group.",
+            "related_domain_knowledge": [
+                "Enterococcus is the most common gram-positive UTI pathogen in children.",
+                "Gram-positive organisms are more likely in complicated or recurrent UTIs.",
+                "Contamination with perineal flora can produce false-positive gram-positive cultures.",
+                "Gram-positive organisms are intrinsically resistant to some first-line UTI antibiotics."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "gram_positive_culture"
+        },
+        {
+            "name": "OtherGramNeg",
+            "display_name": "Other Gram-Negative Culture Result",
+            "aliases": [
+                "OtherGramNeg",
+                "other_gn_culture",
+                "secondary_gn_growth"
+            ],
+            "type": "binary",
+            "states": [
+                "Negative",
+                "Positive"
+            ],
+            "role": "endogenous",
+            "category": "laboratory",
+            "short_description": "Whether non-E. coli gram-negative organisms are isolated on urine culture.",
+            "extended_description": "Binary indicator of non-E. coli gram-negative bacterial growth on urine culture. Results depend on true infection status, contamination risk, secondary gram-negative colonisation level, and prior antibiotic exposure. Includes Klebsiella, Proteus, Pseudomonas, and other gram-negative species.",
+            "sensitivity_hints": "Similar causal structure to other culture results: influenced by true infection, contamination, colonisation, and antibiotics.",
+            "related_domain_knowledge": [
+                "Klebsiella is the second most common gram-negative uropathogen after E. coli.",
+                "Proteus infections are more common in male children.",
+                "Pseudomonas suggests structural abnormality or prior instrumentation.",
+                "These organisms are often more resistant than E. coli to first-line antibiotics."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "secondary_gramneg_culture"
+        },
+        {
+            "name": "WCCLevel",
+            "display_name": "Blood White Cell Count Level",
+            "aliases": [
+                "WCCLevel",
+                "blood_wcc",
+                "leucocytosis"
+            ],
+            "type": "ordinal",
+            "states": [
+                "Above18",
+                "Below10",
+                "Btw10And18",
+                "NotDone"
+            ],
+            "role": "endogenous",
+            "category": "laboratory",
+            "short_description": "Blood white cell count level (×10⁹/L) indicating systemic inflammatory response.",
+            "extended_description": "Ordinal indicator of blood white cell count reflecting systemic infection severity. Elevated WCC suggests systemic bacterial infection rather than localised UTI. Results depend on infection status (UTI causes systemic inflammation) and age (which affects normal WCC ranges). A 'NotDone' state reflects that not all children have blood tests performed.",
+            "sensitivity_hints": "Blood WCC is a SYSTEMIC inflammatory marker CAUSED by UTI. It indicates severity of infection. Age affects normal reference ranges. Not always performed (hence NotDone state).",
+            "related_domain_knowledge": [
+                "Leucocytosis suggests systemic infection and may indicate pyelonephritis versus cystitis.",
+                "Normal WCC ranges are higher in young children than adults.",
+                "Very young infants may not mount a robust WCC response to infection.",
+                "Blood tests are not routinely performed in all children with suspected UTI."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "blood_white_cell_count"
+        },
+        {
+            "name": "CRPLevel",
+            "display_name": "C-Reactive Protein Level",
+            "aliases": [
+                "CRPLevel",
+                "crp",
+                "inflammatory_marker"
+            ],
+            "type": "ordinal",
+            "states": [
+                "Above70",
+                "Below15",
+                "Btw15And70",
+                "NotDone"
+            ],
+            "role": "endogenous",
+            "category": "laboratory",
+            "short_description": "C-reactive protein level (mg/L) as a systemic inflammatory marker.",
+            "extended_description": "Ordinal indicator of serum C-reactive protein concentration. CRP is an acute-phase reactant produced by the liver in response to infection and inflammation. Elevated CRP in the context of UTI suggests upper tract involvement (pyelonephritis). Results depend on infection status and age. Not always performed.",
+            "sensitivity_hints": "CRP is a SYSTEMIC inflammatory marker CAUSED by infection. It indicates severity and upper tract involvement. It is not specific to UTI—any infection can elevate CRP.",
+            "related_domain_knowledge": [
+                "CRP > 70 mg/L strongly suggests pyelonephritis rather than simple cystitis.",
+                "CRP rises 6-12 hours after infection onset and peaks at 48 hours.",
+                "Normal CRP is <15 mg/L in children.",
+                "CRP is not specific to UTI—respiratory, gastrointestinal, and other infections also elevate CRP."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "serum_inflammatory_marker"
+        },
+        {
+            "name": "NeutLevel",
+            "display_name": "Blood Neutrophil Count Level",
+            "aliases": [
+                "NeutLevel",
+                "neutrophils",
+                "neutrophilia"
+            ],
+            "type": "ordinal",
+            "states": [
+                "Above15",
+                "Below8",
+                "Btw8And15",
+                "NotDone"
+            ],
+            "role": "endogenous",
+            "category": "laboratory",
+            "short_description": "Blood neutrophil count level (×10⁹/L) as a marker of bacterial infection.",
+            "extended_description": "Ordinal indicator of blood neutrophil count. Neutrophilia is a hallmark of bacterial infection and reflects the innate immune response to UTI. Neutrophil levels depend on infection status, age, and overall white cell count (neutrophils are the major component of leucocytosis in bacterial infection).",
+            "sensitivity_hints": "Neutrophils are CAUSED by bacterial infection and are influenced by WCC level (neutrophils are a component of WCC). Age affects reference ranges. Not always performed.",
+            "related_domain_knowledge": [
+                "Neutrophilia is more specific for bacterial infection than total WCC.",
+                "Neutrophil count correlates with WCC but provides additional specificity.",
+                "Very young infants may have impaired neutrophil responses.",
+                "Neutrophil left-shift (band forms) may indicate severe bacterial infection."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "blood_neutrophil_count"
+        },
+        {
+            "name": "UltraSound",
+            "display_name": "Renal Ultrasound Findings",
+            "aliases": [
+                "UltraSound",
+                "renal_ultrasound",
+                "renal_imaging"
+            ],
+            "type": "categorical",
+            "states": [
+                "Abnormal",
+                "NotDone",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "imaging",
+            "short_description": "Findings on renal and urinary tract ultrasound examination.",
+            "extended_description": "Categorical indicator of renal ultrasound findings: abnormal (hydronephrosis, structural abnormality, renal abscess), not done, or unknown. Ultrasound is performed in selected children with UTI to detect structural abnormalities. Whether ultrasound is performed and its findings depend on age, infection status, and urinary history (children with prior problems are more likely to have imaging).",
+            "sensitivity_hints": "Ultrasound findings are influenced by infection (can show renal inflammation/abscess) and by pre-existing structural abnormalities. It is NOT routinely performed in all children. Age and urinary history determine whether imaging is done.",
+            "related_domain_knowledge": [
+                "Renal ultrasound detects hydronephrosis, structural abnormalities, and renal abscesses.",
+                "Imaging is recommended for febrile UTI in young children and all recurrent UTIs.",
+                "Abnormal findings may indicate vesicoureteral reflux or obstruction.",
+                "Ultrasound does not use radiation and is the first-line imaging modality in children."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "renal_imaging_findings"
+        },
+        {
+            "name": "CurrPhenotype",
+            "display_name": "Clinical Presentation Phenotype",
+            "aliases": [
+                "CurrPhenotype",
+                "presentation_type",
+                "clinical_phenotype"
+            ],
+            "type": "categorical",
+            "states": [
+                "Type1",
+                "Type2",
+                "Type3"
+            ],
+            "role": "endogenous",
+            "category": "clinical",
+            "short_description": "Clinical presentation phenotype categorising the pattern of symptoms.",
+            "extended_description": "Categorical variable representing the clinical presentation pattern. Three phenotypes capture different symptom clusters: one reflecting typical UTI presentation, another reflecting atypical or non-specific presentation, and a third intermediate pattern. The phenotype depends on age (young children present differently), infection status, and urinary history. The phenotype then influences which specific symptoms are observed.",
+            "sensitivity_hints": "Clinical phenotype is a MEDIATING variable between infection status and specific symptoms. It captures the overall presentation pattern. Different phenotypes produce different symptom combinations. Age strongly influences which phenotype manifests.",
+            "related_domain_knowledge": [
+                "Young infants present with non-specific symptoms (fever, irritability, poor feeding).",
+                "Older children present with classic urinary symptoms (dysuria, frequency, urgency).",
+                "Antibiotic pre-treatment can modify the clinical presentation pattern.",
+                "The phenotype reflects the overall clinical picture, not individual symptoms."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "symptom_phenotype"
+        },
+        {
+            "name": "EmpricAbxGroup3",
+            "display_name": "Empiric Antibiotic Selection",
+            "aliases": [
+                "EmpricAbxGroup3",
+                "empiric_treatment",
+                "antibiotic_choice"
+            ],
+            "type": "binary",
+            "states": [
+                "Broader",
+                "Narrow"
+            ],
+            "role": "endogenous",
+            "category": "treatment",
+            "short_description": "Whether broader or narrower spectrum empiric antibiotics are selected for treatment.",
+            "extended_description": "Binary indicator of the spectrum of empiric antibiotic therapy initiated. Broader spectrum is selected for higher-risk patients: younger age, certain clinical phenotypes, and prior antibiotic exposure (suggesting potential resistant organisms). The treatment decision depends on age, clinical phenotype, and current antibiotic status.",
+            "sensitivity_hints": "Empiric antibiotic selection is a TREATMENT decision downstream of clinical assessment. It is determined by age, clinical phenotype, and prior antibiotic use. It does NOT affect infection status (which has already occurred by the time treatment is decided).",
+            "related_domain_knowledge": [
+                "Empiric therapy is initiated before culture results are available.",
+                "Younger children receive broader-spectrum therapy due to higher risk of systemic infection.",
+                "Prior antibiotic exposure suggests potential resistance, favouring broader coverage.",
+                "Treatment decisions should be refined when culture and sensitivity results become available."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "empiric_antibiotic_spectrum"
+        },
+        {
+            "name": "TemperatureLvl2",
+            "display_name": "Temperature Level",
+            "aliases": [
+                "TemperatureLvl2",
+                "temperature",
+                "fever_level"
+            ],
+            "type": "ordinal",
+            "states": [
+                "Abv385",
+                "Below365",
+                "Btw365and375",
+                "Btw375and385"
+            ],
+            "role": "endogenous",
+            "category": "clinical_sign",
+            "short_description": "Patient temperature in clinically meaningful bands.",
+            "extended_description": "Ordinal indicator of body temperature at presentation. Temperature depends on infection status (UTI causes fever), age (febrile response varies with age), clinical phenotype, and concurrent respiratory symptoms (which independently cause fever). High fever (>38.5°C) suggests pyelonephritis or systemic infection.",
+            "sensitivity_hints": "Temperature is CAUSED by infection but also by concurrent respiratory illness. Multiple independent causes can produce fever. Consider the v-structure where infection and respiratory symptoms are independent causes.",
+            "related_domain_knowledge": [
+                "Fever is a cardinal sign of UTI, especially in young children.",
+                "High fever (>38.5°C) suggests upper tract infection (pyelonephritis).",
+                "Concurrent respiratory illness is the most common alternative cause of fever.",
+                "Neonates may not mount a febrile response even with serious infection.",
+                "Temperature influences downstream symptoms like irritability and lethargy."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "body_temperature"
+        },
+        {
+            "name": "UrinSym_PainOrDiscomf",
+            "display_name": "Urinary Pain or Discomfort",
+            "aliases": [
+                "UrinSym_PainOrDiscomf",
+                "dysuria",
+                "urinary_pain"
+            ],
+            "type": "binary",
+            "states": [
+                "Unknown",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether the child reports or exhibits urinary pain or discomfort.",
+            "extended_description": "Binary indicator of urinary pain or discomfort (dysuria). This classic UTI symptom depends on infection status, age (younger children cannot verbalise this symptom), and clinical phenotype. The 'Unknown' state reflects that many young children cannot report urinary symptoms.",
+            "sensitivity_hints": "Urinary pain is a CLASSIC UTI symptom but can only be reported by older children. Age determines whether this symptom is observable. It is CAUSED by urinary tract inflammation from infection.",
+            "related_domain_knowledge": [
+                "Dysuria is the most specific symptom for UTI in verbal children.",
+                "Infants and toddlers cannot report dysuria—it appears as crying with urination.",
+                "Dysuria can occur without UTI (vulvovaginitis, chemical irritation).",
+                "The 'Unknown' state for young children is clinically important (absence of evidence ≠ evidence of absence)."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "urinary_discomfort"
+        },
+        {
+            "name": "UrinSym_haematuria",
+            "display_name": "Visible Haematuria",
+            "aliases": [
+                "UrinSym_haematuria",
+                "haematuria",
+                "blood_in_urine"
+            ],
+            "type": "binary",
+            "states": [
+                "Unknown",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether visible blood in urine (haematuria) is reported.",
+            "extended_description": "Binary indicator of visible (macroscopic) haematuria. Haematuria in the context of UTI reflects mucosal inflammation and vascular injury from bacterial infection. Depends on infection status and clinical phenotype.",
+            "sensitivity_hints": "Haematuria is CAUSED by urinary mucosal inflammation from infection. It is a relatively specific UTI symptom when present but has low sensitivity.",
+            "related_domain_knowledge": [
+                "Macroscopic haematuria occurs in a minority of UTI cases.",
+                "Haematuria can also result from non-infectious causes (stones, trauma, glomerulonephritis).",
+                "Microscopic haematuria is more common than macroscopic haematuria in UTI."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "visible_haematuria"
+        },
+        {
+            "name": "UrinSym_smelly",
+            "display_name": "Malodorous Urine",
+            "aliases": [
+                "UrinSym_smelly",
+                "smelly_urine",
+                "urine_odour"
+            ],
+            "type": "binary",
+            "states": [
+                "Unknown",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether the urine is reported as malodorous (foul-smelling).",
+            "extended_description": "Binary indicator of malodorous urine. Foul-smelling urine is a frequently reported symptom in paediatric UTI, caused by bacterial metabolism of urinary substrates. Depends on infection status, age (caregivers of younger children more likely to notice), and clinical phenotype.",
+            "sensitivity_hints": "Malodorous urine is CAUSED by bacterial infection. It is a commonly reported symptom but has poor specificity—concentrated urine and dietary factors also affect odour.",
+            "related_domain_knowledge": [
+                "Parents frequently report smelly urine as a presenting concern.",
+                "Foul urine odour has low specificity for UTI.",
+                "Bacterial breakdown of urea produces ammonia, causing malodour.",
+                "Concentrated urine from dehydration can also smell strong without infection."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "urine_malodour"
+        },
+        {
+            "name": "FeverPR",
+            "display_name": "Fever by Parental Report",
+            "aliases": [
+                "FeverPR",
+                "reported_fever",
+                "parent_reported_fever"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether parents report a history of fever at home.",
+            "extended_description": "Binary indicator of parental report of fever. This subjective report depends on infection status, age (parents of young children are more vigilant about fever), clinical phenotype, and concurrent respiratory symptoms (which independently cause fever). Parental report may not match measured temperature at presentation.",
+            "sensitivity_hints": "Reported fever is CAUSED by infection and by concurrent respiratory illness (multiple independent causes). It may not align with measured temperature at presentation due to timing and antipyretic use.",
+            "related_domain_knowledge": [
+                "Parental report of fever is the most common presenting complaint for paediatric UTI.",
+                "Fever may have resolved by presentation due to antipyretic use.",
+                "Concurrent respiratory illness is a common confounding cause of reported fever.",
+                "Fever alone is the most common presentation of UTI in infants."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "parent_reported_fever"
+        },
+        {
+            "name": "NauseaOrVomit",
+            "display_name": "Nausea or Vomiting",
+            "aliases": [
+                "NauseaOrVomit",
+                "vomiting",
+                "nausea"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether the child has nausea or vomiting.",
+            "extended_description": "Binary indicator of nausea or vomiting. These symptoms suggest systemic illness and may occur with pyelonephritis. Depends on infection status, age, and clinical phenotype. Vomiting also affects downstream oral intake tolerance.",
+            "sensitivity_hints": "Nausea/vomiting is a NON-SPECIFIC symptom CAUSED by systemic infection. It is more common in pyelonephritis than simple cystitis. It directly causes poor oral intake downstream.",
+            "related_domain_knowledge": [
+                "Vomiting suggests systemic illness and may indicate pyelonephritis.",
+                "Young children have a lower threshold for vomiting with any illness.",
+                "Vomiting affects oral intake and hydration status.",
+                "Vomiting is not specific to UTI—many childhood illnesses cause vomiting."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "nausea_vomiting"
+        },
+        {
+            "name": "AbdoPain",
+            "display_name": "Abdominal Pain",
+            "aliases": [
+                "AbdoPain",
+                "abdominal_pain",
+                "tummy_pain"
+            ],
+            "type": "binary",
+            "states": [
+                "Unknown",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether the child reports or exhibits abdominal pain.",
+            "extended_description": "Binary indicator of abdominal pain. In the context of UTI, abdominal pain may reflect renal or bladder inflammation. Depends on infection status, age (younger children cannot localise pain), clinical phenotype, and concurrent diarrhoea (which independently causes abdominal pain).",
+            "sensitivity_hints": "Abdominal pain has MULTIPLE independent causes: UTI (renal/bladder inflammation) and diarrhoea (bowel inflammation). Consider the v-structure where infection and diarrhoea converge. Young children may not report pain.",
+            "related_domain_knowledge": [
+                "Flank or suprapubic pain may indicate pyelonephritis or cystitis respectively.",
+                "Young children cannot localise abdominal pain well.",
+                "Concurrent diarrhoea is an alternative cause of abdominal pain.",
+                "Abdominal pain in infants manifests as irritability or inconsolability."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "abdominal_pain"
+        },
+        {
+            "name": "Irritable",
+            "display_name": "Irritability",
+            "aliases": [
+                "Irritable",
+                "irritability",
+                "fussiness"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether the child is irritable or fussy.",
+            "extended_description": "Binary indicator of irritability. In young children, irritability is a non-specific sign of illness and pain. It depends on infection status, age (more common in young children who cannot verbalise discomfort), clinical phenotype, and temperature (fever increases irritability).",
+            "sensitivity_hints": "Irritability is a NON-SPECIFIC symptom CAUSED by infection and fever. Temperature directly influences irritability. In infants, irritability may be the only sign of UTI.",
+            "related_domain_knowledge": [
+                "Irritability is one of the most common presentations of UTI in infants.",
+                "Fever independently causes irritability regardless of the underlying cause.",
+                "Older children can verbalise specific complaints, reducing reliance on irritability.",
+                "Irritability is non-specific—many conditions cause fussiness in young children."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "child_irritability"
+        },
+        {
+            "name": "Lethargy",
+            "display_name": "Lethargy",
+            "aliases": [
+                "Lethargy",
+                "tiredness",
+                "reduced_activity"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether the child exhibits lethargy or reduced activity.",
+            "extended_description": "Binary indicator of lethargy or reduced activity level. Lethargy is a concerning sign of systemic illness and may indicate serious infection (sepsis, pyelonephritis). Depends on infection status, clinical phenotype, and temperature level (high fever causes lethargy).",
+            "sensitivity_hints": "Lethargy is a more concerning sign than irritability, suggesting more severe illness. It is CAUSED by systemic infection and fever. It does NOT depend on age in this model.",
+            "related_domain_knowledge": [
+                "Lethargy is a red-flag symptom suggesting serious illness in children.",
+                "High fever independently causes lethargy and reduced activity.",
+                "Lethargy combined with fever suggests systemic bacterial infection.",
+                "Lethargy may indicate bacteraemia or evolving sepsis."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "child_lethargy"
+        },
+        {
+            "name": "PoorIntake",
+            "display_name": "Poor Oral Intake",
+            "aliases": [
+                "PoorIntake",
+                "poor_feeding",
+                "reduced_intake"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether the child has reduced oral intake or feeding difficulties.",
+            "extended_description": "Binary indicator of poor oral intake or feeding difficulties. In infants, poor feeding is a common non-specific sign of illness. Poor intake depends on age (feeding patterns differ), clinical phenotype, and nausea/vomiting (which directly causes inability to tolerate oral intake).",
+            "sensitivity_hints": "Poor intake is CAUSED by nausea/vomiting (direct mechanism) and is influenced by age and clinical phenotype. Note: CauseUTI is NOT a direct parent—the effect is mediated through phenotype and nausea/vomiting.",
+            "related_domain_knowledge": [
+                "Poor feeding is a key sign of illness in infants.",
+                "Vomiting directly impairs oral intake.",
+                "Poor oral intake increases dehydration risk.",
+                "In neonates, poor feeding may be the only sign of serious infection."
+            ],
+            "references": [
+                "Ramsay2022_UTI"
+            ],
+            "llm_name": "poor_oral_intake"
+        }
+    ],
+    "constraints": {
+        "forbidden_edges": [
+            [
+                "primary_pathogen_culture",
+                "infection_aetiology"
+            ],
+            [
+                "gram_positive_culture",
+                "infection_aetiology"
+            ],
+            [
+                "secondary_gramneg_culture",
+                "infection_aetiology"
+            ],
+            [
+                "urine_nitrite_test",
+                "infection_aetiology"
+            ],
+            [
+                "urine_leucocyte_esterase",
+                "infection_aetiology"
+            ],
+            [
+                "urine_white_cell_count",
+                "infection_aetiology"
+            ],
+            [
+                "microscopy_bacteria_count",
+                "infection_aetiology"
+            ],
+            [
+                "blood_white_cell_count",
+                "infection_aetiology"
+            ],
+            [
+                "serum_inflammatory_marker",
+                "infection_aetiology"
+            ],
+            [
+                "blood_neutrophil_count",
+                "infection_aetiology"
+            ],
+            [
+                "body_temperature",
+                "infection_aetiology"
+            ],
+            [
+                "urinary_discomfort",
+                "infection_aetiology"
+            ],
+            [
+                "visible_haematuria",
+                "infection_aetiology"
+            ],
+            [
+                "urine_malodour",
+                "infection_aetiology"
+            ],
+            [
+                "nausea_vomiting",
+                "infection_aetiology"
+            ],
+            [
+                "abdominal_pain",
+                "infection_aetiology"
+            ],
+            [
+                "child_irritability",
+                "infection_aetiology"
+            ],
+            [
+                "child_lethargy",
+                "infection_aetiology"
+            ],
+            [
+                "poor_oral_intake",
+                "infection_aetiology"
+            ],
+            [
+                "parent_reported_fever",
+                "infection_aetiology"
+            ],
+            [
+                "empiric_antibiotic_spectrum",
+                "infection_aetiology"
+            ],
+            [
+                "renal_imaging_findings",
+                "infection_aetiology"
+            ],
+            [
+                "specimen_contamination_level",
+                "infection_aetiology"
+            ],
+            [
+                "specimen_epithelial_cells",
+                "infection_aetiology"
+            ],
+            [
+                "child_age_band",
+                "child_age_band"
+            ]
+        ],
+        "partial_order": [
+            [
+                "child_age_band",
+                "prior_urinary_history"
+            ],
+            [
+                "child_age_band",
+                "patient_sex"
+            ],
+            [
+                "child_age_band",
+                "concurrent_diarrhoea"
+            ],
+            [
+                "child_age_band",
+                "respiratory_illness"
+            ],
+            [
+                "child_age_band",
+                "prior_antibiotic_therapy"
+            ],
+            [
+                "child_age_band",
+                "specimen_collection_technique"
+            ],
+            [
+                "child_age_band",
+                "primary_uropathogen_colonisation"
+            ],
+            [
+                "child_age_band",
+                "gram_positive_colonisation"
+            ],
+            [
+                "child_age_band",
+                "secondary_gramneg_colonisation"
+            ],
+            [
+                "child_age_band",
+                "infection_aetiology"
+            ],
+            [
+                "primary_uropathogen_colonisation",
+                "infection_aetiology"
+            ],
+            [
+                "gram_positive_colonisation",
+                "infection_aetiology"
+            ],
+            [
+                "secondary_gramneg_colonisation",
+                "infection_aetiology"
+            ],
+            [
+                "infection_aetiology",
+                "urine_nitrite_test"
+            ],
+            [
+                "infection_aetiology",
+                "urine_leucocyte_esterase"
+            ],
+            [
+                "infection_aetiology",
+                "urine_white_cell_count"
+            ],
+            [
+                "infection_aetiology",
+                "microscopy_bacteria_count"
+            ],
+            [
+                "infection_aetiology",
+                "blood_white_cell_count"
+            ],
+            [
+                "infection_aetiology",
+                "serum_inflammatory_marker"
+            ],
+            [
+                "infection_aetiology",
+                "body_temperature"
+            ],
+            [
+                "infection_aetiology",
+                "urinary_discomfort"
+            ],
+            [
+                "infection_aetiology",
+                "visible_haematuria"
+            ],
+            [
+                "infection_aetiology",
+                "urine_malodour"
+            ],
+            [
+                "infection_aetiology",
+                "nausea_vomiting"
+            ],
+            [
+                "infection_aetiology",
+                "abdominal_pain"
+            ],
+            [
+                "infection_aetiology",
+                "child_irritability"
+            ],
+            [
+                "infection_aetiology",
+                "child_lethargy"
+            ],
+            [
+                "infection_aetiology",
+                "parent_reported_fever"
+            ],
+            [
+                "infection_aetiology",
+                "primary_pathogen_culture"
+            ],
+            [
+                "infection_aetiology",
+                "gram_positive_culture"
+            ],
+            [
+                "infection_aetiology",
+                "secondary_gramneg_culture"
+            ],
+            [
+                "infection_aetiology",
+                "symptom_phenotype"
+            ],
+            [
+                "infection_aetiology",
+                "renal_imaging_findings"
+            ],
+            [
+                "specimen_contamination_level",
+                "primary_pathogen_culture"
+            ],
+            [
+                "specimen_contamination_level",
+                "gram_positive_culture"
+            ],
+            [
+                "specimen_contamination_level",
+                "secondary_gramneg_culture"
+            ],
+            [
+                "specimen_contamination_level",
+                "microscopy_bacteria_count"
+            ],
+            [
+                "specimen_collection_technique",
+                "specimen_contamination_level"
+            ],
+            [
+                "specimen_collection_technique",
+                "specimen_epithelial_cells"
+            ],
+            [
+                "prior_antibiotic_therapy",
+                "primary_pathogen_culture"
+            ],
+            [
+                "prior_antibiotic_therapy",
+                "gram_positive_culture"
+            ],
+            [
+                "prior_antibiotic_therapy",
+                "secondary_gramneg_culture"
+            ],
+            [
+                "prior_antibiotic_therapy",
+                "microscopy_bacteria_count"
+            ],
+            [
+                "nausea_vomiting",
+                "poor_oral_intake"
+            ],
+            [
+                "body_temperature",
+                "child_irritability"
+            ],
+            [
+                "body_temperature",
+                "child_lethargy"
+            ],
+            [
+                "blood_white_cell_count",
+                "blood_neutrophil_count"
+            ],
+            [
+                "symptom_phenotype",
+                "empiric_antibiotic_spectrum"
+            ]
+        ],
+        "tiers": {
+            "demographic": [
+                "child_age_band"
+            ],
+            "patient_history": [
+                "prior_urinary_history",
+                "patient_sex",
+                "concurrent_diarrhoea",
+                "respiratory_illness"
+            ],
+            "clinical_decisions": [
+                "prior_antibiotic_therapy",
+                "specimen_collection_technique"
+            ],
+            "pathogen_colonisation": [
+                "primary_uropathogen_colonisation",
+                "gram_positive_colonisation",
+                "secondary_gramneg_colonisation"
+            ],
+            "specimen_quality": [
+                "specimen_contamination_level",
+                "specimen_epithelial_cells"
+            ],
+            "diagnosis": [
+                "infection_aetiology"
+            ],
+            "clinical_presentation": [
+                "symptom_phenotype",
+                "body_temperature",
+                "parent_reported_fever",
+                "urinary_discomfort",
+                "visible_haematuria",
+                "urine_malodour",
+                "nausea_vomiting",
+                "abdominal_pain",
+                "child_irritability",
+                "child_lethargy",
+                "poor_oral_intake"
+            ],
+            "laboratory_results": [
+                "urine_nitrite_test",
+                "urine_leucocyte_esterase",
+                "urine_white_cell_count",
+                "microscopy_bacteria_count",
+                "primary_pathogen_culture",
+                "gram_positive_culture",
+                "secondary_gramneg_culture",
+                "blood_white_cell_count",
+                "serum_inflammatory_marker",
+                "blood_neutrophil_count"
+            ],
+            "imaging_and_treatment": [
+                "renal_imaging_findings",
+                "empiric_antibiotic_spectrum"
+            ]
+        },
+        "notes": "Constraints reflect clinical diagnostic reasoning: demographics → patient history → pathogen colonisation → true infection status → observable clinical and laboratory manifestations. Tests detect disease; disease does not follow from tests. Specimen quality affects test accuracy but not true infection."
+    },
+    "causal_principles": [
+        {
+            "id": "age_is_primary_hub",
+            "statement": "Patient age is the primary hub variable influencing nearly all other variables: symptom presentation, pathogen epidemiology, specimen collection, laboratory reference ranges, and treatment decisions.",
+            "references": [
+                "Ramsay2022_UTI"
+            ]
+        },
+        {
+            "id": "infection_causes_manifestations",
+            "statement": "The causative organism (or absence of infection) CAUSES downstream clinical symptoms and laboratory findings. Tests detect disease; disease does not follow from test results.",
+            "references": [
+                "Ramsay2022_UTI"
+            ]
+        },
+        {
+            "id": "colonisation_precedes_infection",
+            "statement": "Pathogen colonisation in the urinary tract precedes and enables infection. High colonisation levels increase the probability of UTI caused by that organism.",
+            "references": [
+                "Ramsay2022_UTI"
+            ]
+        },
+        {
+            "id": "contamination_confounds_tests",
+            "statement": "Specimen contamination is a confounder that produces false-positive culture and microscopy results. Contamination risk depends on collection method, age, sex, and diarrhoea—factors independent of true infection.",
+            "references": [
+                "Ramsay2022_UTI"
+            ]
+        },
+        {
+            "id": "antibiotics_affect_tests_not_truth",
+            "statement": "Prior antibiotic exposure affects test results (suppressing bacterial growth on culture and microscopy) but does not change the true underlying infection status in this cross-sectional model.",
+            "references": [
+                "Ramsay2022_UTI"
+            ]
+        },
+        {
+            "id": "fever_has_multiple_causes",
+            "statement": "Fever can be caused independently by UTI and by concurrent respiratory illness. Both are independent causes that converge on the temperature variable (v-structure).",
+            "references": [
+                "Ramsay2022_UTI"
+            ]
+        },
+        {
+            "id": "symptom_phenotype_mediates",
+            "statement": "Clinical presentation phenotype mediates between infection status and specific symptoms, capturing age-dependent patterns of clinical manifestation.",
+            "references": [
+                "Ramsay2022_UTI"
+            ]
+        }
+    ],
+    "ground_truth": {
+        "num_nodes": 36,
+        "num_edges": 109,
+        "edges": [
+            [
+                "AgeGroup",
+                "PrevUriKidProbs"
+            ],
+            [
+                "AgeGroup",
+                "Sex"
+            ],
+            [
+                "AgeGroup",
+                "Diarrhea"
+            ],
+            [
+                "AgeGroup",
+                "RespSymp"
+            ],
+            [
+                "AgeGroup",
+                "OnAbxEDGroup3"
+            ],
+            [
+                "AgeGroup",
+                "CollMethod"
+            ],
+            [
+                "AgeGroup",
+                "EcoliPresence"
+            ],
+            [
+                "AgeGroup",
+                "GramPosPresence"
+            ],
+            [
+                "AgeGroup",
+                "OtherGramNegPresence"
+            ],
+            [
+                "AgeGroup",
+                "Epithelials"
+            ],
+            [
+                "AgeGroup",
+                "ContaminationRisk"
+            ],
+            [
+                "AgeGroup",
+                "CauseUTI"
+            ],
+            [
+                "AgeGroup",
+                "WCCLevel"
+            ],
+            [
+                "AgeGroup",
+                "Urin_LeucEst"
+            ],
+            [
+                "AgeGroup",
+                "Urin_Leuc"
+            ],
+            [
+                "AgeGroup",
+                "UltraSound"
+            ],
+            [
+                "AgeGroup",
+                "CurrPhenotype"
+            ],
+            [
+                "AgeGroup",
+                "CRPLevel"
+            ],
+            [
+                "AgeGroup",
+                "EmpricAbxGroup3"
+            ],
+            [
+                "AgeGroup",
+                "UrinSym_PainOrDiscomf"
+            ],
+            [
+                "AgeGroup",
+                "NeutLevel"
+            ],
+            [
+                "AgeGroup",
+                "TemperatureLvl2"
+            ],
+            [
+                "AgeGroup",
+                "UrinSym_smelly"
+            ],
+            [
+                "AgeGroup",
+                "NauseaOrVomit"
+            ],
+            [
+                "AgeGroup",
+                "FeverPR"
+            ],
+            [
+                "AgeGroup",
+                "AbdoPain"
+            ],
+            [
+                "AgeGroup",
+                "Irritable"
+            ],
+            [
+                "AgeGroup",
+                "PoorIntake"
+            ],
+            [
+                "PrevUriKidProbs",
+                "OnAbxEDGroup3"
+            ],
+            [
+                "PrevUriKidProbs",
+                "CollMethod"
+            ],
+            [
+                "PrevUriKidProbs",
+                "EcoliPresence"
+            ],
+            [
+                "PrevUriKidProbs",
+                "GramPosPresence"
+            ],
+            [
+                "PrevUriKidProbs",
+                "OtherGramNegPresence"
+            ],
+            [
+                "PrevUriKidProbs",
+                "CauseUTI"
+            ],
+            [
+                "PrevUriKidProbs",
+                "UltraSound"
+            ],
+            [
+                "PrevUriKidProbs",
+                "CurrPhenotype"
+            ],
+            [
+                "Sex",
+                "EcoliPresence"
+            ],
+            [
+                "Sex",
+                "GramPosPresence"
+            ],
+            [
+                "Sex",
+                "OtherGramNegPresence"
+            ],
+            [
+                "Sex",
+                "Epithelials"
+            ],
+            [
+                "Sex",
+                "ContaminationRisk"
+            ],
+            [
+                "Diarrhea",
+                "EcoliPresence"
+            ],
+            [
+                "Diarrhea",
+                "GramPosPresence"
+            ],
+            [
+                "Diarrhea",
+                "OtherGramNegPresence"
+            ],
+            [
+                "Diarrhea",
+                "ContaminationRisk"
+            ],
+            [
+                "Diarrhea",
+                "AbdoPain"
+            ],
+            [
+                "RespSymp",
+                "TemperatureLvl2"
+            ],
+            [
+                "RespSymp",
+                "FeverPR"
+            ],
+            [
+                "OnAbxEDGroup3",
+                "EcoliPresence"
+            ],
+            [
+                "OnAbxEDGroup3",
+                "GramPosPresence"
+            ],
+            [
+                "OnAbxEDGroup3",
+                "OtherGramNegPresence"
+            ],
+            [
+                "OnAbxEDGroup3",
+                "GramPos"
+            ],
+            [
+                "OnAbxEDGroup3",
+                "OtherGramNeg"
+            ],
+            [
+                "OnAbxEDGroup3",
+                "EColi"
+            ],
+            [
+                "OnAbxEDGroup3",
+                "Microscopy_bacts"
+            ],
+            [
+                "OnAbxEDGroup3",
+                "EmpricAbxGroup3"
+            ],
+            [
+                "CollMethod",
+                "Epithelials"
+            ],
+            [
+                "CollMethod",
+                "ContaminationRisk"
+            ],
+            [
+                "EcoliPresence",
+                "CauseUTI"
+            ],
+            [
+                "EcoliPresence",
+                "Urin_Nitrite"
+            ],
+            [
+                "EcoliPresence",
+                "Microscopy_bacts"
+            ],
+            [
+                "EcoliPresence",
+                "EColi"
+            ],
+            [
+                "GramPosPresence",
+                "CauseUTI"
+            ],
+            [
+                "GramPosPresence",
+                "Microscopy_bacts"
+            ],
+            [
+                "GramPosPresence",
+                "GramPos"
+            ],
+            [
+                "OtherGramNegPresence",
+                "CauseUTI"
+            ],
+            [
+                "OtherGramNegPresence",
+                "Urin_Nitrite"
+            ],
+            [
+                "OtherGramNegPresence",
+                "Microscopy_bacts"
+            ],
+            [
+                "OtherGramNegPresence",
+                "OtherGramNeg"
+            ],
+            [
+                "ContaminationRisk",
+                "EColi"
+            ],
+            [
+                "ContaminationRisk",
+                "GramPos"
+            ],
+            [
+                "ContaminationRisk",
+                "OtherGramNeg"
+            ],
+            [
+                "ContaminationRisk",
+                "Microscopy_bacts"
+            ],
+            [
+                "CauseUTI",
+                "Urin_Nitrite"
+            ],
+            [
+                "CauseUTI",
+                "WCCLevel"
+            ],
+            [
+                "CauseUTI",
+                "GramPos"
+            ],
+            [
+                "CauseUTI",
+                "Urin_LeucEst"
+            ],
+            [
+                "CauseUTI",
+                "OtherGramNeg"
+            ],
+            [
+                "CauseUTI",
+                "Urin_Leuc"
+            ],
+            [
+                "CauseUTI",
+                "UltraSound"
+            ],
+            [
+                "CauseUTI",
+                "Microscopy_bacts"
+            ],
+            [
+                "CauseUTI",
+                "EColi"
+            ],
+            [
+                "CauseUTI",
+                "CurrPhenotype"
+            ],
+            [
+                "CauseUTI",
+                "CRPLevel"
+            ],
+            [
+                "CauseUTI",
+                "UrinSym_PainOrDiscomf"
+            ],
+            [
+                "CauseUTI",
+                "NeutLevel"
+            ],
+            [
+                "CauseUTI",
+                "TemperatureLvl2"
+            ],
+            [
+                "CauseUTI",
+                "UrinSym_haematuria"
+            ],
+            [
+                "CauseUTI",
+                "UrinSym_smelly"
+            ],
+            [
+                "CauseUTI",
+                "NauseaOrVomit"
+            ],
+            [
+                "CauseUTI",
+                "FeverPR"
+            ],
+            [
+                "CauseUTI",
+                "AbdoPain"
+            ],
+            [
+                "CauseUTI",
+                "Irritable"
+            ],
+            [
+                "CauseUTI",
+                "Lethargy"
+            ],
+            [
+                "WCCLevel",
+                "NeutLevel"
+            ],
+            [
+                "CurrPhenotype",
+                "EmpricAbxGroup3"
+            ],
+            [
+                "CurrPhenotype",
+                "UrinSym_PainOrDiscomf"
+            ],
+            [
+                "CurrPhenotype",
+                "TemperatureLvl2"
+            ],
+            [
+                "CurrPhenotype",
+                "UrinSym_haematuria"
+            ],
+            [
+                "CurrPhenotype",
+                "UrinSym_smelly"
+            ],
+            [
+                "CurrPhenotype",
+                "NauseaOrVomit"
+            ],
+            [
+                "CurrPhenotype",
+                "FeverPR"
+            ],
+            [
+                "CurrPhenotype",
+                "AbdoPain"
+            ],
+            [
+                "CurrPhenotype",
+                "Irritable"
+            ],
+            [
+                "CurrPhenotype",
+                "Lethargy"
+            ],
+            [
+                "CurrPhenotype",
+                "PoorIntake"
+            ],
+            [
+                "TemperatureLvl2",
+                "Irritable"
+            ],
+            [
+                "TemperatureLvl2",
+                "Lethargy"
+            ],
+            [
+                "NauseaOrVomit",
+                "PoorIntake"
+            ]
+        ],
+        "v_structures": [
+            {
+                "canonical": [
+                    "EcoliPresence",
+                    "CauseUTI",
+                    "GramPosPresence"
+                ],
+                "experiment": [
+                    "primary_uropathogen_colonisation",
+                    "infection_aetiology",
+                    "gram_positive_colonisation"
+                ],
+                "description": "E. coli and gram-positive colonisation are independent causes of infection aetiology."
+            },
+            {
+                "canonical": [
+                    "EcoliPresence",
+                    "CauseUTI",
+                    "OtherGramNegPresence"
+                ],
+                "experiment": [
+                    "primary_uropathogen_colonisation",
+                    "infection_aetiology",
+                    "secondary_gramneg_colonisation"
+                ],
+                "description": "E. coli and other gram-negative colonisation are independent causes of infection aetiology."
+            },
+            {
+                "canonical": [
+                    "GramPosPresence",
+                    "CauseUTI",
+                    "OtherGramNegPresence"
+                ],
+                "experiment": [
+                    "gram_positive_colonisation",
+                    "infection_aetiology",
+                    "secondary_gramneg_colonisation"
+                ],
+                "description": "Gram-positive and other gram-negative colonisation are independent causes of infection aetiology."
+            },
+            {
+                "canonical": [
+                    "CauseUTI",
+                    "TemperatureLvl2",
+                    "RespSymp"
+                ],
+                "experiment": [
+                    "infection_aetiology",
+                    "body_temperature",
+                    "respiratory_illness"
+                ],
+                "description": "UTI and respiratory illness are independent causes of fever (temperature)."
+            },
+            {
+                "canonical": [
+                    "CauseUTI",
+                    "AbdoPain",
+                    "Diarrhea"
+                ],
+                "experiment": [
+                    "infection_aetiology",
+                    "abdominal_pain",
+                    "concurrent_diarrhoea"
+                ],
+                "description": "UTI and diarrhoea are independent causes of abdominal pain."
+            },
+            {
+                "canonical": [
+                    "CauseUTI",
+                    "FeverPR",
+                    "RespSymp"
+                ],
+                "experiment": [
+                    "infection_aetiology",
+                    "parent_reported_fever",
+                    "respiratory_illness"
+                ],
+                "description": "UTI and respiratory illness are independent causes of reported fever."
+            },
+            {
+                "canonical": [
+                    "CauseUTI",
+                    "Microscopy_bacts",
+                    "ContaminationRisk"
+                ],
+                "experiment": [
+                    "infection_aetiology",
+                    "microscopy_bacteria_count",
+                    "specimen_contamination_level"
+                ],
+                "description": "True infection and specimen contamination are independent causes of bacteria on microscopy."
+            },
+            {
+                "canonical": [
+                    "CauseUTI",
+                    "EColi",
+                    "ContaminationRisk"
+                ],
+                "experiment": [
+                    "infection_aetiology",
+                    "primary_pathogen_culture",
+                    "specimen_contamination_level"
+                ],
+                "description": "True infection and contamination are independent causes of E. coli culture positivity."
+            },
+            {
+                "canonical": [
+                    "CauseUTI",
+                    "GramPos",
+                    "ContaminationRisk"
+                ],
+                "experiment": [
+                    "infection_aetiology",
+                    "gram_positive_culture",
+                    "specimen_contamination_level"
+                ],
+                "description": "True infection and contamination are independent causes of gram-positive culture positivity."
+            },
+            {
+                "canonical": [
+                    "CauseUTI",
+                    "OtherGramNeg",
+                    "ContaminationRisk"
+                ],
+                "experiment": [
+                    "infection_aetiology",
+                    "secondary_gramneg_culture",
+                    "specimen_contamination_level"
+                ],
+                "description": "True infection and contamination are independent causes of other gram-negative culture positivity."
+            },
+            {
+                "canonical": [
+                    "CauseUTI",
+                    "Irritable",
+                    "TemperatureLvl2"
+                ],
+                "experiment": [
+                    "infection_aetiology",
+                    "child_irritability",
+                    "body_temperature"
+                ],
+                "description": "Infection and fever are independent causes of irritability."
+            },
+            {
+                "canonical": [
+                    "CauseUTI",
+                    "Lethargy",
+                    "TemperatureLvl2"
+                ],
+                "experiment": [
+                    "infection_aetiology",
+                    "child_lethargy",
+                    "body_temperature"
+                ],
+                "description": "Infection and fever are independent causes of lethargy (via phenotype and temperature)."
+            }
+        ],
+        "conditional_independencies": [
+            {
+                "statement": "RespSymp ⊥ Diarrhea | AgeGroup",
+                "experiment_names": "respiratory_illness ⊥ concurrent_diarrhoea | child_age_band",
+                "description": "Respiratory symptoms and diarrhoea are conditionally independent given age."
+            },
+            {
+                "statement": "Urin_Nitrite ⊥ Urin_LeucEst | CauseUTI",
+                "experiment_names": "urine_nitrite_test ⊥ urine_leucocyte_esterase | infection_aetiology",
+                "description": "Nitrite and leucocyte esterase are conditionally independent given infection cause."
+            },
+            {
+                "statement": "WCCLevel ⊥ CRPLevel | CauseUTI, AgeGroup",
+                "experiment_names": "blood_white_cell_count ⊥ serum_inflammatory_marker | infection_aetiology, child_age_band",
+                "description": "Blood WCC and CRP are conditionally independent given infection cause and age."
+            },
+            {
+                "statement": "EColi ⊥ GramPos | CauseUTI, ContaminationRisk, OnAbxEDGroup3",
+                "experiment_names": "primary_pathogen_culture ⊥ gram_positive_culture | infection_aetiology, specimen_contamination_level, prior_antibiotic_therapy",
+                "description": "E. coli and gram-positive culture results are conditionally independent given infection cause, contamination, and antibiotics."
+            },
+            {
+                "statement": "Epithelials ⊥ ContaminationRisk | AgeGroup, CollMethod, Sex",
+                "experiment_names": "specimen_epithelial_cells ⊥ specimen_contamination_level | child_age_band, specimen_collection_technique, patient_sex",
+                "description": "Epithelial cells and contamination risk are conditionally independent given age, collection method, and sex (they share parents but have no direct connection)."
+            },
+            {
+                "statement": "RespSymp ⊥ CauseUTI | AgeGroup",
+                "experiment_names": "respiratory_illness ⊥ infection_aetiology | child_age_band",
+                "description": "Respiratory symptoms are conditionally independent of UTI cause given age (separate disease processes)."
+            },
+            {
+                "statement": "PoorIntake ⊥ CauseUTI | AgeGroup, CurrPhenotype, NauseaOrVomit",
+                "experiment_names": "poor_oral_intake ⊥ infection_aetiology | child_age_band, symptom_phenotype, nausea_vomiting",
+                "description": "Poor intake is conditionally independent of infection cause given its direct parents (effect is fully mediated)."
+            },
+            {
+                "statement": "EmpricAbxGroup3 ⊥ CauseUTI | AgeGroup, CurrPhenotype, OnAbxEDGroup3",
+                "experiment_names": "empiric_antibiotic_spectrum ⊥ infection_aetiology | child_age_band, symptom_phenotype, prior_antibiotic_therapy",
+                "description": "Empiric antibiotic choice is conditionally independent of true infection cause given clinical phenotype, age, and prior antibiotics (treatment is based on presentation, not confirmed diagnosis)."
+            }
+        ]
+    }
+}

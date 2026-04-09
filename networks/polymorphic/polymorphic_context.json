@@ -1,0 +1,625 @@
+{
+    "schema_version": "2.0",
+    "network": "polymorphic",
+    "domain": "high_voltage_drive_motor_reliability",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a polymorphic Bayesian network modelling the reliability of a high-voltage drive motor system in pure electric commercial vehicles, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "polymorphic",
+        "source_reference": "Zheng, W., Jiang, H., Li, S., & Ma, Q. (2023). Reliability Analysis of High-Voltage Drive Motor Systems in Terms of the Polymorphic Bayesian Network. Mathematics, 11(10), 2378.",
+        "source_url": "https://doi.org/10.3390/math11102378",
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "The polymorphic network models the reliability of a high-voltage drive motor system for pure electric commercial vehicles, originally developed by Zheng, Jiang, Li, and Ma (2023). It converts a polymorphic fault tree into a Bayesian network with 22 tri-state nodes (Normal/Degradation/Failed) and 21 edges. The network has a three-layer structure: 17 root-cause basic events feed into 4 intermediate failure modes (bearing corrosion, insulation deterioration, bearing plastic deformation, bearing wear), which in turn feed into a single top-level system degradation node. CPTs follow a max-severity aggregation pattern derived from expert judgement and importance analysis. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a reliability model of a high-voltage drive motor system used in pure electric commercial vehicles (trucks, buses).",
+            "The causal structure follows a fault-tree hierarchy: basic root causes → four intermediate subsystem failure modes → overall system degradation.",
+            "All 22 nodes have three states: Normal (fully operational), Degradation (partial impairment), and Failed (complete failure).",
+            "The polymorphic (tri-state) representation captures partial degradation states that binary fault trees cannot express.",
+            "The four intermediate failure subsystems are: (1) bearing corrosion failure, (2) stator winding insulation deterioration, (3) bearing plastic deformation, and (4) bearing wear fault.",
+            "Bearing corrosion is driven by chemical attack on surfaces, parasitic inter-shaft electrical currents, and moisture exposure.",
+            "Insulation deterioration is driven by high-frequency pulse voltage from the inverter, localised thermal hotspots, poor cooling, severe partial discharge events, and surface corrosion of insulation materials.",
+            "Bearing plastic deformation results from improper assembly, inadequate lubrication, and surface indentation damage.",
+            "Bearing wear is caused by excessive operating speed, high-temperature adhesive wear (gluing), inappropriate clearance, poor lubrication quality, presence of abrasive particles, and vibration-induced scratching.",
+            "System degradation is the top-level event determined by the combined state of all four subsystem failure modes.",
+            "CPTs follow a max-severity aggregation pattern: the worst parent state generally propagates to the child (any parent Failed typically drives the child to Failed).",
+            "The paper identifies presence of abrasive particles, high-temperature gluing, moisture, and localised high temperatures as the system's primary weak links through importance analysis.",
+            "Root-cause prior probabilities are very low (>99.9% Normal), reflecting normal operating conditions for a well-maintained motor system.",
+            "The model is intended for structure design optimisation and fault diagnosis of electric vehicle drive motor systems."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "ChemicalCorrosion",
+            "display_name": "Chemical Corrosion of Bearing Surfaces",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_corrosion",
+            "short_description": "Chemical attack on bearing surfaces causing material loss.",
+            "extended_description": "Represents the extent of chemical corrosion affecting motor bearing surfaces. Chemical corrosion occurs when reactive substances in the operating environment attack bearing metal, leading to pitting, surface roughening, and eventual material loss. One of three root causes contributing to the bearing corrosion failure subsystem.",
+            "sensitivity_hints": "Root cause with very low prior failure probability. Contributes to bearing corrosion failure alongside inter-shaft current and moisture.",
+            "related_domain_knowledge": [
+                "Chemical corrosion in bearings is caused by acids, alkalis, or aggressive agents in the lubricant or environment.",
+                "Corrosion products create surface irregularities that accelerate fatigue failure.",
+                "Prevention includes proper sealing and use of corrosion-resistant bearing materials.",
+                "Corrosion can be accelerated by moisture and electrical discharge pitting."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "chemical_bearing_corrosion"
+        },
+        {
+            "name": "CorrosionFailure",
+            "display_name": "Bearing Corrosion Failure Mode",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "endogenous",
+            "category": "intermediate_failure_mode",
+            "short_description": "Intermediate failure mode aggregating all bearing corrosion root causes.",
+            "extended_description": "Represents the overall state of the bearing corrosion failure subsystem. Determined by the combined severity of chemical corrosion, excessive inter-shaft current, and moisture exposure. Follows a max-severity aggregation where the worst parent state propagates: any parent in Failed state drives this node to Failed; any parent in Degradation (with none Failed) drives Degradation.",
+            "sensitivity_hints": "Intermediate aggregation node. Fed by three root causes: chemical corrosion, inter-shaft current, and moisture. Feeds directly into overall system degradation.",
+            "related_domain_knowledge": [
+                "Bearing corrosion encompasses multiple mechanisms: chemical attack, electrical erosion, and moisture-induced damage.",
+                "In electric motor bearings, electrical pitting from shaft currents is a major corrosion mechanism.",
+                "Corrosion failure manifests as increased vibration, noise, and eventual bearing seizure.",
+                "Corrosion synergises with other failure modes — corroded surfaces accelerate wear and fatigue."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "bearing_corrosion_failure"
+        },
+        {
+            "name": "ExcessiveInterShaftCurrent",
+            "display_name": "Excessive Inter-Shaft Current",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_corrosion",
+            "short_description": "Parasitic electrical current flowing through the motor shaft and bearings.",
+            "extended_description": "Represents the severity of inter-shaft (bearing) currents in the high-voltage drive motor. These parasitic currents arise from common-mode voltage generated by the pulse-width modulation (PWM) inverter and flow through the shaft to ground via the bearings. They cause electrical discharge machining (EDM) damage, pitting, and fluting on bearing raceways.",
+            "sensitivity_hints": "Root cause contributing to bearing corrosion failure. Driven by inverter switching characteristics and grounding quality.",
+            "related_domain_knowledge": [
+                "Bearing currents are a major reliability concern in inverter-fed electric motors.",
+                "PWM inverters generate common-mode voltage that capacitively couples through the motor windings to the shaft.",
+                "Discharge pitting creates characteristic washboard (fluting) patterns on bearing raceways.",
+                "Mitigation includes insulated bearings, shaft grounding brushes, and EMI filters."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "inter_shaft_current"
+        },
+        {
+            "name": "ExcessiveSpeed",
+            "display_name": "Excessive Operating Speed",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_wear",
+            "short_description": "Motor operating beyond its rated speed, stressing bearing components.",
+            "extended_description": "Represents the degree to which the motor operates at speeds exceeding design limits. Excessive speed increases centrifugal forces on rolling elements, generates more heat through friction, and accelerates lubricant degradation. It is one of six root causes contributing to the bearing wear fault subsystem.",
+            "sensitivity_hints": "Root cause contributing to bearing wear failure. Higher speed increases mechanical stress, friction heat, and lubricant breakdown.",
+            "related_domain_knowledge": [
+                "Electric motors in vehicles may experience overspeed during regenerative braking or control faults.",
+                "High-speed operation increases the dynamic load rating (P/C ratio) and reduces bearing life.",
+                "Centrifugal forces at high speed push rolling elements against the outer race, increasing contact stress.",
+                "Speed limits are specified by bearing manufacturers based on cage material and lubrication type."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "excessive_motor_speed"
+        },
+        {
+            "name": "HighFrequencyPulseVoltage",
+            "display_name": "High-Frequency Pulse Voltage",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_insulation",
+            "short_description": "High-frequency voltage pulses from the PWM inverter stressing winding insulation.",
+            "extended_description": "Represents the severity of high-frequency pulse voltage imposed on motor winding insulation by the power electronics inverter. Fast-switching semiconductor devices (IGBTs, SiC MOSFETs) produce steep voltage transients (dV/dt) that create non-uniform voltage distribution across winding turns, leading to partial discharge and insulation degradation.",
+            "sensitivity_hints": "Root cause contributing to insulation deterioration. Modern wide-bandgap inverters produce particularly steep dV/dt.",
+            "related_domain_knowledge": [
+                "PWM inverter output contains high-frequency harmonics that stress motor insulation beyond sinusoidal ratings.",
+                "Voltage reflection in long cables between inverter and motor can double the peak voltage at motor terminals.",
+                "Repetitive voltage spikes cause cumulative insulation damage through partial discharge activity.",
+                "IEC 60034-18-41 specifies insulation systems designed to withstand inverter-fed voltage stress."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "hf_pulse_voltage"
+        },
+        {
+            "name": "HighTemperatureGluing",
+            "display_name": "High-Temperature Adhesive Wear (Gluing)",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_wear",
+            "short_description": "Adhesive wear from localised high temperatures causing material transfer between bearing surfaces.",
+            "extended_description": "Represents the severity of high-temperature adhesive wear (smearing/gluing) in motor bearings. When localised temperatures at the contact interface become extreme, the lubricant film breaks down and metal-to-metal contact occurs, causing material transfer (adhesion) between rolling elements and raceways. Identified as one of the system's primary weak links.",
+            "sensitivity_hints": "Root cause contributing to bearing wear failure. Identified as a weak link in the system by importance analysis.",
+            "related_domain_knowledge": [
+                "Adhesive wear (gluing/smearing) is a severe bearing damage mode where surfaces weld together momentarily.",
+                "It occurs when the lubricant film thickness drops below the combined surface roughness.",
+                "High sliding velocities combined with heavy loads create conditions for adhesive wear.",
+                "Smearing damage appears as discoloured, plastically deformed patches on raceways."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "high_temp_adhesive_wear"
+        },
+        {
+            "name": "ImproperAssembly",
+            "display_name": "Improper Bearing Assembly",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_plastic_deformation",
+            "short_description": "Incorrect bearing assembly procedures causing mechanical damage.",
+            "extended_description": "Represents the degree of damage from improper bearing assembly during motor manufacture or maintenance. Incorrect mounting techniques such as applying force to the wrong ring, misalignment during press-fitting, or contamination introduced during assembly can create initial damage that accelerates bearing failure through plastic deformation.",
+            "sensitivity_hints": "Root cause contributing to bearing plastic deformation. A manufacturing/maintenance quality issue.",
+            "related_domain_knowledge": [
+                "Bearing mounting errors account for a significant proportion of premature bearing failures.",
+                "Applying force through rolling elements during mounting creates brinelling marks on raceways.",
+                "Thermal mounting (heating the inner ring) is preferred over cold press-fitting for interference fits.",
+                "Proper alignment tools and clean assembly environments are essential for bearing longevity."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "improper_bearing_assembly"
+        },
+        {
+            "name": "ImproperLubrification",
+            "display_name": "Improper Bearing Lubrication",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_plastic_deformation",
+            "short_description": "Incorrect lubricant type, quantity, or application causing bearing damage.",
+            "extended_description": "Represents the severity of damage from improper lubrication practices in bearing maintenance. This includes using the wrong lubricant viscosity or type, over- or under-greasing, or incompatible lubricant mixing. Improper lubrication leads to insufficient film thickness, increased contact stress, and plastic deformation of bearing surfaces.",
+            "sensitivity_hints": "Root cause contributing to bearing plastic deformation. Distinct from poor lubrication quality (which affects wear).",
+            "related_domain_knowledge": [
+                "Lubrication errors are among the most common causes of premature bearing failure.",
+                "Over-greasing generates excess heat and can damage seals, while under-greasing starves the contact.",
+                "Lubricant compatibility must be verified when re-greasing to avoid softening or hardening of the grease.",
+                "The correct lubricant viscosity depends on bearing speed, load, and operating temperature."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "improper_bearing_lubrication"
+        },
+        {
+            "name": "InappropriateClearance",
+            "display_name": "Inappropriate Bearing Clearance",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_wear",
+            "short_description": "Incorrect internal bearing clearance causing abnormal loading and wear.",
+            "extended_description": "Represents the degree to which bearing internal clearance deviates from the design specification. Too-tight clearance increases preload and friction heat, while too-loose clearance allows excessive play and dynamic instability. Both conditions promote accelerated wear of rolling elements and raceways.",
+            "sensitivity_hints": "Root cause contributing to bearing wear failure. Clearance is set during assembly and changes with thermal expansion.",
+            "related_domain_knowledge": [
+                "Bearing internal clearance must account for interference fit reduction and thermal expansion during operation.",
+                "Negative clearance (preload) in high-speed motor bearings reduces vibration but increases friction heat.",
+                "Clearance groups (C2, CN, C3, C4) are standardised and selected based on application requirements.",
+                "Thermal growth of the inner ring riding on the shaft reduces mounted clearance from free-state values."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "inappropriate_bearing_clearance"
+        },
+        {
+            "name": "Indentation",
+            "display_name": "Bearing Surface Indentation",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_plastic_deformation",
+            "short_description": "Dents and impressions on bearing raceways from foreign particles or shock loads.",
+            "extended_description": "Represents the severity of surface indentation (brinelling or debris denting) on bearing raceways. Indentation damage creates stress concentrations that initiate fatigue cracks and spalling. It can result from static overloads, shock impacts during transport, or hard contaminant particles trapped between rolling elements and raceways.",
+            "sensitivity_hints": "Root cause contributing to bearing plastic deformation. Static indentation is called brinelling; dynamic indentation is called false brinelling.",
+            "related_domain_knowledge": [
+                "True brinelling occurs from static overload creating permanent raceway impressions matching rolling element spacing.",
+                "False brinelling results from micro-oscillations during transport or standstill vibration.",
+                "Foreign particle indentation (debris denting) depends on particle hardness relative to bearing steel.",
+                "Indentation-initiated fatigue life can be orders of magnitude shorter than clean-contact fatigue life."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "bearing_surface_indentation"
+        },
+        {
+            "name": "InsulationDeterioration",
+            "display_name": "Stator Winding Insulation Deterioration",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "endogenous",
+            "category": "intermediate_failure_mode",
+            "short_description": "Intermediate failure mode aggregating all insulation degradation root causes.",
+            "extended_description": "Represents the overall state of the stator winding insulation subsystem. Determined by the combined severity of five root causes: high-frequency pulse voltage, localised high temperatures, poor cooling, severe partial discharges, and surface corrosion. Insulation failure is a primary failure mode in inverter-fed high-voltage motors, where electrical, thermal, and environmental stresses synergistically degrade the dielectric properties of winding insulation.",
+            "sensitivity_hints": "Intermediate aggregation node with the most parents (5). Feeds directly into system degradation. Insulation failure accounts for a large proportion of motor failures in electric vehicle drivetrains.",
+            "related_domain_knowledge": [
+                "Insulation deterioration follows the TEAM (Thermal, Electrical, Ambient, Mechanical) stress model.",
+                "In inverter-fed motors, electrical stress from voltage spikes is often the dominant degradation mechanism.",
+                "Insulation life approximately halves for every 10°C rise above rated temperature (Arrhenius rule).",
+                "Partial discharge inception voltage (PDIV) is a key diagnostic parameter for insulation health."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "insulation_deterioration"
+        },
+        {
+            "name": "LocalizedHighTemperatures",
+            "display_name": "Localised High Temperatures",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_insulation",
+            "short_description": "Localised thermal hotspots in the motor causing insulation degradation.",
+            "extended_description": "Represents the severity of localised thermal hotspots within the motor. These can arise from uneven current distribution, rotor eccentricity, eddy current losses in laminations, or poor thermal contact between winding and slot. Localised high temperatures accelerate thermal ageing of insulation materials and can trigger thermal runaway. Identified as one of the system's primary weak links.",
+            "sensitivity_hints": "Root cause contributing to insulation deterioration. Identified as a weak link in importance analysis. Distinct from general cooling deficiency.",
+            "related_domain_knowledge": [
+                "Thermal hotspots in motors can exceed average winding temperature by 20–40°C.",
+                "Hotspot location depends on motor topology, cooling geometry, and harmonic losses.",
+                "Embedded temperature sensors (RTDs, thermistors) may not detect localised hotspots in all slot positions.",
+                "Thermal modelling using lumped-parameter or finite-element methods helps predict hotspot locations."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "localised_thermal_hotspots"
+        },
+        {
+            "name": "Moisture",
+            "display_name": "Moisture Exposure",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_corrosion",
+            "short_description": "Presence of moisture or humidity affecting bearing components.",
+            "extended_description": "Represents the severity of moisture exposure to motor bearings. Moisture ingress through inadequate sealing, condensation from thermal cycling, or humid operating environments promotes corrosion of bearing steel surfaces, degrades lubricant properties, and can cause hydrogen embrittlement of bearing material. Identified as one of the system's primary weak links.",
+            "sensitivity_hints": "Root cause contributing to bearing corrosion failure. Identified as a weak link by importance analysis. Synergises with chemical corrosion and electrical damage.",
+            "related_domain_knowledge": [
+                "Moisture in bearings accelerates corrosion, especially when combined with acidic lubricant degradation products.",
+                "Thermal cycling causes condensation inside sealed motor housings as ambient temperature drops.",
+                "Even small amounts of water (>200 ppm) in lubricant significantly reduce bearing fatigue life.",
+                "IP (Ingress Protection) rating of the motor enclosure determines moisture resistance."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "moisture_exposure"
+        },
+        {
+            "name": "PlasticDeformation",
+            "display_name": "Bearing Plastic Deformation Failure Mode",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "endogenous",
+            "category": "intermediate_failure_mode",
+            "short_description": "Intermediate failure mode aggregating bearing plastic deformation root causes.",
+            "extended_description": "Represents the overall state of the bearing plastic deformation failure subsystem. Determined by the combined severity of improper assembly, improper lubrication, and surface indentation. Plastic deformation of bearing raceways and rolling elements creates stress concentrations that initiate fatigue cracking, spalling, and ultimately bearing seizure.",
+            "sensitivity_hints": "Intermediate aggregation node with three root causes. Feeds directly into system degradation. Represents permanent (non-elastic) deformation of bearing contact surfaces.",
+            "related_domain_knowledge": [
+                "Plastic deformation occurs when contact stresses exceed the yield strength of bearing steel.",
+                "It manifests as permanent dents, flattening of rolling elements, or raceway depressions.",
+                "Static load ratings (C0) define the load that produces a specific permanent deformation.",
+                "Once initiated, plastic deformation concentrates subsequent loads, creating a positive feedback loop toward failure."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "bearing_plastic_deformation"
+        },
+        {
+            "name": "PoorCooling",
+            "display_name": "Poor Motor Cooling",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_insulation",
+            "short_description": "Inadequate motor cooling capacity causing elevated temperatures.",
+            "extended_description": "Represents the degree of cooling system deficiency in the motor. Poor cooling can result from blocked ventilation passages, coolant pump failure, degraded thermal interface materials, or operating beyond the thermal design envelope. Elevated bulk temperatures from poor cooling accelerate thermal ageing of insulation across the entire winding.",
+            "sensitivity_hints": "Root cause contributing to insulation deterioration. Represents global thermal management failure, distinct from localised hotspots.",
+            "related_domain_knowledge": [
+                "Electric vehicle drive motors typically use liquid cooling (water-glycol jacket) for high power density.",
+                "Cooling system failure can raise winding temperatures by 50–100°C within minutes under load.",
+                "Derating curves specify reduced continuous power output at elevated ambient temperatures.",
+                "Thermal protection devices (PTC thermistors, bimetallic switches) provide last-resort overtemperature shutdown."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "poor_motor_cooling"
+        },
+        {
+            "name": "PoorLubrification",
+            "display_name": "Poor Lubrication Quality",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_wear",
+            "short_description": "Degraded or insufficient lubricant quality causing accelerated bearing wear.",
+            "extended_description": "Represents the quality and effectiveness of bearing lubrication during operation. Poor lubrication occurs when lubricant degrades through oxidation, thermal breakdown, or contamination, reducing film thickness and load-carrying capacity. Distinct from improper lubrication (which relates to initial application errors), this represents in-service lubricant degradation contributing to wear.",
+            "sensitivity_hints": "Root cause contributing to bearing wear failure. Represents lubricant condition during operation, distinct from improper lubrication (assembly/maintenance error).",
+            "related_domain_knowledge": [
+                "Lubrication failure is the leading cause of bearing failure in electric motors.",
+                "Grease life in motor bearings depends on speed, temperature, load, and grease type.",
+                "The minimum film thickness relative to surface roughness (lambda ratio) determines the lubrication regime.",
+                "Grease re-lubrication intervals are critical for bearings in continuous-duty motor applications."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "poor_lubrication_quality"
+        },
+        {
+            "name": "PresenceAbrasiveParticles",
+            "display_name": "Presence of Abrasive Particles",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_wear",
+            "short_description": "Abrasive contaminant particles in the bearing causing accelerated surface wear.",
+            "extended_description": "Represents the severity of abrasive particle contamination in motor bearings. Contaminant particles from external ingress, internal wear debris, or manufacturing residue become trapped in the bearing contact zone, causing three-body abrasive wear that removes material from raceways and rolling elements. Identified as one of the system's primary weak links.",
+            "sensitivity_hints": "Root cause contributing to bearing wear failure. Identified as the most critical weak link by importance analysis. Contamination control is the most effective reliability improvement.",
+            "related_domain_knowledge": [
+                "Particle contamination is the dominant cause of premature bearing failure across industrial applications.",
+                "Particles as small as the lubricant film thickness (~0.5 μm) can cause significant damage.",
+                "Sealing effectiveness and environmental cleanliness are the primary contamination barriers.",
+                "ISO 4406 cleanliness codes quantify particle contamination levels in lubricating oils."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "abrasive_particle_contamination"
+        },
+        {
+            "name": "ScratchVibration",
+            "display_name": "Vibration-Induced Scratching",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_wear",
+            "short_description": "Vibration-induced scratching and fretting damage on bearing surfaces.",
+            "extended_description": "Represents the severity of vibration-induced surface damage (fretting or false brinelling) in motor bearings. Mechanical vibrations from the vehicle drivetrain, road irregularities, or electromagnetic forces cause micro-oscillations at bearing contact points, producing wear debris and surface roughening through a fretting mechanism.",
+            "sensitivity_hints": "Root cause contributing to bearing wear failure. Particularly relevant for vehicle applications with continuous vibration exposure.",
+            "related_domain_knowledge": [
+                "Fretting wear from vibration produces reddish-brown oxide debris (fretting corrosion).",
+                "Vibration during vehicle standstill or transport can damage bearings before the motor ever operates.",
+                "Electromagnetic vibration forces in motors include twice-line-frequency forces and slot harmonics.",
+                "Vibration monitoring is a primary condition-based maintenance technique for motor bearing health."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "vibration_induced_scratching"
+        },
+        {
+            "name": "SeverePartialDischarges",
+            "display_name": "Severe Partial Discharges",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_insulation",
+            "short_description": "Partial electrical discharge events within the insulation system.",
+            "extended_description": "Represents the severity of partial discharge (PD) activity within the motor winding insulation. Partial discharges are localised electrical breakdowns in voids, delaminations, or at surface discontinuities within the insulation system. Each PD event erodes a microscopic amount of insulation material, and cumulative PD activity leads to progressive insulation deterioration and eventual dielectric failure.",
+            "sensitivity_hints": "Root cause contributing to insulation deterioration. PD activity is both a cause and an indicator of insulation degradation.",
+            "related_domain_knowledge": [
+                "Partial discharge inception voltage (PDIV) is a critical insulation quality parameter.",
+                "In inverter-fed motors, repetitive voltage spikes regularly exceed PDIV even in new insulation.",
+                "PD measurement during acceptance testing is mandated by IEC standards for medium-voltage motors.",
+                "PD-resistant insulation systems use inorganic fillers (mica) to withstand electrical erosion."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "severe_partial_discharges"
+        },
+        {
+            "name": "SurfaceCorrosion",
+            "display_name": "Insulation Surface Corrosion",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "exogenous",
+            "category": "root_cause_insulation",
+            "short_description": "Surface corrosion of insulation materials degrading dielectric properties.",
+            "extended_description": "Represents the severity of surface corrosion or chemical degradation of the motor winding insulation material. Environmental agents such as moisture, ozone (produced by partial discharges), acidic condensation, or chemical contaminants attack the insulation surface, reducing its dielectric strength and tracking resistance.",
+            "sensitivity_hints": "Root cause contributing to insulation deterioration. Interacts synergistically with partial discharges (PD produces ozone that corrodes insulation).",
+            "related_domain_knowledge": [
+                "Ozone produced by partial discharge activity is a potent insulation degradation agent.",
+                "Surface tracking occurs when conductive paths form on contaminated or corroded insulation surfaces.",
+                "Insulation varnish and encapsulation provide the primary environmental barrier.",
+                "Comparative Tracking Index (CTI) rates insulation material resistance to surface degradation."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "insulation_surface_corrosion"
+        },
+        {
+            "name": "SystemDegradation",
+            "display_name": "Overall Drive Motor System Degradation",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "endogenous",
+            "category": "system_level_outcome",
+            "short_description": "Top-level event representing the overall degradation state of the drive motor system.",
+            "extended_description": "Represents the overall reliability state of the high-voltage drive motor system. This is the top event of the polymorphic fault tree, determined by the combined severity of four subsystem failure modes: bearing corrosion, insulation deterioration, bearing plastic deformation, and bearing wear. The system transitions from Normal through Degradation to Failed as component-level faults propagate and accumulate.",
+            "sensitivity_hints": "Top-level system outcome node. The single leaf node of the network with four parents representing the four major failure subsystems. Target variable for reliability prediction and diagnosis.",
+            "related_domain_knowledge": [
+                "System reliability is determined by the weakest subsystem in a series-connected reliability model.",
+                "Drive motor failure in an electric vehicle results in total loss of traction power.",
+                "Predictive maintenance aims to detect Degradation state before progression to Failed.",
+                "Mean time between failures (MTBF) for electric vehicle drive motors targets >100,000 hours."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "drive_motor_system_degradation"
+        },
+        {
+            "name": "WearFault",
+            "display_name": "Bearing Wear Failure Mode",
+            "type": "ordinal",
+            "states": [
+                "Normal",
+                "Degradation",
+                "Failed"
+            ],
+            "role": "endogenous",
+            "category": "intermediate_failure_mode",
+            "short_description": "Intermediate failure mode aggregating all bearing wear root causes.",
+            "extended_description": "Represents the overall state of the bearing wear failure subsystem. Determined by the combined severity of six root causes: excessive speed, high-temperature adhesive wear, inappropriate clearance, poor lubrication quality, presence of abrasive particles, and vibration-induced scratching. The node with the most parents (6) in the network, reflecting the diverse mechanisms that contribute to bearing wear in high-speed motor applications.",
+            "sensitivity_hints": "Intermediate aggregation node with the most parents (6). Feeds directly into system degradation. Bearing wear is the most complex failure subsystem with the largest number of contributing root causes.",
+            "related_domain_knowledge": [
+                "Bearing wear encompasses abrasive, adhesive, and erosive mechanisms acting on contact surfaces.",
+                "Wear progresses through running-in, steady-state, and severe (tertiary) phases.",
+                "Surface roughness, hardness differential, and lubricant cleanliness are the primary wear-controlling factors.",
+                "Vibration spectral analysis can detect bearing wear through characteristic defect frequencies (BPFO, BPFI, BSF, FTF)."
+            ],
+            "references": [
+                "Zheng2023_PolyBN"
+            ],
+            "llm_name": "bearing_wear_failure"
+        }
+    ]
+}

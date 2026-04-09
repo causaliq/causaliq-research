@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This network was created in BNBENCH -->
+<smile version="1.0" id="bnbench" numsamples="100000" discsamples="100000">
+    <nodes>
+        <cpt id="Age">
+            <state id="S0_9" />
+            <state id="S10_19" />
+            <state id="S20_29" />
+            <state id="S30_39" />
+            <state id="S40_49" />
+            <state id="S50_59" />
+            <state id="S60_69" />
+            <state id="S70_" />
+            <probabilities>0.1233831 0.1233831 0.1402985 0.1452736 0.1273632 0.121393 0.1044776 0.1144279</probabilities>
+        </cpt>
+        <cpt id="AZVaccineDoses">
+            <state id="None" />
+            <state id="One" />
+            <state id="Two" />
+            <probabilities>0.3 0.35 0.35</probabilities>
+        </cpt>
+        <cpt id="SARSCoV2Variant">
+            <state id="Alpha_Wild" />
+            <state id="Delta" />
+            <probabilities>0.05 0.95</probabilities>
+        </cpt>
+        <cpt id="IntensityOfCommunityTransmission">
+            <state id="ATAGI_High" />
+            <state id="ATAGI_Low" />
+            <state id="ATAGI_Med" />
+            <state id="NSW_1000_Daily" />
+            <state id="NSW_200_Daily" />
+            <state id="None" />
+            <state id="One_Percent" />
+            <state id="QLD_1000_Daily" />
+            <state id="Two_Percent" />
+            <state id="VIC_1000_Daily" />
+            <probabilities>0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1</probabilities>
+        </cpt>
+        <cpt id="Sex">
+            <state id="Female" />
+            <state id="Male" />
+            <probabilities>0.5 0.5</probabilities>
+        </cpt>
+        <cpt id="VaccineEffectivenessAgainstDeathIfInfected">
+            <state id="Effective" />
+            <state id="Not_Effective" />
+            <parents>AZVaccineDoses SARSCoV2Variant</parents>
+            <probabilities>0.0 1.0 0.0 1.0 0.8 0.2 0.69 0.31 0.95 0.05 0.9 0.1</probabilities>
+        </cpt>
+        <cpt id="VaccineEffectivenessAgainstSymptomaticInfection">
+            <state id="Effective" />
+            <state id="Not_Effective" />
+            <parents>AZVaccineDoses SARSCoV2Variant</parents>
+            <probabilities>0.0 1.0 0.0 1.0 0.6 0.4 0.3333333 0.6666667 0.8 0.2 0.61 0.39</probabilities>
+        </cpt>
+        <cpt id="BackgroundPVTOver6Weeks">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>Age</parents>
+            <probabilities>0.99 0.01 0.99 0.01 0.98 0.02 0.975 0.025 0.965 0.035 0.95 0.05 0.93 0.07 0.92 0.08</probabilities>
+        </cpt>
+        <cpt id="BackgroundCSVTOver6Weeks">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>Age</parents>
+            <probabilities>0.97 0.03 0.97 0.03 0.96 0.04 0.96 0.04 0.96 0.04 0.95 0.05 0.95 0.05 0.95 0.05</probabilities>
+        </cpt>
+        <cpt id="VaccineAssociatedTTS">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>AZVaccineDoses Age</parents>
+            <probabilities>1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.96 0.04 0.96 0.04 0.96 0.04 0.96 0.04 0.96 0.04 0.955 0.045 0.965 0.035 0.96 0.04 0.985 0.015 0.985 0.015 0.985 0.015 0.985 0.015 0.985 0.015 0.985 0.015 0.985 0.015 0.985 0.015</probabilities>
+        </cpt>
+        <cpt id="RiskOfSymptomaticInfection">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>Age SARSCoV2Variant</parents>
+            <probabilities>0.88 0.12 0.75 0.25 0.8 0.2 0.65 0.35 0.65 0.35 0.65 0.35 0.72 0.28 0.72 0.28 0.75 0.25 0.75 0.25 0.75 0.25 0.75 0.25 0.78 0.22 0.82 0.18 0.72 0.28 0.85 0.15</probabilities>
+        </cpt>
+        <cpt id="DieFromBackgroundCSVT">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>BackgroundCSVTOver6Weeks</parents>
+            <probabilities>1.0 0.0 0.85 0.15</probabilities>
+        </cpt>
+        <cpt id="DieFromVaccineAssociatedTTS">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>VaccineAssociatedTTS</parents>
+            <probabilities>1.0 0.0 0.85 0.15</probabilities>
+        </cpt>
+        <cpt id="DieFromBackgroundPVT">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>BackgroundPVTOver6Weeks</parents>
+            <probabilities>1.0 0.0 0.73 0.27</probabilities>
+        </cpt>
+        <cpt id="RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>IntensityOfCommunityTransmission RiskOfSymptomaticInfection VaccineEffectivenessAgainstSymptomaticInfection</parents>
+            <probabilities>1.0 0.0 1.0 0.0 1.0 0.0 0.4241 0.5759 1.0 0.0 1.0 0.0 1.0 0.0 0.95 0.05 1.0 0.0 1.0 0.0 1.0 0.0 0.9 0.1 1.0 0.0 1.0 0.0 1.0 0.0 0.77724 0.22276 1.0 0.0 1.0 0.0 1.0 0.0 0.9 0.1 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.85 0.15 1.0 0.0 1.0 0.0 1.0 0.0 0.64933 0.35067 1.0 0.0 1.0 0.0 1.0 0.0 0.75 0.25 1.0 0.0 1.0 0.0 1.0 0.0 0.72711 0.27289</probabilities>
+        </cpt>
+        <cpt id="Covid19AssociatedCSVT">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus Sex</parents>
+            <probabilities>1.0 0.0 1.0 0.0 0.75 0.25 0.8 0.2</probabilities>
+        </cpt>
+        <cpt id="Covid19AssociatedPVT">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus Sex</parents>
+            <probabilities>1.0 0.0 1.0 0.0 0.75 0.25 0.7 0.3</probabilities>
+        </cpt>
+        <cpt id="DieFromCovid19">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>Age RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus Sex VaccineEffectivenessAgainstDeathIfInfected</parents>
+            <probabilities>1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.96 0.04 1.0 0.0 0.95 0.05 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.95 0.05 1.0 0.0 0.93 0.07 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.95 0.05 1.0 0.0 0.93 0.07 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.92 0.08 1.0 0.0 0.9 0.1 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.92 0.08 1.0 0.0 0.9 0.1 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.88 0.12 1.0 0.0 0.85 0.15 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.8 0.2 1.0 0.0 0.75 0.25 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.6 0.4 1.0 0.0 0.55 0.45</probabilities>
+        </cpt>
+        <cpt id="DieFromCovid19AssociatedCSVT">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>Covid19AssociatedCSVT</parents>
+            <probabilities>1.0 0.0 0.6 0.4</probabilities>
+        </cpt>
+        <cpt id="DieFromCovid19AssociatedPVT">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>Covid19AssociatedPVT</parents>
+            <probabilities>1.0 0.0 0.6 0.4</probabilities>
+        </cpt>
+    </nodes>
+    <extensions>
+        <genie version="1.0" app="GeNIe 4.0.1922.0 ACADEMIC" name="Network1">
+            <node id="Age">
+                <name>Age</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 100 100 140</position>
+            </node>
+            <node id="AZVaccineDoses">
+                <name>AZVaccineDoses</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 100 200 140</position>
+            </node>
+            <node id="SARSCoV2Variant">
+                <name>SARSCoV2Variant</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 100 300 140</position>
+            </node>
+            <node id="IntensityOfCommunityTransmission">
+                <name>IntensityOfCommunityTransmission</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 100 400 140</position>
+            </node>
+            <node id="Sex">
+                <name>Sex</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 100 500 140</position>
+            </node>
+            <node id="VaccineEffectivenessAgainstDeathIfInfected">
+                <name>VaccineEffectivenessAgainstDeathIfInfected</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 200 100 240</position>
+            </node>
+            <node id="VaccineEffectivenessAgainstSymptomaticInfection">
+                <name>VaccineEffectivenessAgainstSymptomaticInfection</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 200 200 240</position>
+            </node>
+            <node id="BackgroundPVTOver6Weeks">
+                <name>BackgroundPVTOver6Weeks</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 200 300 240</position>
+            </node>
+            <node id="BackgroundCSVTOver6Weeks">
+                <name>BackgroundCSVTOver6Weeks</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 200 400 240</position>
+            </node>
+            <node id="VaccineAssociatedTTS">
+                <name>VaccineAssociatedTTS</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 200 500 240</position>
+            </node>
+            <node id="RiskOfSymptomaticInfection">
+                <name>RiskOfSymptomaticInfection</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>520 200 600 240</position>
+            </node>
+            <node id="DieFromBackgroundCSVT">
+                <name>DieFromBackgroundCSVT</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 300 100 340</position>
+            </node>
+            <node id="DieFromVaccineAssociatedTTS">
+                <name>DieFromVaccineAssociatedTTS</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 300 200 340</position>
+            </node>
+            <node id="DieFromBackgroundPVT">
+                <name>DieFromBackgroundPVT</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 300 300 340</position>
+            </node>
+            <node id="RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus">
+                <name>RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 300 400 340</position>
+            </node>
+            <node id="Covid19AssociatedCSVT">
+                <name>Covid19AssociatedCSVT</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 400 100 440</position>
+            </node>
+            <node id="Covid19AssociatedPVT">
+                <name>Covid19AssociatedPVT</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 400 200 440</position>
+            </node>
+            <node id="DieFromCovid19">
+                <name>DieFromCovid19</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 400 300 440</position>
+            </node>
+            <node id="DieFromCovid19AssociatedCSVT">
+                <name>DieFromCovid19AssociatedCSVT</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 500 100 540</position>
+            </node>
+            <node id="DieFromCovid19AssociatedPVT">
+                <name>DieFromCovid19AssociatedPVT</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 500 200 540</position>
+            </node>
+        </genie>
+    </extensions>
+</smile>

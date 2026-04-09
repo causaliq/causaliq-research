@@ -1,0 +1,321 @@
+{
+    "schema_version": "2.0",
+    "network": "seismic",
+    "domain": "structural_seismic_risk",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a seismic risk assessment model of reinforced concrete buildings, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "seismic",
+        "source_reference": "Roy2024",
+        "source_url": "https://doi.org/10.1007/s42107-023-00872-0",
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "The Seismic network models probabilistic seismic risk assessment of a reinforced concrete building, developed by Roy, Sen, Singh, Dutta, and Choudhury (2024) using a Bayesian Belief Network approach. It captures relationships between seismic source characteristics, ground shaking propagation, structural vulnerability, and overall seismic risk. Contains 10 nodes and 12 edges. All variables are ternary. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a model of probabilistic seismic risk assessment for a reinforced concrete building.",
+            "The causal chain follows two main pathways: (1) seismic hazard pathway: earthquake magnitude + distance → shaking intensity → seismic hazard, and (2) vulnerability pathway: construction quality → strength degradation + live load + seismic hazard → fragility → vulnerability.",
+            "Earthquake magnitude and epicentral distance are exogenous seismic source parameters that jointly determine ground shaking intensity.",
+            "Shaking intensity, distance, and magnitude all influence the overall seismic hazard level at the building site.",
+            "Construction quality is an exogenous structural property that determines strength degradation of the building.",
+            "Fragility is a central node integrating seismic demand (hazard) and structural capacity (strength degradation, live load).",
+            "Vulnerability is directly determined by the fragility level of the structure.",
+            "Seismic risk is the terminal outcome combining seismic hazard and structural vulnerability.",
+            "Live load represents the imposed loading on the structure, which affects its fragility under seismic action.",
+            "All variables are ternary (Low/Medium/High or Short/Medium/Long), reflecting discretised expert assessments."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "ConstructionQuality",
+            "display_name": "Construction Quality",
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "exogenous",
+            "category": "structural_property",
+            "short_description": "Quality of construction of the reinforced concrete building.",
+            "extended_description": "The overall quality of construction of the reinforced concrete building, encompassing material quality, workmanship, compliance with design codes, and structural detailing. An exogenous structural property that directly determines the degree of strength degradation over the building's life. High construction quality implies better durability and lower degradation.",
+            "sensitivity_hints": "Exogenous structural variable. Directly determines strength degradation. Does not depend on any seismic parameters.",
+            "related_domain_knowledge": [
+                "Construction quality is a primary determinant of structural resilience in developing countries.",
+                "Poor construction quality is the leading cause of building collapse in moderate earthquakes.",
+                "Quality encompasses concrete strength, rebar placement, joint detailing, and curing practices.",
+                "Building code compliance varies significantly by region and construction era."
+            ],
+            "references": [
+                "Roy2024"
+            ],
+            "llm_name": "construction_quality"
+        },
+        {
+            "name": "Distance",
+            "display_name": "Epicentral Distance",
+            "type": "categorical",
+            "states": [
+                "Short",
+                "Medium",
+                "Long"
+            ],
+            "role": "exogenous",
+            "category": "seismic_source",
+            "short_description": "Distance from the earthquake epicentre to the building site.",
+            "extended_description": "The distance from the earthquake epicentre (or fault rupture plane) to the building site. An exogenous seismic source parameter that influences ground shaking intensity through geometric attenuation and also affects the overall seismic hazard characterisation. Shorter distances generally produce stronger shaking.",
+            "sensitivity_hints": "Exogenous seismic parameter. Affects shaking intensity and seismic hazard. Combined with magnitude to characterise the seismic demand.",
+            "related_domain_knowledge": [
+                "Ground motion attenuates approximately as 1/r with distance from the source.",
+                "Near-field effects (directivity, fling-step) can amplify shaking at short distances.",
+                "Site-specific soil conditions can modify the distance-attenuation relationship.",
+                "Distance is measured from the closest point on the fault rupture plane, not just the epicentre."
+            ],
+            "references": [
+                "Roy2024"
+            ],
+            "llm_name": "epicentral_distance"
+        },
+        {
+            "name": "Fragility",
+            "display_name": "Structural Fragility",
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "structural_response",
+            "short_description": "Fragility of the structure under seismic loading.",
+            "extended_description": "The structural fragility representing the probability of the building reaching or exceeding a damage state given the seismic demand. A central integrative node determined by the interplay of seismic hazard level, structural strength degradation, and imposed live loading. High fragility means the structure is more likely to sustain significant damage.",
+            "sensitivity_hints": "Central integrative node. Driven by seismic hazard, strength degradation, and live load. Directly determines vulnerability. Has the largest CPT in the network.",
+            "related_domain_knowledge": [
+                "Fragility curves are fundamental tools in performance-based earthquake engineering.",
+                "Fragility integrates both demand (hazard) and capacity (structural resistance).",
+                "Higher live loads reduce the structural reserve capacity available to resist seismic forces.",
+                "Fragility is typically expressed as probability of exceeding a damage state given a ground motion intensity."
+            ],
+            "references": [
+                "Roy2024"
+            ],
+            "llm_name": "structural_fragility"
+        },
+        {
+            "name": "LiveLoad",
+            "display_name": "Live Load",
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "exogenous",
+            "category": "structural_property",
+            "short_description": "Imposed live loading on the building structure.",
+            "extended_description": "The imposed live loading on the reinforced concrete structure from occupancy, furniture, equipment, and other non-permanent loads. An exogenous structural parameter that affects fragility by consuming part of the structural capacity that would otherwise be available to resist seismic forces. Higher live loads increase structural demand and fragility.",
+            "sensitivity_hints": "Exogenous structural parameter. Directly affects fragility. Does not depend on seismic parameters or construction quality.",
+            "related_domain_knowledge": [
+                "Live loads in residential buildings are typically 1.5-2.0 kN/m²; commercial buildings are higher.",
+                "Seismic load combinations include a fraction of live load as per design codes.",
+                "Heavy live loads increase the seismic mass, amplifying inertial forces during earthquakes.",
+                "Live load variability is a significant source of uncertainty in structural reliability."
+            ],
+            "references": [
+                "Roy2024"
+            ],
+            "llm_name": "imposed_live_load"
+        },
+        {
+            "name": "Magnitude",
+            "display_name": "Earthquake Magnitude",
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "exogenous",
+            "category": "seismic_source",
+            "short_description": "Magnitude of the earthquake event.",
+            "extended_description": "The magnitude of the earthquake event, representing the total energy released at the source. An exogenous seismic source parameter that, together with epicentral distance, determines the ground shaking intensity at the building site and contributes to the overall seismic hazard characterisation.",
+            "sensitivity_hints": "Exogenous seismic parameter. Affects shaking intensity and seismic hazard. Combined with distance to characterise the seismic demand at the site.",
+            "related_domain_knowledge": [
+                "Earthquake magnitude is measured on a logarithmic scale (e.g., Richter, moment magnitude).",
+                "Each unit increase in magnitude corresponds to approximately 31.6 times more energy released.",
+                "Low magnitude earthquakes are far more frequent than high magnitude events (Gutenberg-Richter law).",
+                "Magnitude alone does not determine damage; distance, site conditions, and building vulnerability all matter."
+            ],
+            "references": [
+                "Roy2024"
+            ],
+            "llm_name": "earthquake_magnitude"
+        },
+        {
+            "name": "SeismicHazard",
+            "display_name": "Seismic Hazard Level",
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "seismic_demand",
+            "short_description": "Overall seismic hazard level at the building site.",
+            "extended_description": "The overall seismic hazard level at the building site, integrating earthquake magnitude, epicentral distance, and ground shaking intensity. Represents the severity of seismic demand that the structure must withstand. Feeds into both the fragility assessment and the final seismic risk evaluation.",
+            "sensitivity_hints": "Key integrative node for seismic demand. Driven by distance, magnitude, and shaking intensity. Affects both fragility and seismic risk.",
+            "related_domain_knowledge": [
+                "Seismic hazard analysis is typically performed probabilistically (PSHA) for design purposes.",
+                "Hazard depends on source characteristics, path effects, and local site conditions.",
+                "Seismic hazard maps are used in building codes to define design ground motion levels.",
+                "Hazard is distinct from risk: hazard is the ground motion severity, risk includes consequences."
+            ],
+            "references": [
+                "Roy2024"
+            ],
+            "llm_name": "seismic_hazard_level"
+        },
+        {
+            "name": "SeismicRisk",
+            "display_name": "Seismic Risk",
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "risk_outcome",
+            "short_description": "Overall seismic risk to the building combining hazard and vulnerability.",
+            "extended_description": "The terminal outcome node representing the overall seismic risk to the reinforced concrete building. Determined by the combination of seismic hazard (demand-side) and structural vulnerability (capacity-side). High risk occurs when a vulnerable structure is subjected to high seismic hazard. This is the primary output for decision-making regarding retrofitting, insurance, and emergency planning.",
+            "sensitivity_hints": "Terminal output node. Driven by seismic hazard and vulnerability. All upstream variables affect this through their respective causal chains.",
+            "related_domain_knowledge": [
+                "Seismic risk = hazard × vulnerability × exposure (conceptually).",
+                "Risk assessment informs decisions on structural retrofitting and insurance pricing.",
+                "High-risk buildings may require immediate occupancy restrictions or demolition.",
+                "Risk can be reduced by addressing either hazard (site selection) or vulnerability (strengthening)."
+            ],
+            "references": [
+                "Roy2024"
+            ],
+            "llm_name": "seismic_risk_level"
+        },
+        {
+            "name": "ShakingIntensity",
+            "display_name": "Ground Shaking Intensity",
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "seismic_demand",
+            "short_description": "Intensity of ground shaking at the building site.",
+            "extended_description": "The intensity of ground shaking experienced at the building site, determined by the combination of earthquake magnitude and epicentral distance. Represents the local ground motion severity after accounting for source characteristics and path attenuation. Feeds into the seismic hazard assessment.",
+            "sensitivity_hints": "Intermediate demand node. Driven by distance and magnitude. Contributes to seismic hazard assessment.",
+            "related_domain_knowledge": [
+                "Ground shaking intensity can be measured by peak ground acceleration (PGA), spectral acceleration, or macroseismic intensity.",
+                "Local soil conditions (site effects) can significantly amplify or attenuate ground shaking.",
+                "Shaking intensity decreases with distance but can be focused by basin effects or topography.",
+                "The Modified Mercalli Intensity (MMI) scale relates observed shaking effects to intensity levels."
+            ],
+            "references": [
+                "Roy2024"
+            ],
+            "llm_name": "ground_shaking_intensity"
+        },
+        {
+            "name": "StrengthDegradation",
+            "display_name": "Structural Strength Degradation",
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "structural_property",
+            "short_description": "Degree of strength degradation of the reinforced concrete structure.",
+            "extended_description": "The degree to which the reinforced concrete structure has lost its original designed strength over time, due to factors such as ageing, corrosion of reinforcement, carbonation, alkali-silica reaction, or poor maintenance. Directly determined by construction quality: high-quality construction degrades less. Affects the structural fragility under seismic loading.",
+            "sensitivity_hints": "Driven solely by construction quality. Directly affects fragility. Represents the capacity-side degradation of the structure.",
+            "related_domain_knowledge": [
+                "Reinforcement corrosion is the primary cause of strength degradation in concrete structures.",
+                "Carbonation of concrete reduces the alkaline protection of reinforcing steel.",
+                "Poor construction quality (inadequate cover, poor compaction) accelerates degradation.",
+                "Strength degradation is time-dependent and cumulative."
+            ],
+            "references": [
+                "Roy2024"
+            ],
+            "llm_name": "strength_degradation"
+        },
+        {
+            "name": "Vulnerability",
+            "display_name": "Structural Vulnerability",
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "structural_response",
+            "short_description": "Overall vulnerability of the building to seismic damage.",
+            "extended_description": "The overall vulnerability of the reinforced concrete building to seismic damage, directly determined by its structural fragility. Represents the capacity-side component of the risk equation. Feeds into the final seismic risk assessment together with the seismic hazard. In this model, vulnerability is a direct mapping from fragility.",
+            "sensitivity_hints": "Driven solely by fragility. Directly affects seismic risk. Acts as the capacity-side input to the risk node.",
+            "related_domain_knowledge": [
+                "Vulnerability assessment classifies buildings into damage states (none, slight, moderate, extensive, complete).",
+                "Pre-code buildings are typically more vulnerable than code-compliant structures.",
+                "Vulnerability functions relate ground motion intensity to expected damage levels.",
+                "Structural irregularities (soft storey, torsion) significantly increase vulnerability."
+            ],
+            "references": [
+                "Roy2024"
+            ],
+            "llm_name": "structural_vulnerability"
+        }
+    ]
+}

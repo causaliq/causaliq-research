@@ -1,0 +1,278 @@
+<?xml version='1.0' encoding='utf-8'?>
+<smile version="1.0" id="polymorphic">
+  <nodes>
+    <cpt id="ChemicalCorrosion">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.985 0.010 0.005</probabilities>
+    </cpt>
+    <cpt id="CorrosionFailure">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <parents>ChemicalCorrosion ExcessiveInterShaftCurrent Moisture</parents>
+      <probabilities>1 0 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1</probabilities>
+    </cpt>
+    <cpt id="ExcessiveInterShaftCurrent">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.984 0.010 0.006</probabilities>
+    </cpt>
+    <cpt id="ExcessiveSpeed">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.984 0.010 0.006</probabilities>
+    </cpt>
+    <cpt id="HighFrequencyPulseVoltage">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.986 0.007 0.007</probabilities>
+    </cpt>
+    <cpt id="HighTemperatureGluing">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.975 0.010 0.015</probabilities>
+    </cpt>
+    <cpt id="ImproperAssembly">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.985 0.010 0.005</probabilities>
+    </cpt>
+    <cpt id="ImproperLubrification">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.986 0.007 0.007</probabilities>
+    </cpt>
+    <cpt id="InappropriateClearance">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.985 0.010 0.005</probabilities>
+    </cpt>
+    <cpt id="Indentation">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.985 0.010 0.005</probabilities>
+    </cpt>
+    <cpt id="InsulationDeterioration">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <parents>HighFrequencyPulseVoltage LocalizedHighTemperatures PoorCooling SeverePartialDischarges SurfaceCorrosion</parents>
+      <probabilities>1 0 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 0 1 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1</probabilities>
+    </cpt>
+    <cpt id="LocalizedHighTemperatures">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.975 0.010 0.015</probabilities>
+    </cpt>
+    <cpt id="Moisture">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.975 0.010 0.015</probabilities>
+    </cpt>
+    <cpt id="PlasticDeformation">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <parents>ImproperAssembly ImproperLubrification Indentation</parents>
+      <probabilities>1 0 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1</probabilities>
+    </cpt>
+    <cpt id="PoorCooling">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.984 0.010 0.006</probabilities>
+    </cpt>
+    <cpt id="PoorLubrification">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.986 0.007 0.007</probabilities>
+    </cpt>
+    <cpt id="PresenceAbrasiveParticles">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.975 0.010 0.015</probabilities>
+    </cpt>
+    <cpt id="ScratchVibration">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.984 0.010 0.006</probabilities>
+    </cpt>
+    <cpt id="SeverePartialDischarges">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.986 0.007 0.007</probabilities>
+    </cpt>
+    <cpt id="SurfaceCorrosion">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <probabilities>0.985 0.010 0.005</probabilities>
+    </cpt>
+    <cpt id="SystemDegradation">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <parents>CorrosionFailure InsulationDeterioration PlasticDeformation WearFault</parents>
+      <probabilities>1 0 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1</probabilities>
+    </cpt>
+    <cpt id="WearFault">
+      <state id="Normal" />
+      <state id="Degradation" />
+      <state id="Failed" />
+      <parents>ExcessiveSpeed HighTemperatureGluing InappropriateClearance PoorLubrification PresenceAbrasiveParticles ScratchVibration</parents>
+      <probabilities>1 0 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1</probabilities>
+    </cpt>
+  </nodes>
+  <extensions>
+    <genie version="1.0" app="GeNIe 4.1">
+      <node id="ChemicalCorrosion">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>50 50 126 86</position>
+      </node>
+      <node id="CorrosionFailure">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>170 50 246 86</position>
+      </node>
+      <node id="ExcessiveInterShaftCurrent">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>290 50 366 86</position>
+      </node>
+      <node id="ExcessiveSpeed">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>410 50 486 86</position>
+      </node>
+      <node id="HighFrequencyPulseVoltage">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>530 50 606 86</position>
+      </node>
+      <node id="HighTemperatureGluing">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>650 50 726 86</position>
+      </node>
+      <node id="ImproperAssembly">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>770 50 846 86</position>
+      </node>
+      <node id="ImproperLubrification">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>890 50 966 86</position>
+      </node>
+      <node id="InappropriateClearance">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>50 130 126 166</position>
+      </node>
+      <node id="Indentation">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>170 130 246 166</position>
+      </node>
+      <node id="InsulationDeterioration">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>290 130 366 166</position>
+      </node>
+      <node id="LocalizedHighTemperatures">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>410 130 486 166</position>
+      </node>
+      <node id="Moisture">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>530 130 606 166</position>
+      </node>
+      <node id="PlasticDeformation">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>650 130 726 166</position>
+      </node>
+      <node id="PoorCooling">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>770 130 846 166</position>
+      </node>
+      <node id="PoorLubrification">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>890 130 966 166</position>
+      </node>
+      <node id="PresenceAbrasiveParticles">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>50 210 126 246</position>
+      </node>
+      <node id="ScratchVibration">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>170 210 246 246</position>
+      </node>
+      <node id="SeverePartialDischarges">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>290 210 366 246</position>
+      </node>
+      <node id="SurfaceCorrosion">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>410 210 486 246</position>
+      </node>
+      <node id="SystemDegradation">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>530 210 606 246</position>
+      </node>
+      <node id="WearFault">
+        <interior color="e5f6f7" />
+        <outline color="000080" />
+        <font color="000000" name="Arial" />
+        <position>650 210 726 246</position>
+      </node>
+    </genie>
+  </extensions>
+</smile>

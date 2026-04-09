@@ -1,0 +1,1717 @@
+{
+    "schema_version": "2.0",
+    "network": "kosterhavet",
+    "domain": "marine_ecosystem_management",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a marine ecosystem management model of a Swedish national park, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "kosterhavet",
+        "source_reference": "Rettig, K., Hansen, A. S., Obst, M., Hering, D., & Feld, C. K. (2023). A Bayesian network to inform the management of key species in Kosterhavet National Park under contrasting storylines of environmental change. Estuarine, Coastal and Shelf Science, 280, 108158.",
+        "source_url": "https://www.bnlearn.com/bnrepository/",
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "The Kosterhavet network models ecological processes in a marine national park. It connects climate drivers, land use, water quality, and biological communities to management-relevant species outcomes. Variable names are disguised to generic marine ecology terms."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a marine ecosystem model linking climate, land use, and human activities to water quality and species outcomes.",
+            "Consider the causal chain: external drivers (climate, land use, fishing) → physical/chemical water conditions → nutrient loading → biological production → species populations.",
+            "Nutrient enrichment follows a classical pathway: land use + precipitation → discharge → nutrient loads → dissolved nutrients → eutrophication risk.",
+            "Climate change affects both shallow and deep water conditions through distinct pathways.",
+            "Human activities (fishing, boating, aquaculture) create direct physical disturbances and indirect ecological cascades.",
+            "Trophic cascades operate: top predators → intermediate predators → grazers → algae → habitat-forming species.",
+            "Some variables are colliders where multiple independent causes converge (e.g. habitat quality depends on oxygen, substrate disturbance, and turbidity)."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a specific benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge & naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, conditional rates, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "base_rate",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "MusselCultivation",
+            "display_name": "Bivalve Aquaculture Intensity",
+            "aliases": [
+                "MusselCultivation",
+                "shellfish_farming",
+                "mussel_aquaculture"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High",
+                "Very_high"
+            ],
+            "role": "exogenous",
+            "category": "human_activity",
+            "short_description": "Intensity of bivalve aquaculture operations in the marine park.",
+            "extended_description": "Categorical variable representing the scale of mussel or other bivalve cultivation within the park waters. Aquaculture intensity affects particulate organic matter through biodeposition and faecal pellets, and can reduce phytoplankton biomass through filter-feeding. This is a management-controllable variable representing a key policy lever.",
+            "base_rate": {
+                "Low": 0.6,
+                "Medium": 0.25,
+                "High": 0.1,
+                "Very_high": 0.05
+            },
+            "sensitivity_hints": "Bivalve aquaculture has a dual role: it reduces phytoplankton through grazing but increases organic particle deposition. The net effect on water quality depends on cultivation intensity.",
+            "related_domain_knowledge": [
+                "Filter-feeding bivalves remove phytoplankton and suspended particles from the water column.",
+                "Biodeposition from aquaculture enriches the sediment with organic matter.",
+                "Intensive aquaculture can shift nutrient cycling pathways locally.",
+                "Mussel cultivation is considered both a management tool and potential disturbance."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "bivalve_farming_intensity"
+        },
+        {
+            "name": "BottomSubstrate",
+            "display_name": "Seabed Substrate Type",
+            "aliases": [
+                "BottomSubstrate",
+                "substrate_type",
+                "seabed_composition"
+            ],
+            "type": "binary",
+            "states": [
+                "Hard",
+                "Soft"
+            ],
+            "role": "exogenous",
+            "category": "physical_environment",
+            "short_description": "Dominant seabed substrate type (hard rock versus soft sediment).",
+            "extended_description": "Binary classification of the dominant bottom substrate. Hard substrates (bedrock, boulders) resist physical disturbance from trawling and produce less turbidity when disturbed. Soft substrates (sand, mud) are vulnerable to trawl damage and generate sediment resuspension. Substrate type mediates the ecological impact of bottom-contact fishing gear.",
+            "base_rate": {
+                "Hard": 0.7,
+                "Soft": 0.3
+            },
+            "sensitivity_hints": "Substrate type determines vulnerability to bottom trawling: soft substrates show much greater disturbance and turbidity effects than hard substrates.",
+            "related_domain_knowledge": [
+                "Hard substrate areas support different epifaunal communities than soft sediment areas.",
+                "Bottom trawling on soft substrates causes significant sediment resuspension.",
+                "Rocky reef habitats in Scandinavian waters support cold-water coral and sponge communities.",
+                "Substrate type is largely fixed over management timescales."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "seabed_substrate"
+        },
+        {
+            "name": "TNExchange",
+            "display_name": "Total Nitrogen Exchange Rate",
+            "aliases": [
+                "TNExchange",
+                "nitrogen_exchange",
+                "TN_flux"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "exogenous",
+            "category": "biogeochemical",
+            "short_description": "Rate of total nitrogen exchange between open sea and coastal waters.",
+            "extended_description": "Represents the external nitrogen input from open-ocean exchange processes. This exogenous boundary condition influences the total nitrogen loading in coastal waters independently of terrestrial nutrient sources. Higher exchange rates increase ambient nitrogen concentrations, contributing to eutrophication risk.",
+            "base_rate": {
+                "Low": 0.45,
+                "Medium": 0.15,
+                "High": 0.4
+            },
+            "sensitivity_hints": "Nitrogen exchange from offshore waters provides a baseline nutrient supply that combines with terrestrial sources to determine total nitrogen loading.",
+            "related_domain_knowledge": [
+                "Coastal-ocean nutrient exchange is driven by hydrographic conditions and upwelling.",
+                "Open-sea nitrogen inputs can dominate coastal nutrient budgets in well-flushed systems.",
+                "Exchange rates vary seasonally with stratification and wind-driven mixing.",
+                "This is an exogenous forcing that management cannot directly control."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "offshore_nitrogen_flux"
+        },
+        {
+            "name": "AgriculturalLand",
+            "display_name": "Agricultural Land Use Intensity",
+            "aliases": [
+                "AgriculturalLand",
+                "farming_intensity",
+                "agricultural_coverage"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "exogenous",
+            "category": "land_use",
+            "short_description": "Proportion and intensity of agricultural land use in the catchment.",
+            "extended_description": "Represents the extent of agricultural activity in the terrestrial catchment draining into the marine park. Agricultural land contributes to nutrient loading (nitrogen and phosphorus) and sediment runoff through fertiliser application, soil erosion, and drainage modification. Higher agricultural intensity increases all three loading pathways.",
+            "base_rate": {
+                "Low": 0.45,
+                "Medium": 0.3,
+                "High": 0.25
+            },
+            "sensitivity_hints": "Agricultural land use is a primary driver of terrestrial nutrient and sediment loading. It affects nitrogen, phosphorus, and sediment loads through the same discharge pathway.",
+            "related_domain_knowledge": [
+                "Fertiliser runoff from agricultural land is a major source of coastal eutrophication.",
+                "Agricultural drainage increases both dissolved nutrients and particulate sediment loads.",
+                "Nutrient management on farmland is a key policy lever for coastal water quality.",
+                "The effect of agriculture on loading is mediated by precipitation and discharge."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "catchment_farming_intensity"
+        },
+        {
+            "name": "TPExchange",
+            "display_name": "Total Phosphorus Exchange Rate",
+            "aliases": [
+                "TPExchange",
+                "phosphorus_exchange",
+                "TP_flux"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "exogenous",
+            "category": "biogeochemical",
+            "short_description": "Rate of total phosphorus exchange between open sea and coastal waters.",
+            "extended_description": "Represents the external phosphorus input from open-ocean exchange. Analogous to nitrogen exchange, this boundary condition influences total phosphorus loading independently of catchment sources. Phosphorus is often the limiting nutrient in marine systems, making this exchange rate ecologically significant.",
+            "base_rate": {
+                "Low": 0.6,
+                "Medium": 0.15,
+                "High": 0.25
+            },
+            "sensitivity_hints": "Phosphorus exchange from offshore provides a baseline phosphorus supply that combines with terrestrial loading to determine total phosphorus concentration.",
+            "related_domain_knowledge": [
+                "Phosphorus is often limiting in marine coastal waters.",
+                "Offshore phosphorus exchange varies with deep-water renewal and mixing.",
+                "Internal phosphorus loading from sediments can also contribute under hypoxic conditions.",
+                "This exogenous forcing is not directly manageable."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "offshore_phosphorus_flux"
+        },
+        {
+            "name": "LeisureBoating",
+            "display_name": "Recreational Boating Activity",
+            "aliases": [
+                "LeisureBoating",
+                "recreational_boating",
+                "boat_traffic"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "exogenous",
+            "category": "human_activity",
+            "short_description": "Level of recreational boating activity in the marine park.",
+            "extended_description": "Represents the intensity of leisure boat traffic. Recreational boating causes multiple ecological impacts: underwater noise disturbance to marine fauna, physical anchor damage to seabed habitats (especially seagrass), and reduced water transparency through wake-induced turbulence and propeller wash. This is a management-controllable variable.",
+            "base_rate": {
+                "Low": 0.1,
+                "Medium": 0.25,
+                "High": 0.65
+            },
+            "sensitivity_hints": "Boating activity is a key management lever affecting multiple pathways: noise disturbance to fish, anchor damage to seagrass, and water clarity reduction through wake turbulence.",
+            "related_domain_knowledge": [
+                "Recreational boating is a major summer activity in Scandinavian coastal waters.",
+                "Boat anchoring in seagrass beds can cause significant habitat loss.",
+                "Underwater noise from boat engines disturbs fish behaviour and feeding.",
+                "Marine parks often regulate boating to protect sensitive habitats."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "recreational_boat_traffic"
+        },
+        {
+            "name": "TrawlingFrequency",
+            "display_name": "Bottom Trawling Frequency",
+            "aliases": [
+                "TrawlingFrequency",
+                "fishing_trawl_intensity",
+                "bottom_trawling"
+            ],
+            "type": "binary",
+            "states": [
+                "Low",
+                "High"
+            ],
+            "role": "exogenous",
+            "category": "human_activity",
+            "short_description": "Frequency of bottom trawling operations in the marine park.",
+            "extended_description": "Binary variable representing the intensity of bottom-contact fishing gear deployment. Bottom trawling is one of the most ecologically impactful human activities in marine environments, causing direct physical disturbance to the seabed, increased turbidity, and depletion of benthic prey organisms. It also directly affects shrimp stocks through harvest mortality.",
+            "base_rate": {
+                "Low": 0.5,
+                "High": 0.5
+            },
+            "sensitivity_hints": "Trawling frequency has widespread effects: it physically disturbs the seabed, increases turbidity on soft substrates, depletes benthic prey, and directly harvests shrimp populations.",
+            "related_domain_knowledge": [
+                "Bottom trawling is regulated or prohibited in many marine protected areas.",
+                "Trawling impacts depend heavily on substrate type—soft substrates are more vulnerable.",
+                "Recovery from trawling disturbance can take years to decades for benthic communities.",
+                "Shrimp trawling has bycatch and seabed disturbance as major ecological costs."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "bottom_trawl_intensity"
+        },
+        {
+            "name": "RadiativeForcing",
+            "display_name": "Climate Change Scenario",
+            "aliases": [
+                "RadiativeForcing",
+                "climate_scenario",
+                "greenhouse_forcing"
+            ],
+            "type": "categorical",
+            "states": [
+                "Current",
+                "RF45",
+                "RF85"
+            ],
+            "role": "exogenous",
+            "category": "climate",
+            "short_description": "Radiative forcing scenario representing current, moderate, or severe climate change.",
+            "extended_description": "Represents the greenhouse gas forcing scenario driving climate projections: current conditions, RCP 4.5 (moderate warming), or RCP 8.5 (high warming). This is the master climate driver affecting water temperature (both shallow and deep), wind patterns, and precipitation—all with cascading effects on the marine ecosystem. Uniform prior across the three scenarios.",
+            "base_rate": {
+                "Current": 0.333,
+                "RF45": 0.333,
+                "RF85": 0.333
+            },
+            "sensitivity_hints": "The climate scenario is the single most influential exogenous variable, driving water temperature, wind, and precipitation changes that cascade through the entire ecosystem model.",
+            "related_domain_knowledge": [
+                "RCP 4.5 represents moderate mitigation; RCP 8.5 is a high-emissions pathway.",
+                "Warming affects marine species through thermal tolerance, oxygen solubility, and metabolic rates.",
+                "Climate change shifts precipitation patterns, altering freshwater discharge and nutrient loading.",
+                "Wind pattern changes affect water mixing, stratification, and surface turbulence."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "climate_forcing_scenario"
+        },
+        {
+            "name": "DevelopedLand",
+            "display_name": "Urban/Developed Land Cover",
+            "aliases": [
+                "DevelopedLand",
+                "urban_land",
+                "developed_area"
+            ],
+            "type": "binary",
+            "states": [
+                "Low",
+                "High"
+            ],
+            "role": "exogenous",
+            "category": "land_use",
+            "short_description": "Extent of urban and developed land in the catchment.",
+            "extended_description": "Represents the proportion of urbanised or otherwise developed land in the catchment area draining to the marine park. Developed land contributes to nutrient and sediment loading through impervious surfaces, stormwater runoff, and wastewater discharge. It acts alongside agricultural land as a terrestrial nutrient source.",
+            "base_rate": {
+                "Low": 0.65,
+                "High": 0.35
+            },
+            "sensitivity_hints": "Urban land use contributes to nutrient and sediment loading through the same discharge-mediated pathway as agriculture, but with different characteristic pollutant ratios.",
+            "related_domain_knowledge": [
+                "Urban runoff contains elevated nutrient, heavy metal, and microplastic loads.",
+                "Impervious surfaces increase peak stormwater discharge volumes.",
+                "Wastewater treatment plant effluent can be a major point source of nutrients.",
+                "Development pressure along Scandinavian coasts is increasing."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "urban_land_cover"
+        },
+        {
+            "name": "Turbidity",
+            "display_name": "Water Turbidity",
+            "aliases": [
+                "Turbidity",
+                "water_cloudiness",
+                "suspended_sediment"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "water_quality",
+            "short_description": "Turbidity of the water column from suspended sediment and particles.",
+            "extended_description": "Represents water cloudiness caused by resuspended sediment. Turbidity is primarily driven by the interaction of bottom substrate type and trawling frequency—soft substrates under heavy trawling produce high turbidity. High turbidity degrades habitat quality by reducing light penetration and smothering benthic organisms.",
+            "sensitivity_hints": "Turbidity is a key mediator of trawling impacts on habitat quality. It depends on the interaction between substrate type and trawling intensity.",
+            "related_domain_knowledge": [
+                "Trawling on soft bottoms resuspends large volumes of fine sediment.",
+                "Hard substrates generate much less turbidity under the same trawling pressure.",
+                "Turbidity reduces light availability for photosynthetic organisms including seagrass.",
+                "Chronic turbidity impairs visual predators and filter-feeding organisms."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "water_turbidity_level"
+        },
+        {
+            "name": "WaterTemperatureShallow",
+            "display_name": "Shallow Water Temperature",
+            "aliases": [
+                "WaterTemperatureShallow",
+                "surface_temperature",
+                "shallow_thermal"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "physical_environment",
+            "short_description": "Temperature of shallow coastal waters.",
+            "extended_description": "Temperature of the upper water column, driven by the radiative forcing (climate) scenario. Shallow water temperature has widespread ecological effects: it influences phytoplankton growth, oxygen solubility, filamentous algae proliferation, zooplankton dynamics, and oxygen conditions. It is a primary mediator of climate change impacts on the coastal ecosystem.",
+            "sensitivity_hints": "Shallow temperature is a critical hub variable affecting phytoplankton, filamentous algae, zooplankton, and oxygen conditions simultaneously.",
+            "related_domain_knowledge": [
+                "Warmer waters hold less dissolved oxygen, exacerbating hypoxia risk.",
+                "Higher temperatures accelerate algal growth including nuisance filamentous species.",
+                "Zooplankton metabolism and grazing rates change with temperature.",
+                "Climate projections for Scandinavian waters show 1-3°C warming by 2100."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "shallow_water_temperature"
+        },
+        {
+            "name": "Wind",
+            "display_name": "Wind Intensity",
+            "aliases": [
+                "Wind",
+                "wind_speed",
+                "wind_exposure"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "physical_environment",
+            "short_description": "Wind speed and exposure intensity at the marine park.",
+            "extended_description": "Represents the prevailing wind conditions, driven by the climate scenario. Wind affects the marine ecosystem primarily through its influence on water transparency—wave action and surface mixing reduce visibility. Under RCP 8.5, increased storminess is projected to increase average wind intensity.",
+            "sensitivity_hints": "Wind primarily affects the system through its impact on water transparency and mixing. Higher winds reduce visibility through wave-induced turbulence.",
+            "related_domain_knowledge": [
+                "Wind-driven mixing affects stratification and nutrient distribution.",
+                "Wave exposure determines shoreline habitat types and erosion rates.",
+                "Climate change projections suggest increased storminess in northern European seas.",
+                "Wind fetch is a key determinant of water clarity in shallow coastal areas."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "wind_exposure_level"
+        },
+        {
+            "name": "Noise",
+            "display_name": "Underwater Noise Level",
+            "aliases": [
+                "Noise",
+                "underwater_noise",
+                "acoustic_disturbance"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "disturbance",
+            "short_description": "Level of anthropogenic underwater noise.",
+            "extended_description": "Represents underwater noise pollution driven by recreational boating activity. Noise disturbance affects fish behaviour, predator-prey interactions, and habitat use. It is particularly relevant for cod and intermediate fish predators, where noise can alter feeding efficiency and spatial distribution.",
+            "sensitivity_hints": "Noise affects fish communities through behavioural disturbance—it modifies the predator-prey cascade involving cod, intermediate predators, and their prey.",
+            "related_domain_knowledge": [
+                "Fish use sound for communication, predator avoidance, and prey detection.",
+                "Chronic noise exposure can cause fish to abandon otherwise suitable habitats.",
+                "Boat engine noise overlaps with the hearing range of many coastal fish species.",
+                "Noise impacts are increasingly recognised as a significant marine management concern."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "underwater_noise_level"
+        },
+        {
+            "name": "WaterTemperatureDeep",
+            "display_name": "Deep Water Temperature",
+            "aliases": [
+                "WaterTemperatureDeep",
+                "deep_temperature",
+                "bottom_thermal"
+            ],
+            "type": "binary",
+            "states": [
+                "Low",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "physical_environment",
+            "short_description": "Temperature of deep coastal waters.",
+            "extended_description": "Temperature of the deeper water column, driven by the climate scenario. Deep water temperature primarily affects cold-water species such as northern shrimp, which are stenothermal and sensitive to warming. Under higher radiative forcing scenarios, deep water warming increases, potentially making conditions unsuitable for cold-adapted species.",
+            "sensitivity_hints": "Deep water temperature is the primary climate pathway affecting cold-water crustacean populations. Warming deep waters stress stenothermal species.",
+            "related_domain_knowledge": [
+                "Deep water temperatures are buffered compared to surface waters but still respond to climate change.",
+                "Northern shrimp (Pandalus borealis) are cold-water adapted and decline with warming.",
+                "Deep water renewal events can temporarily alter temperature and oxygen conditions.",
+                "Skagerrak deep waters are influenced by North Sea and Atlantic inflows."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "deep_water_temperature"
+        },
+        {
+            "name": "SeafloorDisturbance",
+            "display_name": "Seabed Physical Disturbance",
+            "aliases": [
+                "SeafloorDisturbance",
+                "benthic_disturbance",
+                "seabed_impact"
+            ],
+            "type": "binary",
+            "states": [
+                "Low",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "disturbance",
+            "short_description": "Degree of physical disturbance to the seabed.",
+            "extended_description": "Represents the level of physical disruption to the seabed, driven by the interaction of bottom substrate type and trawling frequency. Soft substrates are much more vulnerable to trawl disturbance than hard substrates. Seabed disturbance degrades benthic habitat quality and affects prey availability for demersal species.",
+            "sensitivity_hints": "Seabed disturbance is the primary mediator of trawling impacts on benthic habitat and prey availability. The substrate-trawling interaction is critical.",
+            "related_domain_knowledge": [
+                "Trawling on soft bottoms can flatten biogenic structures and homogenise habitats.",
+                "Hard-bottom areas are more resistant to trawl damage.",
+                "Disturbed seabed areas show reduced biodiversity and altered community composition.",
+                "Recovery times from trawling disturbance range from weeks to decades depending on community type."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "seabed_disturbance_level"
+        },
+        {
+            "name": "Precipitation",
+            "display_name": "Precipitation Level",
+            "aliases": [
+                "Precipitation",
+                "rainfall",
+                "precipitation_amount"
+            ],
+            "type": "binary",
+            "states": [
+                "Low",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "climate",
+            "short_description": "Level of precipitation in the catchment area.",
+            "extended_description": "Represents rainfall and snowmelt in the terrestrial catchment, driven by the climate scenario. Precipitation is the hydrological driver that converts land-use pressures into actual nutrient and sediment delivery to coastal waters via freshwater discharge. Higher radiative forcing increases precipitation in Scandinavian regions.",
+            "sensitivity_hints": "Precipitation is the hydrological link between terrestrial land use and marine nutrient loading. It controls the discharge that transports nutrients and sediment to the coast.",
+            "related_domain_knowledge": [
+                "Climate change projections for Scandinavia show increased precipitation, especially in winter.",
+                "Higher precipitation increases freshwater discharge and nutrient flushing from land.",
+                "Extreme rainfall events cause disproportionate nutrient and sediment pulses.",
+                "Snowmelt timing shifts under warming affect the seasonal pattern of discharge."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "catchment_precipitation"
+        },
+        {
+            "name": "AnchorDamageRisk",
+            "display_name": "Anchor Damage Risk",
+            "aliases": [
+                "AnchorDamageRisk",
+                "anchoring_impact",
+                "mooring_damage"
+            ],
+            "type": "binary",
+            "states": [
+                "Low",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "disturbance",
+            "short_description": "Risk of physical damage to seabed habitats from boat anchoring.",
+            "extended_description": "Represents the probability of anchor-related physical damage to benthic habitats, driven by recreational boating intensity. Anchor dragging and chain scour can destroy seagrass meadows and other fragile seabed habitats. This is a direct mechanical disturbance pathway from boating to habitat-forming species like eelgrass.",
+            "sensitivity_hints": "Anchor damage is the primary mechanical pathway from boating activity to seagrass habitat loss. It directly affects eelgrass populations.",
+            "related_domain_knowledge": [
+                "A single anchor drop can destroy several square metres of seagrass.",
+                "Mooring buoy systems can eliminate anchor damage in sensitive areas.",
+                "Eelgrass recovery after anchor damage can take years.",
+                "Marine parks often designate no-anchor zones to protect seagrass beds."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "anchoring_damage_risk"
+        },
+        {
+            "name": "Discharge",
+            "display_name": "Freshwater Discharge",
+            "aliases": [
+                "Discharge",
+                "river_discharge",
+                "freshwater_flow"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "hydrology",
+            "short_description": "Volume of freshwater discharge from rivers into the marine park.",
+            "extended_description": "Represents the volume of freshwater flowing from the terrestrial catchment into coastal waters, driven by precipitation. Discharge is the transport mechanism for land-derived nutrients (nitrogen, phosphorus) and sediment. Higher discharge increases nutrient and sediment loading, connecting terrestrial land use to marine water quality.",
+            "sensitivity_hints": "Discharge is the critical transport mechanism linking terrestrial pressures to marine impacts. All nutrient and sediment loading is mediated through discharge.",
+            "related_domain_knowledge": [
+                "River discharge varies seasonally with snowmelt and rainfall patterns.",
+                "High discharge events carry disproportionate nutrient loads (first-flush effect).",
+                "Freshwater input also affects salinity stratification in receiving waters.",
+                "Discharge integrates the effects of upstream land use and precipitation."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "river_discharge_volume"
+        },
+        {
+            "name": "SedimentLoad",
+            "display_name": "Sediment Load",
+            "aliases": [
+                "SedimentLoad",
+                "suspended_sediment_load",
+                "particulate_load"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "water_quality",
+            "short_description": "Load of suspended sediment delivered to coastal waters.",
+            "extended_description": "Represents the quantity of particulate sediment entering the marine environment from terrestrial sources, driven by agricultural land use, developed land, and freshwater discharge. Sediment load contributes to particulate organic matter in the water column and affects water clarity. It connects land management practices to marine ecological conditions.",
+            "sensitivity_hints": "Sediment load is a joint product of land use intensity and hydrological discharge. It feeds into particulate organic matter, affecting eutrophication and transparency.",
+            "related_domain_knowledge": [
+                "Agricultural erosion is typically the largest source of sediment to coastal waters.",
+                "Urban runoff contributes sediment with different particle size and contamination profiles.",
+                "Sediment transport is episodic, with most loading occurring during high-discharge events.",
+                "Fine sediment can smother benthic habitats and impair filter-feeding organisms."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "terrestrial_sediment_load"
+        },
+        {
+            "name": "TPLoad",
+            "display_name": "Total Phosphorus Load",
+            "aliases": [
+                "TPLoad",
+                "phosphorus_loading",
+                "TP_input"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "water_quality",
+            "short_description": "Total phosphorus load entering coastal waters.",
+            "extended_description": "Represents the combined phosphorus input from terrestrial sources (agricultural land, developed land, discharge) and offshore exchange. Phosphorus loading is a key determinant of eutrophication risk, as phosphorus availability limits primary production in many marine systems. The four-parent structure reflects the multiple pathways contributing to total loading.",
+            "sensitivity_hints": "Total phosphorus loading integrates terrestrial and marine sources. It is a direct determinant of dissolved inorganic phosphorus and thus eutrophication risk.",
+            "related_domain_knowledge": [
+                "Phosphorus arrives in both dissolved and particulate forms.",
+                "Agricultural fertiliser and animal waste are major terrestrial phosphorus sources.",
+                "Phosphorus is often adsorbed to sediment particles and transported with sediment load.",
+                "Internal loading from anoxic sediments can release stored phosphorus back to the water column."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "total_phosphorus_loading"
+        },
+        {
+            "name": "TNLoad",
+            "display_name": "Total Nitrogen Load",
+            "aliases": [
+                "TNLoad",
+                "nitrogen_loading",
+                "TN_input"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "water_quality",
+            "short_description": "Total nitrogen load entering coastal waters.",
+            "extended_description": "Represents the combined nitrogen input from terrestrial sources (agricultural land, developed land, discharge) and offshore exchange. Nitrogen loading drives dissolved inorganic nitrogen concentrations, contributing to eutrophication alongside phosphorus. The parallel structure to TPLoad reflects the shared terrestrial loading pathways.",
+            "sensitivity_hints": "Total nitrogen loading integrates terrestrial and marine sources. It directly determines dissolved inorganic nitrogen availability for primary producers.",
+            "related_domain_knowledge": [
+                "Nitrogen reaches coastal waters in dissolved (nitrate, ammonium) and particulate (organic N) forms.",
+                "Agricultural fertiliser application is the dominant terrestrial nitrogen source.",
+                "Atmospheric nitrogen deposition also contributes but is typically not the main source.",
+                "Nitrogen and phosphorus co-limitation determines which nutrient controls eutrophication."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "total_nitrogen_loading"
+        },
+        {
+            "name": "DIN",
+            "display_name": "Dissolved Inorganic Nitrogen",
+            "aliases": [
+                "DIN",
+                "dissolved_nitrogen",
+                "inorganic_nitrogen"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "water_quality",
+            "short_description": "Concentration of dissolved inorganic nitrogen in coastal waters.",
+            "extended_description": "Represents the bioavailable nitrogen concentration (nitrate + nitrite + ammonium), driven by total nitrogen loading. DIN is directly available for uptake by phytoplankton and macroalgae, making it a proximate driver of eutrophication. It contributes to nutrient enrichment risk alongside DIP and particulate organic matter.",
+            "sensitivity_hints": "DIN is the bioavailable fraction of nitrogen that directly fuels primary production. It is one of three inputs determining nutrient enrichment risk.",
+            "related_domain_knowledge": [
+                "DIN is immediately available for algal uptake, unlike organic nitrogen.",
+                "Nitrate is the dominant DIN form in well-oxygenated waters; ammonium dominates under anoxia.",
+                "Seasonal DIN cycles reflect the balance of loading, uptake, and regeneration.",
+                "Winter DIN concentrations set the potential for spring phytoplankton blooms."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "dissolved_inorganic_nitrogen"
+        },
+        {
+            "name": "POM",
+            "display_name": "Particulate Organic Matter",
+            "aliases": [
+                "POM",
+                "organic_particles",
+                "particulate_organics"
+            ],
+            "type": "binary",
+            "states": [
+                "Low",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "water_quality",
+            "short_description": "Concentration of particulate organic matter in the water column.",
+            "extended_description": "Represents suspended organic particles in the water column, driven by bivalve aquaculture (biodeposition) and terrestrial sediment load. POM has multiple downstream effects: it contributes to nutrient enrichment risk, reduces water transparency, and its decomposition consumes oxygen in deep waters. It is a central node linking multiple pathways.",
+            "sensitivity_hints": "POM is a hub variable with multiple effects—it drives nutrient enrichment, reduces transparency, and depletes deep-water oxygen. It connects aquaculture and terrestrial inputs to ecological outcomes.",
+            "related_domain_knowledge": [
+                "POM includes detritus, faecal pellets, and resuspended organic sediment.",
+                "Mussel farms produce biodeposits that increase local POM concentrations.",
+                "POM decomposition is the primary driver of oxygen consumption in bottom waters.",
+                "High POM reduces light penetration, affecting photosynthetic organisms."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "organic_particle_concentration"
+        },
+        {
+            "name": "DIP",
+            "display_name": "Dissolved Inorganic Phosphorus",
+            "aliases": [
+                "DIP",
+                "dissolved_phosphorus",
+                "inorganic_phosphorus"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "water_quality",
+            "short_description": "Concentration of dissolved inorganic phosphorus in coastal waters.",
+            "extended_description": "Represents bioavailable phosphorus concentration (primarily orthophosphate), driven by total phosphorus loading. DIP is directly available for uptake by primary producers and contributes to nutrient enrichment risk alongside DIN and POM.",
+            "sensitivity_hints": "DIP is the bioavailable phosphorus fraction. Together with DIN and POM, it determines the overall nutrient enrichment risk.",
+            "related_domain_knowledge": [
+                "Orthophosphate is the primary bioavailable phosphorus form.",
+                "Phosphorus cycling involves complex interactions with iron and sediment chemistry.",
+                "Under anoxic conditions, sediment-bound phosphorus is released, creating a positive feedback.",
+                "Phosphorus limitation is more common in freshwater; co-limitation occurs in coastal waters."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "dissolved_inorganic_phosphorus"
+        },
+        {
+            "name": "NutrientEnrichmentRisk",
+            "display_name": "Eutrophication Risk",
+            "aliases": [
+                "NutrientEnrichmentRisk",
+                "eutrophication_risk",
+                "nutrient_enrichment"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "water_quality",
+            "short_description": "Overall risk of nutrient enrichment and eutrophication.",
+            "extended_description": "Represents the integrated eutrophication risk from dissolved inorganic nitrogen, dissolved inorganic phosphorus, and particulate organic matter. This is a collider node where three nutrient pathways converge. High enrichment risk drives increased phytoplankton and filamentous algae growth, with cascading effects on water clarity, oxygen conditions, and habitat quality.",
+            "sensitivity_hints": "Eutrophication risk is a critical collider integrating three nutrient pathways. It drives both phytoplankton and nuisance algae, with downstream effects throughout the ecosystem.",
+            "related_domain_knowledge": [
+                "Eutrophication is the leading water quality problem in coastal waters worldwide.",
+                "Symptoms include algal blooms, reduced transparency, oxygen depletion, and fish kills.",
+                "The relative importance of N versus P limitation varies by system and season.",
+                "Organic matter enrichment (POM) contributes to eutrophication separately from dissolved nutrients."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "eutrophication_risk_level"
+        },
+        {
+            "name": "Phytoplankton",
+            "display_name": "Phytoplankton Biomass",
+            "aliases": [
+                "Phytoplankton",
+                "algal_biomass",
+                "microalgae"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "biological",
+            "short_description": "Phytoplankton biomass in the water column.",
+            "extended_description": "Represents the standing stock of planktonic microalgae, driven by bivalve cultivation (grazing removal), nutrient enrichment risk, and shallow water temperature. Phytoplankton is a central ecological variable: it drives oxygen production in shallow waters, oxygen consumption via decomposition in deep waters, supports zooplankton, and reduces water transparency. Mussel cultivation reduces phytoplankton through filter-feeding.",
+            "sensitivity_hints": "Phytoplankton is a major hub variable with four downstream effects: shallow oxygen, deep oxygen (via decomposition), transparency, and zooplankton food supply.",
+            "related_domain_knowledge": [
+                "Phytoplankton growth is limited by nutrients, light, and temperature.",
+                "Spring blooms are a characteristic feature of temperate coastal waters.",
+                "Excessive phytoplankton growth (blooms) is a primary symptom of eutrophication.",
+                "Filter-feeding bivalves can exert significant top-down control on phytoplankton."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "phytoplankton_biomass"
+        },
+        {
+            "name": "OxygenDeep",
+            "display_name": "Deep Water Oxygen",
+            "aliases": [
+                "OxygenDeep",
+                "bottom_oxygen",
+                "deep_dissolved_oxygen"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "water_quality",
+            "short_description": "Dissolved oxygen concentration in deep waters.",
+            "extended_description": "Represents oxygen conditions in the deeper water column, driven by POM (organic matter decomposition consumes oxygen) and phytoplankton (sinking dead cells also consume oxygen). Low deep-water oxygen (hypoxia) degrades habitat quality for benthic organisms and demersal fish. This is a key indicator of ecosystem health.",
+            "sensitivity_hints": "Deep oxygen depletion is driven by organic matter decomposition. It directly affects benthic habitat quality, a key determinant of demersal fish populations.",
+            "related_domain_knowledge": [
+                "Hypoxia (low oxygen) is a growing problem in stratified coastal waters.",
+                "Organic matter sinking from surface waters drives deep-water oxygen consumption.",
+                "Stratification prevents oxygen replenishment from the surface.",
+                "Many benthic organisms cannot survive below ~2 mg/L dissolved oxygen."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "deep_water_oxygen"
+        },
+        {
+            "name": "Transparency",
+            "display_name": "Water Transparency",
+            "aliases": [
+                "Transparency",
+                "water_clarity",
+                "secchi_depth"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "water_quality",
+            "short_description": "Clarity of the water column (light penetration depth).",
+            "extended_description": "Represents water clarity as measured by Secchi depth or light attenuation, driven by boating activity (wake turbulence), POM (suspended particles), phytoplankton (light absorption), and wind (wave-induced mixing). Transparency is critical for seagrass (eelgrass) survival, as submerged plants require adequate light for photosynthesis. It is a collider of four distinct pathways.",
+            "sensitivity_hints": "Transparency is the primary pathway through which multiple pressures affect eelgrass. It integrates the effects of eutrophication, sediment, wind, and boating.",
+            "related_domain_knowledge": [
+                "Seagrass distribution is strongly limited by light availability.",
+                "Secchi depth is a standard monitoring indicator for coastal water quality.",
+                "Phytoplankton blooms, sediment resuspension, and CDOM all reduce transparency.",
+                "Transparency improvements are a primary goal of eutrophication management."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "water_transparency"
+        },
+        {
+            "name": "OxygenShallow",
+            "display_name": "Shallow Water Oxygen",
+            "aliases": [
+                "OxygenShallow",
+                "surface_oxygen",
+                "shallow_dissolved_oxygen"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "water_quality",
+            "short_description": "Dissolved oxygen concentration in shallow waters.",
+            "extended_description": "Represents oxygen conditions in the upper water column, driven by phytoplankton (photosynthetic oxygen production during day, respiratory consumption at night) and shallow water temperature (oxygen solubility decreases with warming). Shallow oxygen affects zooplankton survival and habitat suitability.",
+            "sensitivity_hints": "Shallow oxygen reflects the balance of photosynthetic production and temperature-driven solubility. It directly affects zooplankton populations.",
+            "related_domain_knowledge": [
+                "Daytime oxygen supersaturation can occur during intense phytoplankton blooms.",
+                "Nighttime oxygen dips from algal respiration can cause fish kills in shallow waters.",
+                "Warmer water holds less dissolved oxygen at saturation.",
+                "Shallow-water hypoxia events are typically short-lived but ecologically damaging."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "shallow_water_oxygen"
+        },
+        {
+            "name": "HabitatQuality",
+            "display_name": "Benthic Habitat Quality",
+            "aliases": [
+                "HabitatQuality",
+                "seabed_habitat",
+                "benthic_condition"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "biological",
+            "short_description": "Quality of seabed habitats for marine organisms.",
+            "extended_description": "Represents the overall condition of benthic habitats, driven by deep-water oxygen (hypoxia stress), seafloor disturbance (physical damage), and turbidity (sedimentation and light reduction). This is a collider where three distinct pressure pathways converge. Habitat quality directly determines the suitability of the seabed for demersal fish (cod) populations.",
+            "sensitivity_hints": "Habitat quality is a critical collider integrating oxygen, disturbance, and turbidity pressures. It is the primary determinant of demersal fish population status.",
+            "related_domain_knowledge": [
+                "Benthic habitat quality is assessed through species composition, structural complexity, and abiotic conditions.",
+                "Biogenic structures (e.g., mussel beds, cold-water corals) enhance habitat quality.",
+                "Multiple stressors can act synergistically to degrade habitat below individual impact thresholds.",
+                "Habitat quality monitoring is a key element of the EU Marine Strategy Framework Directive."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "benthic_habitat_quality"
+        },
+        {
+            "name": "Zooplankton",
+            "display_name": "Zooplankton Abundance",
+            "aliases": [
+                "Zooplankton",
+                "zooplankton_biomass",
+                "planktonic_grazers"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "biological",
+            "short_description": "Abundance of zooplankton in the water column.",
+            "extended_description": "Represents the standing stock of planktonic animals, driven by shallow oxygen conditions, phytoplankton (food supply), and shallow water temperature (metabolic and reproductive rates). Zooplankton provides the prey base for higher trophic levels, linking primary production to fish populations.",
+            "sensitivity_hints": "Zooplankton links phytoplankton production to higher trophic levels. Its abundance determines prey availability for planktivorous species.",
+            "related_domain_knowledge": [
+                "Copepods are the dominant zooplankton group in Scandinavian coastal waters.",
+                "Zooplankton grazing can control phytoplankton blooms (top-down control).",
+                "Zooplankton are sensitive to oxygen depletion and temperature changes.",
+                "Seasonal zooplankton cycles drive the timing of fish feeding and reproduction."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "zooplankton_abundance"
+        },
+        {
+            "name": "Cod",
+            "display_name": "Cod Population Status",
+            "aliases": [
+                "Cod",
+                "gadus_morhua",
+                "atlantic_cod"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "biological",
+            "short_description": "Population status of Atlantic cod in the marine park.",
+            "extended_description": "Represents the abundance and condition of Atlantic cod, a key predatory fish species, driven by benthic habitat quality and underwater noise disturbance. Cod is a keystone species in the ecosystem: it controls intermediate fish predators through predation and, through a trophic cascade, indirectly affects shrimp populations. Cod population status is a primary management indicator.",
+            "sensitivity_hints": "Cod is a keystone species driving a trophic cascade: cod → intermediate predators → grazers → filamentous algae. It also directly affects shrimp through predation.",
+            "related_domain_knowledge": [
+                "Atlantic cod has declined dramatically in many North Sea and Skagerrak populations.",
+                "Cod require structurally complex habitats for juvenile shelter and adult feeding.",
+                "Noise disturbance can alter cod distribution and feeding behaviour.",
+                "Cod recovery is a primary goal of marine ecosystem management in northern Europe."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "top_predator_fish_status"
+        },
+        {
+            "name": "Prey",
+            "display_name": "Demersal Prey Availability",
+            "aliases": [
+                "Prey",
+                "benthic_prey",
+                "prey_organisms"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "biological",
+            "short_description": "Availability of prey organisms for shrimp and demersal species.",
+            "extended_description": "Represents the abundance of small invertebrate prey organisms, driven by seafloor disturbance (physical depletion of benthic fauna) and zooplankton (planktonic prey component). Prey availability is a determinant of shrimp population status. Note: in this network the CPT is uniform, reflecting high uncertainty about prey dynamics.",
+            "sensitivity_hints": "Prey availability links bottom-up (zooplankton) and disturbance (trawling) pathways to shrimp population dynamics.",
+            "related_domain_knowledge": [
+                "Benthic invertebrates are depleted by bottom trawling but may recolonise rapidly.",
+                "Zooplankton provides a supplementary food source for omnivorous crustaceans.",
+                "Prey quality and composition may be as important as total abundance.",
+                "The uniform CPT indicates expert uncertainty about the precise prey relationships."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "demersal_prey_availability"
+        },
+        {
+            "name": "NorthernShrimp",
+            "display_name": "Northern Shrimp Population",
+            "aliases": [
+                "NorthernShrimp",
+                "pandalus_borealis",
+                "cold_water_shrimp"
+            ],
+            "type": "categorical",
+            "states": [
+                "Decrease",
+                "No_change",
+                "Increase"
+            ],
+            "role": "endogenous",
+            "category": "biological",
+            "short_description": "Population trend of northern shrimp (Pandalus borealis).",
+            "extended_description": "Represents the population trajectory of the cold-water northern shrimp, driven by cod predation, prey availability, trawling mortality, and deep water temperature. This is the most complex endpoint variable with four parents. Shrimp decline under warming (thermal stress), high cod predation, heavy trawling (direct harvest), and low prey. It is an important commercial and ecological indicator species.",
+            "sensitivity_hints": "Northern shrimp integrates climate (deep temperature), predation (cod), harvesting (trawling), and food supply (prey) pressures. It is the terminal node with the most parents.",
+            "related_domain_knowledge": [
+                "Pandalus borealis is a cold-adapted species declining at the southern range edge.",
+                "Cod predation is a major source of natural shrimp mortality.",
+                "Shrimp trawling is the primary commercial fishery in many Scandinavian waters.",
+                "Warming deep waters are expected to reduce shrimp habitat suitability."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "cold_water_crustacean_trend"
+        },
+        {
+            "name": "IntermediateFishPredators",
+            "display_name": "Mesopredator Fish Abundance",
+            "aliases": [
+                "IntermediateFishPredators",
+                "mesopredatory_fish",
+                "small_predators"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "biological",
+            "short_description": "Abundance of intermediate-sized predatory fish (mesopredators).",
+            "extended_description": "Represents the abundance of small to medium predatory fish that are both prey for cod and predators of smaller invertebrates. Driven by cod population (top-down control—more cod suppresses mesopredators) and noise disturbance. This variable mediates the trophic cascade from cod through to grazers and ultimately algae and eelgrass.",
+            "sensitivity_hints": "Mesopredator abundance is controlled top-down by cod and disturbance. It is the key link in the trophic cascade to grazer populations.",
+            "related_domain_knowledge": [
+                "Mesopredator release occurs when top predators (cod) decline.",
+                "Increased mesopredators suppress grazer populations, allowing algal overgrowth.",
+                "This cascade (cod → mesopredators → grazers → algae) is well-documented in temperate seas.",
+                "Noise disturbance may differentially affect fish species, altering competitive dynamics."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "mesopredator_fish_abundance"
+        },
+        {
+            "name": "Mesograzers",
+            "display_name": "Invertebrate Grazer Abundance",
+            "aliases": [
+                "Mesograzers",
+                "herbivorous_invertebrates",
+                "grazer_abundance"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "biological",
+            "short_description": "Abundance of small invertebrate grazers (e.g. amphipods, gastropods).",
+            "extended_description": "Represents the population of small herbivorous invertebrates that feed on filamentous algae, driven by intermediate fish predator abundance (top-down control). When cod is abundant, mesopredators are suppressed, releasing grazers from predation and allowing them to control algal growth. This is the penultimate link in the trophic cascade to eelgrass.",
+            "sensitivity_hints": "Grazer abundance controls filamentous algae through direct consumptive effects. It is regulated top-down by mesopredator fish.",
+            "related_domain_knowledge": [
+                "Amphipods and gastropods are the primary grazers of filamentous algae in Scandinavian waters.",
+                "Grazer-algae interactions are a key structuring force in seagrass ecosystems.",
+                "Loss of grazers through predation release leads to algal overgrowth on seagrass.",
+                "Grazer diversity and abundance are indicators of ecosystem functional integrity."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "invertebrate_grazer_abundance"
+        },
+        {
+            "name": "FilamentousAlgae",
+            "display_name": "Filamentous Algae Cover",
+            "aliases": [
+                "FilamentousAlgae",
+                "epiphytic_algae",
+                "nuisance_algae"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "biological",
+            "short_description": "Cover of filamentous (nuisance) algae on seabed substrates.",
+            "extended_description": "Represents the abundance of filamentous macroalgae, driven by grazer abundance (top-down control), nutrient enrichment risk (bottom-up nutrient supply), and shallow water temperature (growth rate enhancement). Filamentous algae overgrowth smothers eelgrass and other habitat-forming species. This variable integrates the trophic cascade with eutrophication and warming effects.",
+            "sensitivity_hints": "Filamentous algae are controlled by the balance of grazing pressure and nutrient supply. Temperature amplifies growth. Algal overgrowth is the proximate mechanism of eelgrass decline.",
+            "related_domain_knowledge": [
+                "Filamentous algae grow on seagrass blades, reducing light availability.",
+                "Nutrient enrichment shifts competitive balance from seagrass to opportunistic algae.",
+                "Grazers can prevent algal overgrowth even under elevated nutrient conditions.",
+                "Warming waters favour fast-growing filamentous species over slower-growing seagrass."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "nuisance_algae_cover"
+        },
+        {
+            "name": "Eelgrass",
+            "display_name": "Eelgrass Habitat Trend",
+            "aliases": [
+                "Eelgrass",
+                "zostera_marina",
+                "seagrass_meadow"
+            ],
+            "type": "categorical",
+            "states": [
+                "Decrease",
+                "No_change",
+                "Increase"
+            ],
+            "role": "endogenous",
+            "category": "biological",
+            "short_description": "Population trend of eelgrass (Zostera marina) meadows.",
+            "extended_description": "Represents the trajectory of eelgrass (seagrass) meadow extent, the primary management indicator for shallow-water ecosystem health. Driven by anchor damage risk (mechanical destruction), filamentous algae cover (smothering and light competition), and water transparency (light availability for photosynthesis). Eelgrass is a terminal endpoint integrating multiple stressor pathways—it is considered the key habitat-forming species in the park.",
+            "sensitivity_hints": "Eelgrass is the primary shallow-water management target. Its status integrates mechanical disturbance, algal competition, and water clarity pathways from across the entire network.",
+            "related_domain_knowledge": [
+                "Zostera marina meadows provide critical nursery habitat for fish and invertebrates.",
+                "Eelgrass has declined dramatically across European coasts due to eutrophication and disturbance.",
+                "Seagrass requires high light levels and is sensitive to shading by algae and turbidity.",
+                "Eelgrass also sequesters significant carbon, providing climate benefits.",
+                "Restoration of seagrass is a high priority in Scandinavian marine management."
+            ],
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ],
+            "llm_name": "seagrass_habitat_trend"
+        }
+    ],
+    "constraints": {
+        "v_structures": [
+            {
+                "parent1": "bivalve_farming_intensity",
+                "parent2": "terrestrial_sediment_load",
+                "child": "organic_particle_concentration",
+                "explanation": "Aquaculture biodeposition and terrestrial sediment independently contribute to particulate organic matter."
+            },
+            {
+                "parent1": "dissolved_inorganic_nitrogen",
+                "parent2": "dissolved_inorganic_phosphorus",
+                "child": "eutrophication_risk_level",
+                "explanation": "Dissolved nitrogen and phosphorus are independent nutrient pathways converging on eutrophication risk."
+            },
+            {
+                "parent1": "deep_water_oxygen",
+                "parent2": "seabed_disturbance_level",
+                "child": "benthic_habitat_quality",
+                "explanation": "Oxygen stress and physical disturbance independently degrade benthic habitat quality."
+            },
+            {
+                "parent1": "seabed_substrate",
+                "parent2": "bottom_trawl_intensity",
+                "child": "water_turbidity_level",
+                "explanation": "Substrate type and trawling frequency independently determine sediment resuspension and turbidity."
+            },
+            {
+                "parent1": "seabed_substrate",
+                "parent2": "bottom_trawl_intensity",
+                "child": "seabed_disturbance_level",
+                "explanation": "Substrate type modulates the physical impact of trawling on the seabed."
+            },
+            {
+                "parent1": "benthic_habitat_quality",
+                "parent2": "underwater_noise_level",
+                "child": "top_predator_fish_status",
+                "explanation": "Habitat quality and noise disturbance independently determine cod population status."
+            },
+            {
+                "parent1": "top_predator_fish_status",
+                "parent2": "underwater_noise_level",
+                "child": "mesopredator_fish_abundance",
+                "explanation": "Top-down predation by cod and noise disturbance independently affect mesopredator fish."
+            },
+            {
+                "parent1": "anchoring_damage_risk",
+                "parent2": "nuisance_algae_cover",
+                "child": "seagrass_habitat_trend",
+                "explanation": "Anchor damage and algal smothering independently threaten eelgrass meadows."
+            },
+            {
+                "parent1": "top_predator_fish_status",
+                "parent2": "demersal_prey_availability",
+                "child": "cold_water_crustacean_trend",
+                "explanation": "Cod predation and prey supply independently drive shrimp population trends."
+            },
+            {
+                "parent1": "organic_particle_concentration",
+                "parent2": "phytoplankton_biomass",
+                "child": "deep_water_oxygen",
+                "explanation": "Particulate organic matter and sinking phytoplankton independently consume deep-water oxygen."
+            },
+            {
+                "parent1": "phytoplankton_biomass",
+                "parent2": "shallow_water_temperature",
+                "child": "shallow_water_oxygen",
+                "explanation": "Photosynthetic production and temperature-driven solubility independently determine shallow oxygen."
+            },
+            {
+                "parent1": "seabed_disturbance_level",
+                "parent2": "zooplankton_abundance",
+                "child": "demersal_prey_availability",
+                "explanation": "Benthic prey depletion from trawling and planktonic food supply independently affect total prey availability."
+            }
+        ],
+        "conditional_independencies": [
+            {
+                "statement": "offshore_nitrogen_flux ⊥ offshore_phosphorus_flux",
+                "explanation": "Nitrogen and phosphorus exchange from offshore are independent exogenous boundary conditions."
+            },
+            {
+                "statement": "catchment_farming_intensity ⊥ climate_forcing_scenario",
+                "explanation": "Agricultural land use is an independent policy/land-use variable, not driven by climate in this model."
+            },
+            {
+                "statement": "recreational_boat_traffic ⊥ bottom_trawl_intensity",
+                "explanation": "Recreational boating and commercial trawling are independent human activities."
+            },
+            {
+                "statement": "bivalve_farming_intensity ⊥ climate_forcing_scenario",
+                "explanation": "Aquaculture intensity is a management decision independent of the climate scenario."
+            },
+            {
+                "statement": "seabed_substrate ⊥ climate_forcing_scenario",
+                "explanation": "Substrate type is a geological feature independent of climate forcing."
+            },
+            {
+                "statement": "deep_water_temperature ⊥ shallow_water_temperature | climate_forcing_scenario",
+                "explanation": "Given the climate scenario, deep and shallow temperatures are independent (different thermal dynamics)."
+            },
+            {
+                "statement": "total_nitrogen_loading ⊥ total_phosphorus_loading | catchment_farming_intensity, urban_land_cover, river_discharge_volume",
+                "explanation": "Given land use and discharge, the two nutrient loads are independent (separated by their respective exchange terms)."
+            },
+            {
+                "statement": "anchoring_damage_risk ⊥ underwater_noise_level | recreational_boat_traffic",
+                "explanation": "Given boating intensity, anchor damage and noise are conditionally independent effects."
+            }
+        ],
+        "forbidden_edges": [
+            [
+                "seagrass_habitat_trend",
+                "climate_forcing_scenario"
+            ],
+            [
+                "cold_water_crustacean_trend",
+                "bottom_trawl_intensity"
+            ],
+            [
+                "top_predator_fish_status",
+                "benthic_habitat_quality"
+            ],
+            [
+                "phytoplankton_biomass",
+                "eutrophication_risk_level"
+            ]
+        ],
+        "required_edges": [
+            {
+                "from": "climate_forcing_scenario",
+                "to": "shallow_water_temperature",
+                "reason": "Climate scenario directly determines shallow water temperature projections."
+            },
+            {
+                "from": "climate_forcing_scenario",
+                "to": "catchment_precipitation",
+                "reason": "Climate scenario directly drives precipitation changes."
+            },
+            {
+                "from": "eutrophication_risk_level",
+                "to": "phytoplankton_biomass",
+                "reason": "Nutrient enrichment drives phytoplankton growth."
+            },
+            {
+                "from": "top_predator_fish_status",
+                "to": "mesopredator_fish_abundance",
+                "reason": "Cod exerts top-down predation control on mesopredators."
+            },
+            {
+                "from": "invertebrate_grazer_abundance",
+                "to": "nuisance_algae_cover",
+                "reason": "Grazers control filamentous algae through direct consumption."
+            }
+        ]
+    },
+    "causal_principles": [
+        {
+            "id": "climate_cascade",
+            "statement": "Radiative forcing drives four physical variables (shallow temperature, deep temperature, wind, precipitation), which propagate climate impacts through the entire ecosystem.",
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ]
+        },
+        {
+            "id": "terrestrial_marine_nutrient_pathway",
+            "statement": "Land use (agriculture, development) + precipitation → discharge → nutrient/sediment loads → dissolved nutrients → eutrophication risk → biological responses.",
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ]
+        },
+        {
+            "id": "dual_nutrient_pathway",
+            "statement": "Nitrogen and phosphorus follow parallel but independent pathways from loading through dissolved forms to converge at eutrophication risk.",
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ]
+        },
+        {
+            "id": "trophic_cascade",
+            "statement": "Cod (top predator) → mesopredator fish → invertebrate grazers → filamentous algae → eelgrass. Top-down control propagates through four trophic levels.",
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ]
+        },
+        {
+            "id": "bottom_trawling_impact_chain",
+            "statement": "Trawling + substrate type → seafloor disturbance + turbidity → habitat quality degradation and prey depletion, with direct shrimp harvest as a separate pathway.",
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ]
+        },
+        {
+            "id": "recreational_boating_triple_impact",
+            "statement": "Boating causes noise (affecting fish), anchor damage (affecting eelgrass), and reduced transparency (affecting eelgrass) through three independent pathways.",
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ]
+        },
+        {
+            "id": "aquaculture_dual_role",
+            "statement": "Bivalve cultivation simultaneously reduces phytoplankton (filter-feeding) and increases particulate organic matter (biodeposition), creating opposing effects on water quality.",
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ]
+        },
+        {
+            "id": "eelgrass_integrative_endpoint",
+            "statement": "Eelgrass status integrates anchor damage, algal competition, and water clarity—itself a product of eutrophication, sediment, wind, and boating pressures.",
+            "references": [
+                "Rettig2023_Kosterhavet"
+            ]
+        }
+    ],
+    "ground_truth": {
+        "num_nodes": 38,
+        "num_edges": 63,
+        "edges": [
+            [
+                "AgriculturalLand",
+                "SedimentLoad"
+            ],
+            [
+                "AgriculturalLand",
+                "TNLoad"
+            ],
+            [
+                "AgriculturalLand",
+                "TPLoad"
+            ],
+            [
+                "AnchorDamageRisk",
+                "Eelgrass"
+            ],
+            [
+                "BottomSubstrate",
+                "SeafloorDisturbance"
+            ],
+            [
+                "BottomSubstrate",
+                "Turbidity"
+            ],
+            [
+                "Cod",
+                "IntermediateFishPredators"
+            ],
+            [
+                "Cod",
+                "NorthernShrimp"
+            ],
+            [
+                "DIN",
+                "NutrientEnrichmentRisk"
+            ],
+            [
+                "DIP",
+                "NutrientEnrichmentRisk"
+            ],
+            [
+                "DevelopedLand",
+                "SedimentLoad"
+            ],
+            [
+                "DevelopedLand",
+                "TNLoad"
+            ],
+            [
+                "DevelopedLand",
+                "TPLoad"
+            ],
+            [
+                "Discharge",
+                "SedimentLoad"
+            ],
+            [
+                "Discharge",
+                "TNLoad"
+            ],
+            [
+                "Discharge",
+                "TPLoad"
+            ],
+            [
+                "FilamentousAlgae",
+                "Eelgrass"
+            ],
+            [
+                "HabitatQuality",
+                "Cod"
+            ],
+            [
+                "IntermediateFishPredators",
+                "Mesograzers"
+            ],
+            [
+                "LeisureBoating",
+                "AnchorDamageRisk"
+            ],
+            [
+                "LeisureBoating",
+                "Noise"
+            ],
+            [
+                "LeisureBoating",
+                "Transparency"
+            ],
+            [
+                "Mesograzers",
+                "FilamentousAlgae"
+            ],
+            [
+                "MusselCultivation",
+                "POM"
+            ],
+            [
+                "MusselCultivation",
+                "Phytoplankton"
+            ],
+            [
+                "Noise",
+                "Cod"
+            ],
+            [
+                "Noise",
+                "IntermediateFishPredators"
+            ],
+            [
+                "NutrientEnrichmentRisk",
+                "FilamentousAlgae"
+            ],
+            [
+                "NutrientEnrichmentRisk",
+                "Phytoplankton"
+            ],
+            [
+                "OxygenDeep",
+                "HabitatQuality"
+            ],
+            [
+                "OxygenShallow",
+                "Zooplankton"
+            ],
+            [
+                "POM",
+                "NutrientEnrichmentRisk"
+            ],
+            [
+                "POM",
+                "OxygenDeep"
+            ],
+            [
+                "POM",
+                "Transparency"
+            ],
+            [
+                "Phytoplankton",
+                "OxygenDeep"
+            ],
+            [
+                "Phytoplankton",
+                "OxygenShallow"
+            ],
+            [
+                "Phytoplankton",
+                "Transparency"
+            ],
+            [
+                "Phytoplankton",
+                "Zooplankton"
+            ],
+            [
+                "Precipitation",
+                "Discharge"
+            ],
+            [
+                "Prey",
+                "NorthernShrimp"
+            ],
+            [
+                "RadiativeForcing",
+                "Precipitation"
+            ],
+            [
+                "RadiativeForcing",
+                "WaterTemperatureDeep"
+            ],
+            [
+                "RadiativeForcing",
+                "WaterTemperatureShallow"
+            ],
+            [
+                "RadiativeForcing",
+                "Wind"
+            ],
+            [
+                "SeafloorDisturbance",
+                "HabitatQuality"
+            ],
+            [
+                "SeafloorDisturbance",
+                "Prey"
+            ],
+            [
+                "SedimentLoad",
+                "POM"
+            ],
+            [
+                "TNExchange",
+                "TNLoad"
+            ],
+            [
+                "TNLoad",
+                "DIN"
+            ],
+            [
+                "TPExchange",
+                "TPLoad"
+            ],
+            [
+                "TPLoad",
+                "DIP"
+            ],
+            [
+                "Transparency",
+                "Eelgrass"
+            ],
+            [
+                "TrawlingFrequency",
+                "NorthernShrimp"
+            ],
+            [
+                "TrawlingFrequency",
+                "SeafloorDisturbance"
+            ],
+            [
+                "TrawlingFrequency",
+                "Turbidity"
+            ],
+            [
+                "Turbidity",
+                "HabitatQuality"
+            ],
+            [
+                "WaterTemperatureDeep",
+                "NorthernShrimp"
+            ],
+            [
+                "WaterTemperatureShallow",
+                "FilamentousAlgae"
+            ],
+            [
+                "WaterTemperatureShallow",
+                "OxygenShallow"
+            ],
+            [
+                "WaterTemperatureShallow",
+                "Phytoplankton"
+            ],
+            [
+                "WaterTemperatureShallow",
+                "Zooplankton"
+            ],
+            [
+                "Wind",
+                "Transparency"
+            ],
+            [
+                "Zooplankton",
+                "Prey"
+            ]
+        ]
+    }
+}

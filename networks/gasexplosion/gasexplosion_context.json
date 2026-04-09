@@ -1,0 +1,439 @@
+{
+    "schema_version": "2.0",
+    "network": "gasexplosion",
+    "domain": "coal_mine_gas_explosion_human_factors",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a human factors risk model of unsafe acts in coal mine gas explosion accidents, based on the HFACS-GE framework, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "gasexplosion",
+        "source_reference": "Niu, L., Zhao, J., & Yang, J. (2023). Risk assessment of unsafe acts in coal mine gas explosion accidents based on HFACS-GE and Bayesian networks. Processes, 11(2), 554.",
+        "source_url": "https://doi.org/10.3390/pr11020554",
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "The gasexplosion network models human factors contributing to unsafe acts in coal mine gas explosion accidents, originally developed by Niu, Zhao, and Yang (2023) using the HFACS-GE (Human Factors Analysis and Classification System for Gas Explosion) framework. The BN structure was determined from Chi-square tests and odds ratio analysis on 100 Chinese coal mine gas explosion cases (2002-2020), with CPTs derived from accident frequency statistics. Contains 18 nodes and 23 edges. All variables are binary (non-occurrence / occurrence). The model spans four HFACS levels: government negligence, organisational influences, preconditions for unsafe acts (manager and operator factors), and unsafe acts (errors and violations). Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a model of human factors contributing to unsafe acts in coal mine gas explosion accidents, structured according to the HFACS-GE framework.",
+            "The model spans four hierarchical levels: government negligence -> organisational influences -> preconditions for unsafe acts -> unsafe acts.",
+            "All variables are binary: non-occurrence (safe condition) or occurrence (risk factor present).",
+            "Government-level factors represent regulatory oversight failures that cascade into organisational deficiencies.",
+            "Inadequate government safety supervision is a primary root cause that drives multiple downstream factors: organisational safety management confusion, incomplete departmental structures, and insufficient safety education and training.",
+            "Insufficient crackdown on illegal activities is another government-level factor that contributes to security management confusion within the organisation.",
+            "Organisational influences include safety management confusion, incomplete departmental structures, inadequate safety education and training, inadequate emergency planning, and insufficient supervision of work safety.",
+            "Security management confusion is a high-impact organisational node (72% occurrence probability) that drives multiple downstream factors: it influences managers to deceive regulators, organise illegal production, and creates conditions for physical/intellectual disability of workers.",
+            "Manager-level preconditions include illegal commands, organising production in violation of laws, and creating false impressions to deceive regulators.",
+            "Operator-level preconditions include poor mental states and physical/intellectual disability, as well as the technical environment.",
+            "Unsafe acts are divided into errors (skill-based, decision, perceptual) and violations (habitual, accidental).",
+            "Habitual violations have the highest occurrence probability (38%) among unsafe acts and are most strongly driven by employee mental states.",
+            "The most likely causal chain for habitual violations is: inadequate safety supervision -> insufficient safety education and training -> poor mental states -> habitual violations.",
+            "Skill-based errors are driven by illegal commands, deceptive practices towards regulators, and the technical environment.",
+            "Decision errors are driven by illegal commands, illegal production organisation, and the technical environment.",
+            "The CPTs were derived from frequency statistics of 100 coal mine gas explosion cases in China (2002-2020), combined with expert judgement.",
+            "The BN structure was validated using Chi-square tests (p < 0.05) and odds ratio analysis (OR > 1) between HFACS-GE levels."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "states",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references",
+                "llm_name"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "AccidentalViolations",
+            "display_name": "Accidental Violations",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "endogenous",
+            "category": "unsafe_acts_violations",
+            "short_description": "Occurrence of accidental (unintentional) safety regulation violations by workers.",
+            "extended_description": "Accidental violations represent unintentional breaches of safety rules and procedures by front-line miners. Unlike habitual violations, these are not routine but arise from situational pressures such as illegal commands from managers or production organised in violation of regulations. Workers may inadvertently violate safety rules when placed under pressure to meet production targets or when standard procedures are overridden by management directives. Occurrence probability in the BN is approximately 15%.",
+            "sensitivity_hints": "Strongly driven by organised production in violation of laws and regulations. Also influenced by illegal commands from managers.",
+            "related_domain_knowledge": [
+                "Accidental violations differ from habitual ones in that they are not routine but situationally induced.",
+                "Management pressure is a key driver of accidental violations in coal mining."
+            ],
+            "references": [],
+            "llm_name": "UnintentionalRuleBreaches"
+        },
+        {
+            "name": "CreateAFalseImpressionToDeceiveTheRegulators",
+            "display_name": "Create a False Impression to Deceive the Regulators",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "endogenous",
+            "category": "preconditions_manager",
+            "short_description": "Managers creating false impressions to mislead safety regulators.",
+            "extended_description": "This factor represents deliberate deception by mine managers towards government safety regulators, including falsifying safety records, concealing hazardous conditions, and misrepresenting compliance with safety standards. It is driven by security management confusion within the organisation. When safety management systems are chaotic, managers are more likely to resort to deception to avoid penalties rather than address the underlying safety deficiencies. This deceptive behaviour creates conditions for skill-based errors by front-line workers who operate under a false sense of safety.",
+            "sensitivity_hints": "Driven by security management confusion. Feeds into skill-based errors by creating a false safety perception.",
+            "related_domain_knowledge": [
+                "Concealment of safety violations from regulators is a significant contributing factor in Chinese coal mine disasters.",
+                "Falsifying gas monitoring data is a common form of regulatory deception."
+            ],
+            "references": [],
+            "llm_name": "RegulatoryDeception"
+        },
+        {
+            "name": "DecisionErrors",
+            "display_name": "Decision Errors",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "endogenous",
+            "category": "unsafe_acts_errors",
+            "short_description": "Occurrence of poor decision-making errors by workers.",
+            "extended_description": "Decision errors represent intentional but incorrect choices made by workers during mining operations, such as choosing an inappropriate work method, failing to follow procedures under abnormal conditions, or making incorrect risk assessments. These errors are driven by illegal commands from managers (which create confusion about correct procedures), production organised in violation of regulations (which normalises non-compliance), and poor technical environment (which limits access to correct information). Occurrence probability is approximately 8%.",
+            "sensitivity_hints": "Driven by the interaction of illegal commands, illegal production organisation, and technical environment. Technical environment and illegal commands are the most sensitive factors.",
+            "related_domain_knowledge": [
+                "Decision errors in coal mining often involve incorrect responses to gas accumulation warnings.",
+                "Poor information flow from management to workers contributes to decision errors."
+            ],
+            "references": [],
+            "llm_name": "WorkerDecisionFailures"
+        },
+        {
+            "name": "DeparmentsAndInstitutionsAreNotComplete",
+            "display_name": "Departments and Institutions Are Not Complete",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "endogenous",
+            "category": "organisational_influences",
+            "short_description": "Incomplete safety departments and institutional structures.",
+            "extended_description": "This factor indicates that the mine's organisational structure lacks complete safety departments and institutional frameworks necessary for effective safety management. This includes missing safety roles, understaffed safety departments, or absence of formal safety review processes. It is driven by inadequate government safety supervision — when regulators do not enforce organisational requirements, mines may cut costs by reducing safety infrastructure. Incomplete organisational structures contribute to illegal production practices by removing institutional checks and balances.",
+            "sensitivity_hints": "Driven by inadequate government safety supervision. Contributes to organised production in violation of laws and regulations.",
+            "related_domain_knowledge": [
+                "Chinese coal mining regulations require specific safety departments and staffing levels.",
+                "Smaller mines are more likely to have incomplete safety organisational structures."
+            ],
+            "references": [],
+            "llm_name": "IncompleteSafetyOrganisation"
+        },
+        {
+            "name": "HabitualViolations",
+            "display_name": "Habitual Violations",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "endogenous",
+            "category": "unsafe_acts_violations",
+            "short_description": "Occurrence of habitual (routine) safety regulation violations.",
+            "extended_description": "Habitual violations represent routine, deliberate breaches of safety rules that have become normalised workplace behaviour among miners. These include operating without gas detection, bypassing ventilation systems, smoking underground, and ignoring safety equipment requirements. This is the most probable unsafe act in the model (38% occurrence). It is driven by poor mental states (lack of safety awareness, complacency) and physical/intellectual disability (fatigue, reduced cognitive capacity). The most likely causal chain is: inadequate safety supervision -> insufficient safety training -> poor mental states -> habitual violations.",
+            "sensitivity_hints": "Most probable unsafe act at 38%. Mental states have the highest sensitivity value (12.7%) on habitual violations.",
+            "related_domain_knowledge": [
+                "Habitual violations are the most dangerous type of unsafe act because they are normalised and persistent.",
+                "Risk habituation in repetitive underground mining tasks leads to complacency about gas explosion hazards."
+            ],
+            "references": [],
+            "llm_name": "RoutineSafetyViolations"
+        },
+        {
+            "name": "IllegalCommand",
+            "display_name": "Illegal Command",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "exogenous",
+            "category": "preconditions_manager",
+            "short_description": "Issuance of illegal production commands by managers.",
+            "extended_description": "Illegal command represents managers issuing production directives that violate safety regulations, such as ordering work in areas with excessive gas concentrations, commanding blasting operations without proper gas clearance, or directing workers to bypass safety interlocks. This is an exogenous root node in the BN (40% occurrence) and a fundamental cause of multiple unsafe acts. Illegal commands directly increase the probability of perceptual errors, decision errors, skill-based errors, and accidental violations among front-line workers.",
+            "sensitivity_hints": "Root node with 40% occurrence probability. High sensitivity factor for skill-based errors and perceptual errors.",
+            "related_domain_knowledge": [
+                "Illegal production commands were identified in 40% of the 100 analysed gas explosion cases.",
+                "Mine managers may issue illegal commands under pressure to meet production quotas."
+            ],
+            "references": [],
+            "llm_name": "IllegalProductionOrders"
+        },
+        {
+            "name": "InadequateEmergencyPlan",
+            "display_name": "Inadequate Emergency Plan",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "exogenous",
+            "category": "organisational_influences",
+            "short_description": "Inadequate emergency response planning and preparedness.",
+            "extended_description": "Inadequate emergency plan represents deficiencies in the mine's emergency response preparations, including lack of updated evacuation procedures, insufficient emergency drills, missing rescue equipment, and poorly maintained emergency communication systems. This is an exogenous root node (21% occurrence). It contributes to physical and intellectual disability of workers by leaving them unprepared for emergency situations, unable to respond effectively, and more prone to panic and confusion during gas incidents.",
+            "sensitivity_hints": "Root node with 21% occurrence probability. Contributes to physical/intellectual disability of workers.",
+            "related_domain_knowledge": [
+                "Chinese coal safety regulations mandate regular emergency drills and updated response plans.",
+                "Emergency preparedness gaps are particularly dangerous because gas explosions require rapid self-rescue decisions."
+            ],
+            "references": [],
+            "llm_name": "DeficientEmergencyPreparedness"
+        },
+        {
+            "name": "InsufficientCracdownOnIllegalActivities",
+            "display_name": "Insufficient Crackdown on Illegal Activities",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "exogenous",
+            "category": "government_negligence",
+            "short_description": "Government failure to crack down on illegal mining activities.",
+            "extended_description": "This factor represents inadequate government enforcement against illegal mining operations, including failure to shut down unlicensed mines, insufficient penalties for safety violations, and lack of follow-up on cited violations. This is an exogenous root node (22% occurrence). It directly contributes to security management confusion within mining organisations by signalling weak enforcement, which reduces the incentive for mines to maintain proper safety management systems.",
+            "sensitivity_hints": "Root node with 22% occurrence probability. Drives security management confusion within organisations.",
+            "related_domain_knowledge": [
+                "China has undertaken significant campaigns to close illegal small mines, but enforcement challenges persist in remote areas.",
+                "Weak enforcement of penalties for safety violations reduces deterrence."
+            ],
+            "references": [],
+            "llm_name": "WeakEnforcementOfMiningLaws"
+        },
+        {
+            "name": "InsufficientSupervisionOfWorkSafety",
+            "display_name": "Insufficient Supervision of Work Safety",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "exogenous",
+            "category": "organisational_influences",
+            "short_description": "Insufficient organisational supervision of workplace safety practices.",
+            "extended_description": "This factor represents inadequate internal supervision of day-to-day safety practices within the mine, including insufficient on-site safety inspections, lack of monitoring of worker compliance with safety procedures, and inadequate supervision of equipment maintenance. This is an exogenous root node (44% occurrence). It directly drives the quality of the technical environment — poor supervision leads to degraded equipment, insufficient ventilation monitoring, and deteriorated working conditions.",
+            "sensitivity_hints": "Root node with 44% occurrence probability. Drives the technical environment quality.",
+            "related_domain_knowledge": [
+                "Work safety supervision includes routine gas monitoring, ventilation checks, and equipment inspections.",
+                "Full-time safety inspectors should be present during all mining shifts."
+            ],
+            "references": [],
+            "llm_name": "InadequateWorkplaceSafetyOversight"
+        },
+        {
+            "name": "MentalStates",
+            "display_name": "Mental States",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "endogenous",
+            "category": "preconditions_operator",
+            "short_description": "Adverse mental states of workers reducing safety awareness.",
+            "extended_description": "Mental states represent adverse psychological conditions of front-line miners including lack of safety awareness, complacency, fatigue-related cognitive impairment, risk tolerance, fluke mentality, and reduced vigilance. It is driven by insufficient safety education and training — workers who receive inadequate training develop poor safety habits and lack awareness of gas explosion risks. Mental states have the highest sensitivity value (12.7%) on habitual violations, making them the most critical precondition for the most probable unsafe act.",
+            "sensitivity_hints": "Driven by safety education and training quality. Highest sensitivity factor (12.7%) on habitual violations.",
+            "related_domain_knowledge": [
+                "'Fluke mentality' (believing accidents only happen to others) is a recognised psychological factor in Chinese mining safety literature.",
+                "Repetitive tasks in mining lead to habituation that reduces risk perception."
+            ],
+            "references": [],
+            "llm_name": "AdverseWorkerMindset"
+        },
+        {
+            "name": "OrganizeProductionInViolationOfLawsAndRegulations",
+            "display_name": "Organise Production in Violation of Laws and Regulations",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "endogenous",
+            "category": "preconditions_manager",
+            "short_description": "Managers organising production that violates safety laws.",
+            "extended_description": "This factor represents mine managers systematically organising production operations in violation of safety laws and regulations, including exceeding permitted production capacity, mining in prohibited zones, operating without required safety certificates, and scheduling work during maintenance periods. It is driven by incomplete departmental structures and security management confusion. When safety institutions are lacking and management is chaotic, managers face less resistance to illegal production organisation. This factor directly increases the probability of both decision errors and accidental violations among workers.",
+            "sensitivity_hints": "Driven by incomplete safety departments and security management confusion. Highly sensitive factor for accidental violations.",
+            "related_domain_knowledge": [
+                "Exceeding permitted production capacity was a factor in many large-scale Chinese coal mine disasters.",
+                "Illegal production organisation creates conditions where multiple safety systems are simultaneously compromised."
+            ],
+            "references": [],
+            "llm_name": "UnlawfulProductionManagement"
+        },
+        {
+            "name": "PerceptualErrors",
+            "display_name": "Perceptual Errors",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "endogenous",
+            "category": "unsafe_acts_errors",
+            "short_description": "Occurrence of perceptual errors — failures in sensory detection or interpretation.",
+            "extended_description": "Perceptual errors represent failures in workers' ability to detect or correctly interpret safety-critical sensory information, such as misreading gas concentration gauges, failing to detect unusual odours or sounds indicating gas accumulation, or misjudging ventilation adequacy. These errors are solely driven by illegal commands — when managers override normal procedures, workers' perceptual frameworks for hazard detection are disrupted. Occurrence probability is approximately 11%.",
+            "sensitivity_hints": "Solely driven by illegal commands from managers. Illegal command is the only highly sensitive factor.",
+            "related_domain_knowledge": [
+                "Coal mine gas (methane) is odourless and colourless, making instrumental detection critical.",
+                "Perceptual errors in gas detection are particularly dangerous because they eliminate the last line of defence before explosion."
+            ],
+            "references": [],
+            "llm_name": "HazardPerceptionFailures"
+        },
+        {
+            "name": "PhysicalIntellectualDisability",
+            "display_name": "Physical/Intellectual Disability",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "endogenous",
+            "category": "preconditions_operator",
+            "short_description": "Physical or cognitive impairment reducing worker capacity.",
+            "extended_description": "Physical/intellectual disability represents conditions that reduce workers' physical or cognitive capacity to perform safely, including fatigue, illness, impaired vision or hearing, insufficient technical knowledge, and inability to operate safety equipment correctly. It is driven by three factors: inadequate emergency planning (leaving workers unprepared and confused during emergencies), insufficient safety education and training (resulting in poor technical knowledge), and security management confusion (creating disorganised work conditions that exhaust workers). This factor contributes to habitual violations by reducing workers' capacity to maintain safety discipline.",
+            "sensitivity_hints": "Driven by emergency planning, safety training, and management confusion. Contributes to habitual violations alongside mental states.",
+            "related_domain_knowledge": [
+                "Underground mining is physically demanding work with long shifts that can impair cognitive function.",
+                "Insufficient technical training leaves workers unable to use gas detection and safety equipment correctly."
+            ],
+            "references": [],
+            "llm_name": "ReducedWorkerCapacity"
+        },
+        {
+            "name": "SafetyEducationAndTraning",
+            "display_name": "Safety Education and Training",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "endogenous",
+            "category": "organisational_influences",
+            "short_description": "Deficiency in safety education and training programmes.",
+            "extended_description": "Safety education and training represents inadequacies in the mine's safety training programmes, including insufficient frequency of training sessions, poor training content quality, lack of practical emergency drills, and failure to train workers on gas detection equipment. It is driven by inadequate government safety supervision — when regulators do not enforce training requirements, organisations reduce training investment. This factor is a critical mediator, driving both mental states (poor safety awareness) and physical/intellectual disability (lack of technical knowledge).",
+            "sensitivity_hints": "Driven by inadequate government safety supervision. Key mediator to mental states and physical/intellectual disability.",
+            "related_domain_knowledge": [
+                "Chinese coal safety regulations require specific training hours before miners can work underground.",
+                "Safety training must cover gas explosion risks, self-rescue procedures, and equipment operation."
+            ],
+            "references": [],
+            "llm_name": "InsufficientSafetyTraining"
+        },
+        {
+            "name": "SafetySupervisionIsInadequate",
+            "display_name": "Safety Supervision Is Inadequate",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "exogenous",
+            "category": "government_negligence",
+            "short_description": "Government safety supervision is inadequate.",
+            "extended_description": "This factor represents failures in government-level safety supervision of coal mining operations, including infrequent mine inspections, inadequate follow-up on safety violations, understaffed regulatory agencies, and lack of rigorous enforcement of safety standards. This is the most influential root node in the model (50% occurrence) and the starting point of multiple major risk chains. It directly drives organisational-level factors: security management confusion, incomplete departmental structures, and insufficient safety education and training.",
+            "sensitivity_hints": "Root node with 50% occurrence probability — highest among root nodes. Starting point of the most probable causal chains for multiple unsafe acts.",
+            "related_domain_knowledge": [
+                "Government safety supervision is especially challenging given the large number of coal mines in China.",
+                "Provincial and local safety regulators may lack resources for comprehensive mine inspections."
+            ],
+            "references": [],
+            "llm_name": "InadequateGovernmentOversight"
+        },
+        {
+            "name": "SecurityManagementConfusion",
+            "display_name": "Security Management Confusion",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "endogenous",
+            "category": "organisational_influences",
+            "short_description": "Chaotic and disorganised safety management systems.",
+            "extended_description": "Security management confusion represents a state of disorder in the mine's safety management systems, including conflicting safety procedures, unclear chains of command for safety decisions, poor communication of safety policies, lack of systematic safety record-keeping, and failure to implement safety management plans. It is driven by both insufficient government crackdown on illegal activities (which signals weak enforcement) and inadequate government safety supervision. With 72% occurrence probability, this is the most prevalent organisational factor. It drives multiple downstream factors: regulatory deception by managers, illegal production organisation, and physical/intellectual disability of workers.",
+            "sensitivity_hints": "Highest occurrence probability (72%) among organisational factors. Driven by both government negligence factors.",
+            "related_domain_knowledge": [
+                "Management confusion is particularly dangerous because it affects all downstream safety systems simultaneously.",
+                "Chaotic management is often a symptom of rapid production scaling without corresponding safety infrastructure investment."
+            ],
+            "references": [],
+            "llm_name": "DisorganisedSafetyManagement"
+        },
+        {
+            "name": "SkillBasedErrors",
+            "display_name": "Skill-Based Errors",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "endogenous",
+            "category": "unsafe_acts_errors",
+            "short_description": "Occurrence of skill-based errors in routine task execution.",
+            "extended_description": "Skill-based errors represent mistakes in the execution of well-practised, largely automatic tasks, such as fumbling controls on gas detection equipment, inadvertently opening wrong valves, or making procedural slips during routine operations. These errors are driven by three factors: illegal commands (which disrupt normal task sequences), creating false impressions to deceive regulators (which alters the information environment), and poor technical environment (which degrades equipment and working conditions). Occurrence probability is approximately 10%.",
+            "sensitivity_hints": "Driven by illegal commands, regulatory deception, and technical environment. Illegal command and technical environment are the most sensitive factors.",
+            "related_domain_knowledge": [
+                "Skill-based errors are typically involuntary and occur during routine operations.",
+                "Degraded equipment and poor working conditions increase the frequency of procedural slips."
+            ],
+            "references": [],
+            "llm_name": "RoutineTaskExecutionErrors"
+        },
+        {
+            "name": "TechnicalEnvironment",
+            "display_name": "Technical Environment",
+            "type": "binary",
+            "states": [
+                "Non-occurence",
+                "Occurence"
+            ],
+            "role": "endogenous",
+            "category": "preconditions_operator",
+            "short_description": "Deficient technical environment and working conditions.",
+            "extended_description": "Technical environment represents deficiencies in the physical working environment and technical infrastructure of the mine, including poorly maintained ventilation systems, malfunctioning gas monitoring equipment, inadequate lighting, deteriorated electrical installations, and substandard blasting equipment. It is driven by insufficient organisational supervision of work safety — when internal safety oversight is lacking, equipment maintenance and environmental monitoring deteriorate. A poor technical environment directly contributes to both skill-based errors and decision errors by front-line miners.",
+            "sensitivity_hints": "Driven by insufficient work safety supervision. Highly sensitive factor for both skill-based errors and decision errors.",
+            "related_domain_knowledge": [
+                "Proper ventilation is the primary engineering control against gas accumulation in coal mines.",
+                "Gas monitoring systems must be regularly calibrated and maintained to function correctly."
+            ],
+            "references": [],
+            "llm_name": "DegradedWorkingConditions"
+        }
+    ]
+}

@@ -1,0 +1,1874 @@
+{
+    "schema_version": "2.0",
+    "network": "earthquake",
+    "domain": "maritime_transportation_risk",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a coastal maritime transportation delay risk model following a seismic event, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "earthquake",
+        "source_reference": "Goerlandt, F., & Islam, S. (2021). A Bayesian Network risk model for estimating coastal maritime transportation delays following an earthquake in British Columbia. Reliability Engineering & System Safety, 214, 107708.",
+        "source_url": "https://www.bnlearn.com/bnrepository/",
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "The earthquake network models how seismic events propagate through maritime supply chain infrastructure to cause transportation delays. It features three parallel transportation legs (origin, route, destination) with shared seismic and vessel-type dependencies. Variable names are disguised to generic maritime risk terminology."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a maritime transportation risk model assessing delays caused by seismic events along a coastal shipping route.",
+            "The model has a three-leg structure: origin port, sea route, and destination port, each with parallel delay mechanisms.",
+            "Seismic shaking intensity at three locations (origin, route, destination) is the primary hazard driver, propagating through infrastructure damage, operational disruption, and navigational hazards.",
+            "Each location has specialised delay pathways: wave/tsunami impacts, infrastructure damage, port accessibility, and tidal/weather disruption.",
+            "Vessel type interacts with crew network congestion and route-specific hazards to determine delay duration.",
+            "Transportation delays are measured in time bands (no delay, 0-6h, 6-12h, 12-24h, 24-48h, >48h).",
+            "The final output is the total round-trip delay, integrating delays from all three legs plus vessel-specific departure delays.",
+            "Some variables are colliders where multiple independent causes converge (e.g. berth suspension depends on congestion, vessel type, and wave/wind conditions)."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a specific benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge & naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, conditional rates, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "base_rate",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "BVOR",
+            "display_name": "Vessel Operator Risk Awareness",
+            "aliases": [
+                "BVOR",
+                "bridge_vessel_operator_readiness",
+                "operator_preparedness"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "exogenous",
+            "category": "operational",
+            "short_description": "Whether the vessel operator has prior seismic awareness or preparedness.",
+            "extended_description": "Binary variable indicating whether the bridge/vessel operator has received advance warning or has seismic preparedness protocols in place. When present, this awareness reduces the likelihood of berth suspension at the origin port during seismic events, as the operator can take proactive measures.",
+            "base_rate": {
+                "No": 0.5,
+                "Yes": 0.5
+            },
+            "sensitivity_hints": "Operator awareness moderates the effect of seismic shaking on berth suspension at the origin port. It acts only in combination with other risk factors.",
+            "related_domain_knowledge": [
+                "Maritime operators in seismically active regions may have standing protocols for earthquake response.",
+                "Early warning systems can provide seconds to minutes of advance notification.",
+                "Operator preparedness affects port evacuation and berth clearance decisions."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "operator_seismic_awareness"
+        },
+        {
+            "name": "ESR",
+            "display_name": "Seismic Intensity at Route",
+            "aliases": [
+                "ESR",
+                "earthquake_shaking_route",
+                "route_seismic_intensity"
+            ],
+            "type": "categorical",
+            "states": [
+                "VI_or_less",
+                "VII",
+                "VIII",
+                "IX",
+                "X_or_more"
+            ],
+            "role": "exogenous",
+            "category": "seismic_hazard",
+            "short_description": "Earthquake shaking intensity along the sea route (Modified Mercalli scale).",
+            "extended_description": "Represents the seismic shaking intensity experienced along the maritime route, categorised by Modified Mercalli Intensity (MMI) levels. Higher intensity causes greater infrastructure damage, increased congestion in the maritime network, and more severe navigational hazards. This is a primary driver of route-level delays.",
+            "base_rate": {
+                "VI_or_less": 0.2,
+                "VII": 0.2,
+                "VIII": 0.2,
+                "IX": 0.2,
+                "X_or_more": 0.2
+            },
+            "sensitivity_hints": "Route seismic intensity drives congestion in the maritime network, which cascades to affect multiple vessel operations including berth suspension, cargo handling, and dangerous goods restrictions.",
+            "related_domain_knowledge": [
+                "MMI VI represents strong shaking with light damage; MMI X+ represents extreme damage.",
+                "The Cascadia subduction zone poses significant seismic risk to British Columbia coastal routes.",
+                "Route-level shaking affects both navigational hazards and port infrastructure along the path.",
+                "Uniform prior across intensity levels reflects scenario-based risk assessment."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "route_shaking_intensity"
+        },
+        {
+            "name": "OL",
+            "display_name": "Origin Port Location",
+            "aliases": [
+                "OL",
+                "origin_location",
+                "departure_port"
+            ],
+            "type": "categorical",
+            "states": [
+                "BC_ML",
+                "V_Isl_E",
+                "V_Isl_S",
+                "V_Isl_W"
+            ],
+            "role": "exogenous",
+            "category": "geographic",
+            "short_description": "Geographic location of the origin (departure) port.",
+            "extended_description": "Categorical variable specifying the origin port location among four coastal regions: mainland British Columbia, and three Vancouver Island zones (east, south, west). The location determines tsunami exposure at origin and the specific tsunami wave delay experienced during departure.",
+            "base_rate": {
+                "BC_ML": 0.25,
+                "V_Isl_E": 0.25,
+                "V_Isl_S": 0.25,
+                "V_Isl_W": 0.25
+            },
+            "sensitivity_hints": "Origin location interacts with the earthquake epicentre location to determine tsunami exposure at the departure port.",
+            "related_domain_knowledge": [
+                "Vancouver Island's west coast faces open Pacific and has highest tsunami exposure.",
+                "The east coast of Vancouver Island is relatively sheltered from Pacific tsunamis.",
+                "BC mainland ports include major facilities like Vancouver and Prince Rupert.",
+                "Port location determines both seismic vulnerability and tsunami arrival time."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "departure_port_region"
+        },
+        {
+            "name": "VT",
+            "display_name": "Vessel Category",
+            "aliases": [
+                "VT",
+                "vessel_type",
+                "ship_category"
+            ],
+            "type": "categorical",
+            "states": [
+                "BC_Ferries",
+                "Barge",
+                "Seaspan"
+            ],
+            "role": "exogenous",
+            "category": "operational",
+            "short_description": "Type of vessel operating the maritime route.",
+            "extended_description": "Categorical variable classifying the vessel into three categories: passenger ferry service, barge transport, or coastal shipping service. Vessel type determines susceptibility to different delay mechanisms: ferries are most affected by dangerous goods restrictions, barges are least affected by crew scheduling, and coastal shippers face intermediate vulnerability across all delay types.",
+            "base_rate": {
+                "BC_Ferries": 0.333,
+                "Barge": 0.334,
+                "Seaspan": 0.333
+            },
+            "sensitivity_hints": "Vessel type modulates the impact of network congestion on berth suspension, cargo handling restrictions, dangerous goods routing, and crew scheduling. Different vessel types have very different vulnerability profiles.",
+            "related_domain_knowledge": [
+                "Passenger ferries (BC Ferries) have strict safety requirements affecting dangerous goods transport.",
+                "Barges are less affected by crew availability issues but vulnerable to weather delays.",
+                "Seaspan operates coastal cargo services with moderate vulnerability to all disruption types.",
+                "Vessel type determines which delay pathways dominate the total disruption."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "vessel_category"
+        },
+        {
+            "name": "ESD",
+            "display_name": "Seismic Intensity at Destination",
+            "aliases": [
+                "ESD",
+                "earthquake_shaking_destination",
+                "destination_seismic_intensity"
+            ],
+            "type": "categorical",
+            "states": [
+                "VI_or_less",
+                "VII",
+                "VIII",
+                "IX",
+                "X_or_more"
+            ],
+            "role": "exogenous",
+            "category": "seismic_hazard",
+            "short_description": "Earthquake shaking intensity at the destination port (Modified Mercalli scale).",
+            "extended_description": "Represents the seismic shaking intensity at the destination port. It drives four destination-specific hazard variables: wave/wind disruption, infrastructure damage interaction, tidal disruption, and port accessibility. Higher destination shaking creates arrival delays through damaged berths, restricted access, and hazardous conditions.",
+            "base_rate": {
+                "VI_or_less": 0.2,
+                "VII": 0.2,
+                "VIII": 0.2,
+                "IX": 0.2,
+                "X_or_more": 0.2
+            },
+            "sensitivity_hints": "Destination seismic intensity drives four parallel hazard pathways at the arrival port, all contributing to arrival-leg delays.",
+            "related_domain_knowledge": [
+                "Destination port damage can strand vessels awaiting berth assignment.",
+                "Port accessibility after earthquakes depends on structural integrity of wharves and loading equipment.",
+                "Higher MMI levels cause exponentially greater infrastructure damage.",
+                "Destination conditions are assessed independently from origin and route conditions."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "destination_shaking_intensity"
+        },
+        {
+            "name": "DL",
+            "display_name": "Destination Port Location",
+            "aliases": [
+                "DL",
+                "destination_location",
+                "arrival_port"
+            ],
+            "type": "categorical",
+            "states": [
+                "V_Isl_E",
+                "V_Isl_S",
+                "V_Isl_W"
+            ],
+            "role": "exogenous",
+            "category": "geographic",
+            "short_description": "Geographic location of the destination (arrival) port.",
+            "extended_description": "Categorical variable specifying the destination port among three Vancouver Island zones (east, south, west). Unlike origin location, the destination does not include BC mainland. Destination location interacts with earthquake epicentre location to determine tsunami wave exposure upon arrival.",
+            "base_rate": {
+                "V_Isl_E": 0.333,
+                "V_Isl_S": 0.334,
+                "V_Isl_W": 0.333
+            },
+            "sensitivity_hints": "Destination location determines tsunami arrival delay at the destination port through its interaction with the epicentre location.",
+            "related_domain_knowledge": [
+                "Vancouver Island destinations are the primary endpoints for BC coastal shipping.",
+                "West coast destinations face the highest tsunami risk from Cascadia subduction zone events.",
+                "East coast destinations are partially sheltered but still vulnerable to reflected waves.",
+                "Port infrastructure vulnerability varies significantly by location."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "arrival_port_region"
+        },
+        {
+            "name": "ESO",
+            "display_name": "Seismic Intensity at Origin",
+            "aliases": [
+                "ESO",
+                "earthquake_shaking_origin",
+                "origin_seismic_intensity"
+            ],
+            "type": "categorical",
+            "states": [
+                "VI_or_less",
+                "VII",
+                "VIII",
+                "IX",
+                "X_or_more"
+            ],
+            "role": "exogenous",
+            "category": "seismic_hazard",
+            "short_description": "Earthquake shaking intensity at the origin port (Modified Mercalli scale).",
+            "extended_description": "Represents the seismic shaking intensity at the origin (departure) port. It drives origin-specific hazard variables: wave/wind disruption, infrastructure damage interaction, tidal disruption, and port accessibility. It also directly influences berth suspension and delay at the origin terminal. Origin shaking is the primary driver of departure delays.",
+            "base_rate": {
+                "VI_or_less": 0.2,
+                "VII": 0.2,
+                "VIII": 0.2,
+                "IX": 0.2,
+                "X_or_more": 0.2
+            },
+            "sensitivity_hints": "Origin seismic intensity is the most connected exogenous variable, driving six downstream effects at the departure port.",
+            "related_domain_knowledge": [
+                "Origin port damage delays vessel loading and departure.",
+                "Port accessibility after earthquakes depends on road/rail access and wharf integrity.",
+                "Origin shaking determines the immediate operational disruption experienced by departing vessels.",
+                "Seismic intensity can vary significantly between nearby locations depending on local geology."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "origin_shaking_intensity"
+        },
+        {
+            "name": "EEL",
+            "display_name": "Earthquake Epicentre Location",
+            "aliases": [
+                "EEL",
+                "epicentre_location",
+                "seismic_source_location"
+            ],
+            "type": "categorical",
+            "states": [
+                "BC_ML",
+                "V_Isl_E_offshore",
+                "V_Isl_Inland",
+                "V_Isl_W_offshore"
+            ],
+            "role": "exogenous",
+            "category": "seismic_hazard",
+            "short_description": "Geographic location of the earthquake epicentre.",
+            "extended_description": "Categorical variable specifying where the earthquake originates: BC mainland, Vancouver Island east offshore, Vancouver Island inland, or Vancouver Island west offshore. The epicentre location determines tsunami generation potential and wave propagation patterns, interacting with both origin and destination port locations to determine tsunami-related delays.",
+            "base_rate": {
+                "BC_ML": 0.25,
+                "V_Isl_E_offshore": 0.25,
+                "V_Isl_Inland": 0.25,
+                "V_Isl_W_offshore": 0.25
+            },
+            "sensitivity_hints": "Epicentre location is the key determinant of tsunami risk. West offshore epicentres pose the greatest tsunami hazard, while inland epicentres generate no tsunamis.",
+            "related_domain_knowledge": [
+                "The Cascadia subduction zone lies offshore of Vancouver Island's west coast.",
+                "Offshore epicentres generate tsunamis; inland epicentres typically do not.",
+                "Tsunami arrival time depends on distance from epicentre to port.",
+                "The Juan de Fuca plate boundary is a major seismic source for the region."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "epicentre_region"
+        },
+        {
+            "name": "WIDO",
+            "display_name": "Wave/Wind Disruption at Origin",
+            "aliases": [
+                "WIDO",
+                "wind_wave_impact_origin",
+                "origin_sea_state"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "hazard_origin",
+            "short_description": "Severity of wave and wind disruption at the origin port.",
+            "extended_description": "Represents the level of wave and wind disruption at the departure port caused by the earthquake. Driven by origin seismic intensity—stronger shaking creates larger seismically induced waves and can alter local wind/sea-state conditions. WIDO affects berth suspension decisions and contributes to the total berth suspension delay at origin.",
+            "sensitivity_hints": "Wave/wind disruption at origin affects berth suspension both directly and through the combined berth suspension delay calculation.",
+            "related_domain_knowledge": [
+                "Earthquake-induced seiches can generate dangerous wave conditions in harbours.",
+                "Port operations are suspended when wave heights exceed safe berthing thresholds.",
+                "Wave disruption persists longer than the earthquake itself as oscillations decay.",
+                "Harbour geometry amplifies seismically induced waves."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "origin_wave_disruption"
+        },
+        {
+            "name": "CIDD",
+            "display_name": "Infrastructure Damage Interaction at Destination",
+            "aliases": [
+                "CIDD",
+                "combined_infrastructure_damage_destination",
+                "destination_infrastructure_impact"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "hazard_destination",
+            "short_description": "Combined effect of seismic damage to port and route infrastructure at destination.",
+            "extended_description": "Represents the joint infrastructure damage level at the destination from the combined effects of destination seismic intensity and route seismic intensity. Both must be considered because the vessel transits route infrastructure before arriving at the destination port. This variable feeds into cargo handling suspension decisions at the destination.",
+            "sensitivity_hints": "Infrastructure damage at destination is a collider of both destination and route shaking intensities. It determines whether cargo handling operations can proceed at the arrival port.",
+            "related_domain_knowledge": [
+                "Port infrastructure includes wharves, cranes, loading equipment, and storage facilities.",
+                "Road and rail connections to ports may also be damaged, affecting cargo handling.",
+                "Higher MMI levels cause disproportionately greater structural damage.",
+                "Infrastructure assessment takes time, adding to delays even when damage is minor."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "destination_infra_damage"
+        },
+        {
+            "name": "TIDO",
+            "display_name": "Tidal Disruption at Origin",
+            "aliases": [
+                "TIDO",
+                "tidal_impact_origin",
+                "origin_tidal_disruption"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "hazard_origin",
+            "short_description": "Severity of tidal disruption at the origin port from seismic effects.",
+            "extended_description": "Represents tidal anomalies at the origin port caused by the earthquake. Seismic events can disrupt normal tidal patterns through coseismic land-level changes and harbour oscillations. Tidal disruption affects vessel transit timing, contributing to transport time delays at origin.",
+            "sensitivity_hints": "Tidal disruption at origin feeds into the transit time delay at origin. Stronger shaking produces greater tidal anomalies.",
+            "related_domain_knowledge": [
+                "Coseismic land-level changes alter tidal datum and affect under-keel clearance.",
+                "Disrupted tidal patterns can persist for days after a major earthquake.",
+                "Vessels may need to wait for suitable tidal windows before departure.",
+                "Tidal disruptions are particularly relevant for shallow-draught navigation channels."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "origin_tidal_disruption"
+        },
+        {
+            "name": "TWO",
+            "display_name": "Tsunami Wave at Origin",
+            "aliases": [
+                "TWO",
+                "tsunami_warning_origin",
+                "origin_tsunami"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "hazard_origin",
+            "short_description": "Whether a tsunami wave affects the origin port.",
+            "extended_description": "Binary variable indicating whether a tsunami reaches the origin port. Determined by the interaction of earthquake epicentre location and origin port location—offshore epicentres facing the port generate tsunamis, while inland or distant epicentres do not. Tsunami occurrence triggers potentially severe delays in departure wave timing.",
+            "sensitivity_hints": "Tsunami at origin is a critical binary trigger that can cause extreme departure delays. It depends on the spatial relationship between epicentre and origin port.",
+            "related_domain_knowledge": [
+                "Tsunamis are generated only by offshore or submarine earthquakes.",
+                "Vancouver Island's west coast faces the highest tsunami risk from Cascadia events.",
+                "Tsunami arrival time ranges from minutes (near-field) to hours (far-field).",
+                "Port closures during tsunami warnings can last 12-24 hours or more."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "origin_tsunami_occurrence"
+        },
+        {
+            "name": "PAO",
+            "display_name": "Port Accessibility at Origin",
+            "aliases": [
+                "PAO",
+                "port_access_origin",
+                "origin_port_access"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "hazard_origin",
+            "short_description": "Level of port accessibility disruption at the origin.",
+            "extended_description": "Represents how severely earthquake damage restricts access to the origin port. Driven by origin seismic intensity—stronger shaking damages road/rail connections and port approaches. Port accessibility affects multiple downstream delay mechanisms: berth suspension assessment, transit timing, cargo handling, and crew access.",
+            "sensitivity_hints": "Port accessibility at origin is a highly connected intermediate variable, feeding into five different delay pathways. It represents overall port operability.",
+            "related_domain_knowledge": [
+                "Port access depends on road, rail, and waterway approach integrity.",
+                "Landslides and liquefaction can block land-based port access routes.",
+                "Even minor access disruption causes cascading delays in vessel loading and departure.",
+                "Port accessibility assessment is one of the first post-earthquake priorities."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "origin_port_accessibility"
+        },
+        {
+            "name": "TWD",
+            "display_name": "Tsunami Wave at Destination",
+            "aliases": [
+                "TWD",
+                "tsunami_warning_destination",
+                "destination_tsunami"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "hazard_destination",
+            "short_description": "Whether a tsunami wave affects the destination port.",
+            "extended_description": "Binary variable indicating whether a tsunami reaches the destination port. Determined by the interaction of earthquake epicentre location and destination port location. West-facing destination ports are most vulnerable to Cascadia subduction tsunamis.",
+            "sensitivity_hints": "Tsunami at destination triggers severe arrival delays. The epicentre-destination spatial relationship is the key determinant.",
+            "related_domain_knowledge": [
+                "Destination tsunami arrival can prevent vessel entry to port for extended periods.",
+                "Tsunami-damaged port infrastructure compounds delays beyond the wave event itself.",
+                "Post-tsunami harbour surveys are required before vessel entry is permitted.",
+                "Tsunami inundation can damage cargo and port equipment at the destination."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "destination_tsunami_occurrence"
+        },
+        {
+            "name": "WIDD",
+            "display_name": "Wave/Wind Disruption at Destination",
+            "aliases": [
+                "WIDD",
+                "wind_wave_impact_destination",
+                "destination_sea_state"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "hazard_destination",
+            "short_description": "Severity of wave and wind disruption at the destination port.",
+            "extended_description": "Represents wave and wind disruption at the arrival port caused by the earthquake. Driven by destination seismic intensity. Affects berth suspension at the destination and feeds into the combined berth suspension delay calculation for the arrival leg.",
+            "sensitivity_hints": "Wave/wind disruption at destination affects berth operations upon arrival, contributing to the destination berth suspension delay.",
+            "related_domain_knowledge": [
+                "Harbour resonance from seismic waves can persist for hours.",
+                "Wave conditions affect the safety of vessel manoeuvring in port approaches.",
+                "Destination wave disruption may differ significantly from origin conditions.",
+                "Port pilots may refuse to guide vessels in if wave conditions exceed thresholds."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "destination_wave_disruption"
+        },
+        {
+            "name": "TIDD",
+            "display_name": "Tidal Disruption at Destination",
+            "aliases": [
+                "TIDD",
+                "tidal_impact_destination",
+                "destination_tidal_disruption"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "hazard_destination",
+            "short_description": "Severity of tidal disruption at the destination port from seismic effects.",
+            "extended_description": "Represents tidal anomalies at the destination port caused by the earthquake. Driven by destination seismic intensity. Affects transit timing at the destination through altered tidal windows and under-keel clearance constraints.",
+            "sensitivity_hints": "Tidal disruption at destination contributes to transit time delays on the arrival leg, parallel to the origin tidal disruption pathway.",
+            "related_domain_knowledge": [
+                "Tidal disruptions at destination may be different from origin due to different local bathymetry.",
+                "Large tidal ranges in BC coastal waters make tidal disruption particularly impactful.",
+                "Altered tidal patterns affect vessel scheduling at the destination berth.",
+                "Post-earthquake tidal surveys may be needed before port entry is safe."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "destination_tidal_disruption"
+        },
+        {
+            "name": "PAD",
+            "display_name": "Port Accessibility at Destination",
+            "aliases": [
+                "PAD",
+                "port_access_destination",
+                "destination_port_access"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "hazard_destination",
+            "short_description": "Level of port accessibility disruption at the destination.",
+            "extended_description": "Represents how severely earthquake damage restricts access to the destination port. Driven by destination seismic intensity. Feeds into berth suspension, transit time, and cargo handling delays at the destination, mirroring the origin accessibility structure.",
+            "sensitivity_hints": "Destination port accessibility affects three delay pathways at the arrival end: berth suspension, transit time, and cargo handling.",
+            "related_domain_knowledge": [
+                "Destination port access may be further compromised by tsunami damage if applicable.",
+                "Vancouver Island communities may face isolation if transport links are severed.",
+                "Port accessibility is a key factor in emergency response logistics.",
+                "Assessment of destination port accessibility is needed before dispatching vessels."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "destination_port_accessibility"
+        },
+        {
+            "name": "CIDO",
+            "display_name": "Infrastructure Damage Interaction at Origin",
+            "aliases": [
+                "CIDO",
+                "combined_infrastructure_damage_origin",
+                "origin_infrastructure_impact"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "hazard_origin",
+            "short_description": "Combined effect of seismic damage to port and route infrastructure at origin.",
+            "extended_description": "Represents the joint infrastructure damage at the origin from the combined effects of origin seismic intensity and route seismic intensity. Both origin port and route infrastructure conditions affect whether cargo handling can proceed at the departure terminal.",
+            "sensitivity_hints": "Infrastructure damage at origin is a collider of origin and route shaking intensities. It determines cargo handling feasibility at the departure port.",
+            "related_domain_knowledge": [
+                "Port loading equipment (cranes, conveyors) is vulnerable to seismic damage.",
+                "Route infrastructure damage may prevent vessel departure even if the port is undamaged.",
+                "Combined damage assessment integrates local port and broader network conditions.",
+                "Infrastructure repair timelines range from hours for minor damage to weeks for major damage."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "origin_infra_damage"
+        },
+        {
+            "name": "CN",
+            "display_name": "Maritime Network Congestion",
+            "aliases": [
+                "CN",
+                "congestion_network",
+                "shipping_congestion"
+            ],
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "operational",
+            "short_description": "Level of congestion in the maritime transportation network following the earthquake.",
+            "extended_description": "Represents the overall congestion state of the maritime network after the earthquake, driven by route seismic intensity. Network congestion affects six downstream operational variables: berth suspension at origin and destination, cargo handling restrictions, dangerous goods routing, crew scheduling availability, and vessel berthing operations. It is the primary pathway through which route-level seismic effects cascade to operational delays.",
+            "sensitivity_hints": "Maritime network congestion is the most connected endogenous variable, affecting six downstream operational processes. It is the critical node through which route seismic intensity propagates to vessel-level delays.",
+            "related_domain_knowledge": [
+                "Post-earthquake port congestion arises from vessel rerouting, inspection queues, and mutual aid operations.",
+                "Maritime network congestion has compounding effects as delays cascade through schedules.",
+                "Priority routing for emergency supplies can exacerbate congestion for commercial vessels.",
+                "Congestion resolution requires coordination across multiple port authorities."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "maritime_network_congestion"
+        },
+        {
+            "name": "DGR",
+            "display_name": "Dangerous Goods Routing Restriction",
+            "aliases": [
+                "DGR",
+                "dangerous_goods_restriction",
+                "hazmat_routing"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "operational",
+            "short_description": "Whether dangerous goods routing restrictions apply to this vessel.",
+            "extended_description": "Binary variable indicating whether the vessel is subject to dangerous goods routing restrictions. Depends on maritime network congestion and vessel type—passenger ferries (BC Ferries) are most strictly affected, while barges are typically exempt. When active, DGR delays the vessel's departure from the origin.",
+            "sensitivity_hints": "Dangerous goods restrictions interact strongly with vessel type. They primarily affect passenger ferries and contribute to departure delays through the dangerous goods delay pathway.",
+            "related_domain_knowledge": [
+                "Passenger ferries have strict regulations on carrying dangerous goods.",
+                "Post-earthquake damage may reclassify certain cargo as hazardous.",
+                "Routing restrictions may require vessels to use alternative, longer routes.",
+                "Barges are generally exempt from passenger-oriented dangerous goods restrictions."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "hazmat_routing_restriction"
+        },
+        {
+            "name": "CSR",
+            "display_name": "Crew Scheduling Restriction",
+            "aliases": [
+                "CSR",
+                "crew_schedule_restriction",
+                "crew_availability"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "operational",
+            "short_description": "Whether crew scheduling restrictions affect vessel operations.",
+            "extended_description": "Binary variable indicating whether crew scheduling limitations affect the vessel. Depends on maritime network congestion and vessel type. Crew may be unavailable due to transport disruption, reassignment to emergency duties, or fatigue/rest regulations. Crew restrictions affect cargo handling suspension decisions at both origin and destination.",
+            "sensitivity_hints": "Crew scheduling restrictions feed into cargo handling suspension at both origin and destination. The effect varies significantly by vessel type.",
+            "related_domain_knowledge": [
+                "Maritime crew must comply with hours-of-rest regulations even during emergencies.",
+                "Land transport disruption may prevent crew from reaching their vessels.",
+                "Crew may be diverted to search and rescue operations after major earthquakes.",
+                "Smaller operators (barges) may have less crew redundancy."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "crew_schedule_disruption"
+        },
+        {
+            "name": "BSD",
+            "display_name": "Berth Suspension at Destination",
+            "aliases": [
+                "BSD",
+                "berth_suspension_destination",
+                "destination_berth_closure"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "operational",
+            "short_description": "Whether berthing operations are suspended at the destination port.",
+            "extended_description": "Binary variable indicating whether berth suspension is in effect at the destination. Driven by network congestion, vessel type, and wave/wind disruption at destination. Berth suspension contributes to the total berth suspension delay at destination through the combined delay calculation.",
+            "sensitivity_hints": "Berth suspension at destination is a three-parent collider integrating network congestion, vessel type, and wave conditions. It feeds directly into destination berth suspension delay.",
+            "related_domain_knowledge": [
+                "Port authorities suspend berth operations when safety conditions are not met.",
+                "Different vessel types have different berthing requirements and thresholds.",
+                "Berth suspension decisions consider wave height, wind speed, and structural integrity.",
+                "Suspension duration depends on the persistence of the hazardous conditions."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "destination_berth_suspension"
+        },
+        {
+            "name": "MMSC",
+            "display_name": "Major Maritime Supply Chain Disruption",
+            "aliases": [
+                "MMSC",
+                "major_supply_chain_disruption",
+                "supply_chain_impact"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "operational",
+            "short_description": "Whether a major maritime supply chain disruption has occurred.",
+            "extended_description": "Binary variable indicating whether the earthquake has triggered a major disruption across the maritime supply chain. Driven by network congestion and vessel type. Major supply chain disruption affects the direction/access control delay, representing the highest-level operational impact that restricts overall vessel movement.",
+            "sensitivity_hints": "Major supply chain disruption represents a systemic failure mode that triggers different delay mechanisms than localised port damage. It feeds into access control delays.",
+            "related_domain_knowledge": [
+                "Major supply chain disruptions trigger emergency management protocols.",
+                "Cascade effects can amplify local damage into system-wide disruption.",
+                "Different vessel types have different supply chain dependencies.",
+                "Supply chain disruption assessment may take 24-48 hours after a major event."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "supply_chain_disruption"
+        },
+        {
+            "name": "TTRO",
+            "display_name": "Transit Time Delay at Origin",
+            "aliases": [
+                "TTRO",
+                "transport_time_restriction_origin",
+                "origin_transit_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_origin",
+            "short_description": "Duration of transit time delay at the origin port.",
+            "extended_description": "Represents the time delay in vessel transit at the origin, categorised into six duration bands. Driven by port accessibility at origin, tidal disruption at origin, and vessel type. Combines the effects of restricted port approach, tidal anomalies, and vessel-specific navigational constraints to produce the departure transit delay.",
+            "sensitivity_hints": "Transit time delay at origin integrates port access, tidal conditions, and vessel type effects. It is one of the delay components feeding into the departure-leg total.",
+            "related_domain_knowledge": [
+                "Transit delays include pilotage waiting time, restricted channel navigation, and speed restrictions.",
+                "Different vessel types have different manoeuvring capabilities and channel requirements.",
+                "Tidal disruption compounds transit delays by narrowing safe passage windows.",
+                "L0 indicates no delay; M48 indicates delays exceeding 48 hours."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "origin_transit_delay"
+        },
+        {
+            "name": "BSO",
+            "display_name": "Berth Suspension at Origin",
+            "aliases": [
+                "BSO",
+                "berth_suspension_origin",
+                "origin_berth_closure"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "operational",
+            "short_description": "Whether berthing operations are suspended at the origin port.",
+            "extended_description": "Binary variable indicating whether berth suspension is in effect at the origin. Driven by network congestion, vessel type, and wave/wind disruption at origin. Berth suspension at origin prevents vessel loading and contributes to the total berth suspension delay calculation for the departure leg.",
+            "sensitivity_hints": "Berth suspension at origin directly blocks vessel departure. It feeds into the combined origin berth suspension delay.",
+            "related_domain_knowledge": [
+                "Berth suspension prevents all cargo loading and unloading operations.",
+                "Port authorities make suspension decisions based on real-time safety assessments.",
+                "Vessels already at berth may be required to depart to safer anchorages.",
+                "Suspension lifts only after safety reassessment and structural inspection."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "origin_berth_suspension"
+        },
+        {
+            "name": "DTWD",
+            "display_name": "Tsunami Wave Delay at Destination",
+            "aliases": [
+                "DTWD",
+                "delay_tsunami_wave_destination",
+                "destination_tsunami_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_destination",
+            "short_description": "Duration of delay at destination due to tsunami wave effects.",
+            "extended_description": "Represents the time delay caused by a tsunami at the destination port, in six duration bands. Driven by destination location, epicentre location, and whether a tsunami wave occurs at the destination. No tsunami means no delay; tsunami occurrence combined with vulnerable location can cause extreme delays.",
+            "sensitivity_hints": "Tsunami delay at destination combines geographic vulnerability with tsunami occurrence. It contributes to the total arrival delay calculation.",
+            "related_domain_knowledge": [
+                "Tsunami-related port closures can last 12-48 hours or longer.",
+                "Port reopening requires marine surveys to check for debris and depth changes.",
+                "Tsunami delays compound with infrastructure damage for the worst-case scenarios.",
+                "The geographic relationship between epicentre and port determines wave severity."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "destination_tsunami_delay"
+        },
+        {
+            "name": "DTWO",
+            "display_name": "Tsunami Wave Delay at Origin",
+            "aliases": [
+                "DTWO",
+                "delay_tsunami_wave_origin",
+                "origin_tsunami_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_origin",
+            "short_description": "Duration of delay at origin due to tsunami wave effects.",
+            "extended_description": "Represents the time delay caused by a tsunami at the origin port, in six duration bands. Driven by epicentre location, origin port location, and whether a tsunami wave occurs at origin. This is a parallel delay pathway to other origin delay mechanisms.",
+            "sensitivity_hints": "Tsunami delay at origin is the most severe potential delay at the departure port, potentially causing >48h delays under worst-case tsunami scenarios.",
+            "related_domain_knowledge": [
+                "Origin tsunami delays are often the dominant component of total departure delay.",
+                "Ports facing the open Pacific are most vulnerable to tsunami-induced delays.",
+                "Post-tsunami port inspections add further delay even after the wave threat passes.",
+                "Inland epicentres generate no tsunami, so this delay is zero for inland events."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "origin_tsunami_delay"
+        },
+        {
+            "name": "BSA",
+            "display_name": "Berth Suspension Assessment",
+            "aliases": [
+                "BSA",
+                "berth_suspension_assessment",
+                "berth_safety_evaluation"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "operational",
+            "short_description": "Whether a berth suspension assessment is triggered at the origin.",
+            "extended_description": "Binary variable indicating whether a formal berth suspension assessment occurs at the origin port. Driven by vessel operator awareness, network congestion, and origin seismic intensity. When an assessment is triggered and conditions warrant, it leads to the total berth suspension delay at origin through the TBS pathway.",
+            "sensitivity_hints": "Berth suspension assessment is a three-parent collider. Operator awareness can prevent unnecessary assessments, while high congestion and shaking intensity trigger them.",
+            "related_domain_knowledge": [
+                "Berth assessments involve structural engineering evaluation of wharf integrity.",
+                "Assessment protocols vary by port authority and vessel type.",
+                "Proactive operator awareness can expedite assessment procedures.",
+                "False-positive assessments still cause delays even when no damage is found."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "origin_berth_assessment"
+        },
+        {
+            "name": "TTRD",
+            "display_name": "Transit Time Delay at Destination",
+            "aliases": [
+                "TTRD",
+                "transport_time_restriction_destination",
+                "destination_transit_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_destination",
+            "short_description": "Duration of transit time delay at the destination port.",
+            "extended_description": "Represents the time delay in vessel transit at the destination, driven by port accessibility at destination, tidal disruption at destination, and vessel type. Mirrors the origin transit delay structure for the arrival leg.",
+            "sensitivity_hints": "Transit time delay at destination is the arrival-leg counterpart of origin transit delay. It integrates destination port access, tidal conditions, and vessel type.",
+            "related_domain_knowledge": [
+                "Destination transit delays affect vessel approach and berthing operations.",
+                "Damaged navigation aids compound transit delays at unfamiliar or restricted ports.",
+                "Vessel type affects minimum under-keel clearance requirements and channel width needs.",
+                "High tidal disruption at destination can strand large vessels outside port approaches."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "destination_transit_delay"
+        },
+        {
+            "name": "TBSO",
+            "display_name": "Total Berth Suspension Delay at Origin",
+            "aliases": [
+                "TBSO",
+                "total_berth_suspension_origin",
+                "origin_berth_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_origin",
+            "short_description": "Total delay from berth suspension at the origin port.",
+            "extended_description": "Represents the total berth suspension delay at origin, combining berth suspension status, tsunami wave delay at origin, port accessibility, and wave/wind disruption. This is a four-parent aggregation node that computes the overall berth-related delay at departure.",
+            "sensitivity_hints": "This is a key aggregation node combining four separate origin delay pathways into a single berth suspension delay estimate. It represents the largest potential delay component at origin.",
+            "related_domain_knowledge": [
+                "Berth suspension delays dominate total departure delays in severe earthquake scenarios.",
+                "The four contributing factors interact: tsunami + berth suspension creates extreme delays.",
+                "Delay categories are mutually exclusive time bands from no delay to >48 hours.",
+                "Berth suspension delay is the principal delay mechanism for docked vessels."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "origin_berth_total_delay"
+        },
+        {
+            "name": "DAC",
+            "display_name": "Direction/Access Control Delay",
+            "aliases": [
+                "DAC",
+                "direction_access_control",
+                "access_control_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_departure",
+            "short_description": "Delay from direction and access control restrictions.",
+            "extended_description": "Represents the delay caused by navigational direction and access control restrictions imposed after the earthquake. Driven by major supply chain disruption and port accessibility at origin. Access controls regulate vessel movements to prevent collisions and ensure safe navigation in damaged port areas.",
+            "sensitivity_hints": "Access control delay is triggered by supply chain disruption and restricted port access. It represents system-level management of vessel traffic flow.",
+            "related_domain_knowledge": [
+                "Vessel traffic services impose one-way traffic or speed restrictions after earthquakes.",
+                "Access control is more restrictive when multiple vessels compete for limited safe channels.",
+                "Supply chain disruption triggers emergency traffic management protocols.",
+                "Direction controls may persist for days as port assessments proceed sequentially."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "access_control_delay"
+        },
+        {
+            "name": "TBS",
+            "display_name": "Total Berth Suspension at Origin (Assessment)",
+            "aliases": [
+                "TBS",
+                "total_berth_suspension",
+                "berth_assessment_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_origin",
+            "short_description": "Delay resulting from the berth suspension assessment at origin.",
+            "extended_description": "Represents the delay caused by the berth suspension assessment process at the origin port. Driven by whether a berth suspension assessment was triggered (BSA), origin seismic intensity (ESO), and port accessibility at origin (PAO). This delay captures the time consumed by inspection and safety evaluation processes.",
+            "sensitivity_hints": "This delay node captures the assessment process itself, separate from the actual berth suspension delay. Both contribute to the departure leg total.",
+            "related_domain_knowledge": [
+                "Structural assessment of wharves requires specialised engineering expertise.",
+                "Assessment duration depends on the extent of damage and number of berths to inspect.",
+                "No assessment is needed if the berth suspension assessment (BSA) was not triggered.",
+                "Assessment delays can range from hours for visual inspection to days for detailed engineering evaluation."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "origin_berth_assessment_delay"
+        },
+        {
+            "name": "TBSD",
+            "display_name": "Total Berth Suspension Delay at Destination",
+            "aliases": [
+                "TBSD",
+                "total_berth_suspension_destination",
+                "destination_berth_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_destination",
+            "short_description": "Total delay from berth suspension at the destination port.",
+            "extended_description": "Represents the total berth suspension delay at destination, combining berth suspension status (BSD), tsunami wave delay at destination (DTWD), port accessibility (PAD), and wave/wind disruption (WIDD). Mirrors the TBSO structure for the arrival leg.",
+            "sensitivity_hints": "Destination berth suspension delay is the arrival-leg counterpart of TBSO. It aggregates four hazard pathways into a single delay estimate for the arrival berth.",
+            "related_domain_knowledge": [
+                "Destination berth delays affect vessel waiting time at anchorage.",
+                "Multiple vessels converging on a damaged port can compound berth suspension delays.",
+                "Tsunami damage at destination may require alternative berthing arrangements.",
+                "The four-parent structure captures the interacting nature of destination port hazards."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "destination_berth_total_delay"
+        },
+        {
+            "name": "TCSO",
+            "display_name": "Cargo Handling Suspension Delay at Origin",
+            "aliases": [
+                "TCSO",
+                "total_cargo_suspension_origin",
+                "origin_cargo_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_origin",
+            "short_description": "Delay from cargo handling suspension at the origin port.",
+            "extended_description": "Represents the delay caused by suspension of cargo handling operations at origin. Driven by infrastructure damage interaction at origin, crew scheduling restrictions, and port accessibility at origin. When cargo handling is suspended, vessels cannot load and must wait for operations to resume.",
+            "sensitivity_hints": "Cargo handling suspension at origin integrates infrastructure damage, crew availability, and port access. It represents the loading operations delay component.",
+            "related_domain_knowledge": [
+                "Cargo handling requires functional cranes, conveyors, and shore-side equipment.",
+                "Crew availability is essential for supervision and operation of handling equipment.",
+                "Port accessibility affects the delivery of cargo to quayside for loading.",
+                "Partial cargo handling (reduced rate) may be possible under degraded conditions."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "origin_cargo_handling_delay"
+        },
+        {
+            "name": "TCSD",
+            "display_name": "Cargo Handling Suspension Delay at Destination",
+            "aliases": [
+                "TCSD",
+                "total_cargo_suspension_destination",
+                "destination_cargo_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_destination",
+            "short_description": "Delay from cargo handling suspension at the destination port.",
+            "extended_description": "Represents the delay caused by suspension of cargo handling operations at destination. Driven by infrastructure damage interaction at destination, crew scheduling restrictions, and port accessibility at destination. Mirrors the origin cargo handling structure for unloading operations.",
+            "sensitivity_hints": "Cargo handling delay at destination aggregates the same three factors as at origin but for unloading operations.",
+            "related_domain_knowledge": [
+                "Destination cargo handling delays affect the entire return journey schedule.",
+                "Unloading operations require different equipment than loading, potentially with different damage profiles.",
+                "Perishable and time-sensitive cargo suffers disproportionately from handling delays.",
+                "Alternative unloading arrangements may partially mitigate delays."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "destination_cargo_handling_delay"
+        },
+        {
+            "name": "DDG",
+            "display_name": "Dangerous Goods Departure Delay",
+            "aliases": [
+                "DDG",
+                "dangerous_goods_delay",
+                "hazmat_departure_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_departure",
+            "short_description": "Delay caused by dangerous goods routing restrictions on vessel departure.",
+            "extended_description": "Represents the departure delay specifically caused by dangerous goods routing restrictions and cargo handling suspension at destination. When dangerous goods restrictions are in effect, vessels must follow alternative procedures before departure, adding to the total delay. It also accounts for onward cargo handling issues at destination reported back to origin scheduling.",
+            "sensitivity_hints": "Dangerous goods delay combines regulatory restrictions with destination cargo handling conditions. It primarily affects passenger ferries carrying regulated cargo.",
+            "related_domain_knowledge": [
+                "Dangerous goods transportation requires specialised routing and handling procedures.",
+                "Post-earthquake conditions may require reclassification of cargo hazard levels.",
+                "Ferries carrying vehicles with fuel are subject to dangerous goods regulations.",
+                "Delay categories range from no delay (L0) to over 48 hours (M48)."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "hazmat_departure_delay"
+        },
+        {
+            "name": "AD",
+            "display_name": "Arrival Delay (Destination Leg)",
+            "aliases": [
+                "AD",
+                "arrival_delay",
+                "destination_leg_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_aggregation",
+            "short_description": "Total delay for the arrival (destination) leg of the journey.",
+            "extended_description": "Represents the combined delay for the arrival leg, aggregating berth suspension delay at destination (TBSD), cargo handling suspension delay at destination (TCSD), and transit time delay at destination (TTRD). Takes the maximum of the three component delays to represent the binding constraint on arrival.",
+            "sensitivity_hints": "Arrival delay is a max-aggregation of three destination-specific delay components. The binding constraint determines the overall arrival delay.",
+            "related_domain_knowledge": [
+                "The arrival leg represents the final approach, berthing, and unloading at destination.",
+                "Multiple delay sources can compound or overlap, with the maximum being the effective delay.",
+                "Arrival delays are often the most unpredictable component due to limited advance information.",
+                "Emergency coordination can reduce arrival delays if advance communication is effective."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "arrival_leg_total_delay"
+        },
+        {
+            "name": "DD",
+            "display_name": "Departure Delay (Origin Leg)",
+            "aliases": [
+                "DD",
+                "departure_delay",
+                "origin_leg_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_aggregation",
+            "short_description": "Total delay for the departure (origin) leg of the journey.",
+            "extended_description": "Represents the combined delay for the departure leg, aggregating direction/access control delay (DAC), total berth suspension assessment delay (TBS), total berth suspension delay at origin (TBSO), cargo handling suspension delay at origin (TCSO), and transit time delay at origin (TTRO). Takes the maximum of all five component delays.",
+            "sensitivity_hints": "Departure delay aggregates five separate origin delay pathways. It is typically the largest delay component because the origin is where the earthquake impact is first experienced.",
+            "related_domain_knowledge": [
+                "Departure delays are the first to materialise after an earthquake.",
+                "Five parallel delay mechanisms compete—the longest one determines the effective delay.",
+                "Emergency management decisions at origin directly affect departure delay.",
+                "Departure delay information may be communicated ahead to the destination for coordination."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "departure_leg_total_delay"
+        },
+        {
+            "name": "VD",
+            "display_name": "Vessel-Specific Departure Delay",
+            "aliases": [
+                "VD",
+                "vessel_delay",
+                "vessel_departure_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_aggregation",
+            "short_description": "Total vessel-specific delay before departure.",
+            "extended_description": "Represents the combined vessel-specific delay, aggregating dangerous goods departure delay (DDG), tsunami wave delay at destination (DTWD), and tsunami wave delay at origin (DTWO). This captures delays that are specific to the vessel's routing, cargo, and tsunami exposure rather than general port conditions.",
+            "sensitivity_hints": "Vessel delay captures the vessel-specific disruptions that compound general port delays. It combines dangerous goods and tsunami pathways into a single vessel-level delay.",
+            "related_domain_knowledge": [
+                "Vessel-specific delays depend on the vessel's particular route, cargo, and type.",
+                "Tsunami delays at both origin and destination contribute to vessel-specific delay.",
+                "Dangerous goods restrictions affect only certain vessel types with certain cargo.",
+                "This delay is independent of the general port operational delays."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "vessel_specific_delay"
+        },
+        {
+            "name": "RD",
+            "display_name": "Total Round-Trip Delay",
+            "aliases": [
+                "RD",
+                "round_trip_delay",
+                "total_transportation_delay"
+            ],
+            "type": "categorical",
+            "states": [
+                "L0",
+                "B0_6",
+                "B6_12",
+                "B12_24",
+                "B24_48",
+                "M48"
+            ],
+            "role": "endogenous",
+            "category": "delay_aggregation",
+            "short_description": "Total round-trip transportation delay for the coastal maritime journey.",
+            "extended_description": "Represents the overall transportation delay for the complete round trip, aggregating arrival delay (AD), departure delay (DD), and vessel-specific departure delay (VD). This is the final output variable of the model—the ultimate risk metric representing total disruption to a coastal maritime transportation operation following an earthquake.",
+            "sensitivity_hints": "Round-trip delay is the terminal output variable of the entire model. It integrates all three delay legs into the final risk assessment.",
+            "related_domain_knowledge": [
+                "Round-trip delay is the key metric for maritime transportation risk assessment.",
+                "Total delay determines economic impact on shipping operations and supply chains.",
+                "The three aggregated delays (arrival, departure, vessel-specific) can overlap in time.",
+                "Post-earthquake transportation recovery planning uses delay estimates like this."
+            ],
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ],
+            "llm_name": "total_roundtrip_delay"
+        }
+    ],
+    "constraints": {
+        "v_structures": [
+            {
+                "parent1": "route_shaking_intensity",
+                "parent2": "destination_shaking_intensity",
+                "child": "destination_infra_damage",
+                "explanation": "Route and destination seismic intensities independently contribute to infrastructure damage at the destination."
+            },
+            {
+                "parent1": "origin_shaking_intensity",
+                "parent2": "route_shaking_intensity",
+                "child": "origin_infra_damage",
+                "explanation": "Origin and route seismic intensities independently contribute to infrastructure damage at the origin."
+            },
+            {
+                "parent1": "epicentre_region",
+                "parent2": "departure_port_region",
+                "child": "origin_tsunami_occurrence",
+                "explanation": "Epicentre location and origin port location independently determine whether a tsunami reaches the origin."
+            },
+            {
+                "parent1": "epicentre_region",
+                "parent2": "arrival_port_region",
+                "child": "destination_tsunami_occurrence",
+                "explanation": "Epicentre location and destination port location independently determine whether a tsunami reaches the destination."
+            },
+            {
+                "parent1": "maritime_network_congestion",
+                "parent2": "vessel_category",
+                "child": "hazmat_routing_restriction",
+                "explanation": "Network congestion and vessel type independently determine dangerous goods routing restrictions."
+            },
+            {
+                "parent1": "maritime_network_congestion",
+                "parent2": "vessel_category",
+                "child": "crew_schedule_disruption",
+                "explanation": "Network congestion and vessel type independently determine crew scheduling restrictions."
+            },
+            {
+                "parent1": "operator_seismic_awareness",
+                "parent2": "maritime_network_congestion",
+                "child": "origin_berth_assessment",
+                "explanation": "Operator awareness and network congestion independently determine whether a berth assessment is triggered."
+            },
+            {
+                "parent1": "origin_port_accessibility",
+                "parent2": "destination_tidal_disruption",
+                "child": "destination_transit_delay",
+                "explanation": "Port accessibility and tidal disruption independently contribute to transit time delays at the destination."
+            },
+            {
+                "parent1": "origin_infra_damage",
+                "parent2": "crew_schedule_disruption",
+                "child": "origin_cargo_handling_delay",
+                "explanation": "Infrastructure damage and crew disruption independently drive cargo handling suspension at origin."
+            },
+            {
+                "parent1": "destination_infra_damage",
+                "parent2": "crew_schedule_disruption",
+                "child": "destination_cargo_handling_delay",
+                "explanation": "Infrastructure damage and crew disruption independently drive cargo handling suspension at destination."
+            },
+            {
+                "parent1": "arrival_leg_total_delay",
+                "parent2": "departure_leg_total_delay",
+                "child": "total_roundtrip_delay",
+                "explanation": "Arrival and departure leg delays independently contribute to the total round-trip delay."
+            }
+        ],
+        "conditional_independencies": [
+            {
+                "statement": "origin_shaking_intensity ⊥ destination_shaking_intensity",
+                "explanation": "Seismic intensity at each location is modelled as an independent exogenous variable (scenario-based)."
+            },
+            {
+                "statement": "departure_port_region ⊥ arrival_port_region",
+                "explanation": "Origin and destination port locations are independent exogenous choices."
+            },
+            {
+                "statement": "vessel_category ⊥ epicentre_region",
+                "explanation": "Vessel type is an independent operational characteristic unrelated to seismic hazard."
+            },
+            {
+                "statement": "operator_seismic_awareness ⊥ origin_shaking_intensity",
+                "explanation": "Operator preparedness is an independent operational characteristic, not determined by the earthquake."
+            },
+            {
+                "statement": "origin_wave_disruption ⊥ destination_wave_disruption | origin_shaking_intensity, destination_shaking_intensity",
+                "explanation": "Given their respective seismic intensities, wave disruption at origin and destination are conditionally independent."
+            },
+            {
+                "statement": "origin_tsunami_occurrence ⊥ destination_tsunami_occurrence | epicentre_region",
+                "explanation": "Given the epicentre location, tsunami occurrence at origin and destination are conditionally independent (determined by their respective port locations)."
+            },
+            {
+                "statement": "origin_berth_suspension ⊥ destination_berth_suspension | maritime_network_congestion, vessel_category",
+                "explanation": "Given congestion and vessel type, berth suspension at origin and destination are conditionally independent (each driven by its own wave/wind conditions)."
+            }
+        ],
+        "forbidden_edges": [
+            [
+                "total_roundtrip_delay",
+                "route_shaking_intensity"
+            ],
+            [
+                "arrival_leg_total_delay",
+                "origin_shaking_intensity"
+            ],
+            [
+                "departure_leg_total_delay",
+                "destination_shaking_intensity"
+            ],
+            [
+                "origin_wave_disruption",
+                "destination_wave_disruption"
+            ],
+            [
+                "vessel_category",
+                "origin_shaking_intensity"
+            ]
+        ],
+        "required_edges": [
+            {
+                "from": "route_shaking_intensity",
+                "to": "maritime_network_congestion",
+                "reason": "Route seismic intensity directly determines maritime network congestion."
+            },
+            {
+                "from": "maritime_network_congestion",
+                "to": "origin_berth_suspension",
+                "reason": "Network congestion directly affects berth suspension decisions at the origin port."
+            },
+            {
+                "from": "epicentre_region",
+                "to": "origin_tsunami_occurrence",
+                "reason": "Epicentre location is a primary determinant of tsunami generation affecting the origin port."
+            },
+            {
+                "from": "arrival_leg_total_delay",
+                "to": "total_roundtrip_delay",
+                "reason": "Arrival delay is a direct component of the total round-trip delay."
+            },
+            {
+                "from": "departure_leg_total_delay",
+                "to": "total_roundtrip_delay",
+                "reason": "Departure delay is a direct component of the total round-trip delay."
+            }
+        ]
+    },
+    "causal_principles": [
+        {
+            "id": "seismic_hazard_propagation",
+            "statement": "Earthquake shaking intensity at three locations (origin, route, destination) independently drives local hazard effects including infrastructure damage, wave disruption, tidal anomalies, and port accessibility degradation.",
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ]
+        },
+        {
+            "id": "tsunami_spatial_interaction",
+            "statement": "Tsunami occurrence depends on the spatial relationship between earthquake epicentre and port location. Offshore epicentres facing the port generate tsunamis; inland or distant epicentres do not.",
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ]
+        },
+        {
+            "id": "network_congestion_cascade",
+            "statement": "Route seismic intensity drives maritime network congestion, which cascades to affect six operational processes: berth suspension (origin and destination), cargo handling restrictions, dangerous goods routing, crew scheduling, and supply chain disruption.",
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ]
+        },
+        {
+            "id": "three_leg_delay_structure",
+            "statement": "Total round-trip delay aggregates three independent delay legs: departure (origin), arrival (destination), and vessel-specific delays. Each leg has its own parallel delay mechanisms.",
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ]
+        },
+        {
+            "id": "vessel_type_vulnerability",
+            "statement": "Vessel type modulates the impact of network congestion and hazard conditions on operational delays. Ferries are most affected by dangerous goods restrictions, barges are least affected by crew scheduling, and coastal shippers have intermediate vulnerability.",
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ]
+        },
+        {
+            "id": "parallel_delay_aggregation",
+            "statement": "Within each transportation leg, multiple parallel delay mechanisms (berth suspension, cargo handling, transit time, access control) contribute to the leg total. The binding constraint (maximum delay) determines the effective leg delay.",
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ]
+        },
+        {
+            "id": "origin_destination_symmetry",
+            "statement": "The origin and destination legs have parallel causal structures: each has seismic intensity, wave/wind disruption, tidal disruption, port accessibility, tsunami wave, berth suspension, cargo handling, and transit time delay variables. These parallel structures are linked through shared route-level congestion and crew scheduling variables.",
+            "references": [
+                "Goerlandt2021_Earthquake"
+            ]
+        }
+    ],
+    "ground_truth": {
+        "num_nodes": 40,
+        "num_edges": 77,
+        "edges": [
+            [
+                "AD",
+                "RD"
+            ],
+            [
+                "BSA",
+                "TBS"
+            ],
+            [
+                "BSD",
+                "TBSD"
+            ],
+            [
+                "BSO",
+                "TBSO"
+            ],
+            [
+                "BVOR",
+                "BSA"
+            ],
+            [
+                "CIDD",
+                "TCSD"
+            ],
+            [
+                "CIDO",
+                "TCSO"
+            ],
+            [
+                "CN",
+                "BSA"
+            ],
+            [
+                "CN",
+                "BSD"
+            ],
+            [
+                "CN",
+                "BSO"
+            ],
+            [
+                "CN",
+                "CSR"
+            ],
+            [
+                "CN",
+                "DGR"
+            ],
+            [
+                "CN",
+                "MMSC"
+            ],
+            [
+                "CSR",
+                "TCSD"
+            ],
+            [
+                "CSR",
+                "TCSO"
+            ],
+            [
+                "DAC",
+                "DD"
+            ],
+            [
+                "DD",
+                "RD"
+            ],
+            [
+                "DDG",
+                "VD"
+            ],
+            [
+                "DGR",
+                "DDG"
+            ],
+            [
+                "DL",
+                "DTWD"
+            ],
+            [
+                "DL",
+                "TWD"
+            ],
+            [
+                "DTWD",
+                "TBSD"
+            ],
+            [
+                "DTWD",
+                "VD"
+            ],
+            [
+                "DTWO",
+                "TBSO"
+            ],
+            [
+                "DTWO",
+                "VD"
+            ],
+            [
+                "EEL",
+                "DTWD"
+            ],
+            [
+                "EEL",
+                "DTWO"
+            ],
+            [
+                "EEL",
+                "TWD"
+            ],
+            [
+                "EEL",
+                "TWO"
+            ],
+            [
+                "ESD",
+                "CIDD"
+            ],
+            [
+                "ESD",
+                "PAD"
+            ],
+            [
+                "ESD",
+                "TIDD"
+            ],
+            [
+                "ESD",
+                "WIDD"
+            ],
+            [
+                "ESO",
+                "BSA"
+            ],
+            [
+                "ESO",
+                "CIDO"
+            ],
+            [
+                "ESO",
+                "PAO"
+            ],
+            [
+                "ESO",
+                "TBS"
+            ],
+            [
+                "ESO",
+                "TIDO"
+            ],
+            [
+                "ESO",
+                "WIDO"
+            ],
+            [
+                "ESR",
+                "CIDD"
+            ],
+            [
+                "ESR",
+                "CIDO"
+            ],
+            [
+                "ESR",
+                "CN"
+            ],
+            [
+                "MMSC",
+                "DAC"
+            ],
+            [
+                "OL",
+                "DTWO"
+            ],
+            [
+                "OL",
+                "TWO"
+            ],
+            [
+                "PAD",
+                "TBSD"
+            ],
+            [
+                "PAD",
+                "TCSD"
+            ],
+            [
+                "PAD",
+                "TTRD"
+            ],
+            [
+                "PAO",
+                "DAC"
+            ],
+            [
+                "PAO",
+                "TBS"
+            ],
+            [
+                "PAO",
+                "TBSO"
+            ],
+            [
+                "PAO",
+                "TCSO"
+            ],
+            [
+                "PAO",
+                "TTRO"
+            ],
+            [
+                "TBS",
+                "DD"
+            ],
+            [
+                "TBSD",
+                "AD"
+            ],
+            [
+                "TBSO",
+                "DD"
+            ],
+            [
+                "TCSD",
+                "AD"
+            ],
+            [
+                "TCSD",
+                "DDG"
+            ],
+            [
+                "TCSO",
+                "DD"
+            ],
+            [
+                "TIDD",
+                "TTRD"
+            ],
+            [
+                "TIDO",
+                "TTRO"
+            ],
+            [
+                "TTRD",
+                "AD"
+            ],
+            [
+                "TTRO",
+                "DD"
+            ],
+            [
+                "TWD",
+                "DTWD"
+            ],
+            [
+                "TWO",
+                "DTWO"
+            ],
+            [
+                "VD",
+                "RD"
+            ],
+            [
+                "VT",
+                "BSD"
+            ],
+            [
+                "VT",
+                "BSO"
+            ],
+            [
+                "VT",
+                "CSR"
+            ],
+            [
+                "VT",
+                "DGR"
+            ],
+            [
+                "VT",
+                "MMSC"
+            ],
+            [
+                "VT",
+                "TTRD"
+            ],
+            [
+                "VT",
+                "TTRO"
+            ],
+            [
+                "WIDD",
+                "BSD"
+            ],
+            [
+                "WIDD",
+                "TBSD"
+            ],
+            [
+                "WIDO",
+                "BSO"
+            ],
+            [
+                "WIDO",
+                "TBSO"
+            ]
+        ]
+    }
+}

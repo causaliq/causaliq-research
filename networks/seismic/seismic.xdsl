@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This network was created in BNBENCH -->
+<smile version="1.0" id="bnbench" numsamples="100000" discsamples="100000">
+    <nodes>
+        <cpt id="ConstructionQuality">
+            <state id="Low" />
+            <state id="Medium" />
+            <state id="High" />
+            <probabilities>0.1 0.2 0.7</probabilities>
+        </cpt>
+        <cpt id="Distance">
+            <state id="Short" />
+            <state id="Medium" />
+            <state id="Long" />
+            <probabilities>0.3333333 0.3333333 0.3333333</probabilities>
+        </cpt>
+        <cpt id="LiveLoad">
+            <state id="Low" />
+            <state id="Medium" />
+            <state id="High" />
+            <probabilities>0.1 0.1 0.8</probabilities>
+        </cpt>
+        <cpt id="Magnitude">
+            <state id="Low" />
+            <state id="Medium" />
+            <state id="High" />
+            <probabilities>0.48 0.40 0.12</probabilities>
+        </cpt>
+        <cpt id="ShakingIntensity">
+            <state id="Low" />
+            <state id="Medium" />
+            <state id="High" />
+            <parents>Distance Magnitude</parents>
+            <probabilities>0.5 0.3 0.2 0.2 0.5 0.3 0.0 0.0 1.0 0.7 0.2 0.1 0.45 0.40 0.15 0.0 0.2 0.8 1.0 0.0 0.0 0.6 0.3 0.1 0.2 0.5 0.3</probabilities>
+        </cpt>
+        <cpt id="StrengthDegradation">
+            <state id="Low" />
+            <state id="Medium" />
+            <state id="High" />
+            <parents>ConstructionQuality</parents>
+            <probabilities>0.0 0.1 0.9 0.2 0.7 0.1 0.90 0.05 0.05</probabilities>
+        </cpt>
+        <cpt id="SeismicHazard">
+            <state id="Low" />
+            <state id="Medium" />
+            <state id="High" />
+            <parents>Distance Magnitude ShakingIntensity</parents>
+            <probabilities>0.80 0.15 0.05 0.75 0.15 0.10 0.7 0.2 0.1 0.25 0.50 0.25 0.15 0.25 0.60 0.02 0.08 0.90 0.2 0.4 0.4 0.2 0.3 0.5 0.00 0.05 0.95 0.85 0.10 0.05 0.80 0.12 0.08 0.78 0.12 0.10 0.35 0.45 0.20 0.3 0.4 0.3 0.2 0.3 0.5 0.2 0.4 0.4 0.2 0.3 0.5 0.1 0.2 0.7 0.9 0.1 0.0 0.85 0.10 0.05 0.84 0.10 0.06 0.6 0.2 0.2 0.30 0.55 0.15 0.25 0.60 0.15 0.35 0.35 0.30 0.3 0.3 0.4 0.2 0.3 0.5</probabilities>
+        </cpt>
+        <cpt id="Fragility">
+            <state id="Low" />
+            <state id="Medium" />
+            <state id="High" />
+            <parents>LiveLoad SeismicHazard StrengthDegradation</parents>
+            <probabilities>0.9 0.1 0.0 0.7 0.2 0.1 0.5 0.3 0.2 0.60 0.23 0.17 0.48 0.30 0.22 0.32 0.33 0.35 0.30 0.38 0.32 0.16 0.44 0.40 0.0 0.2 0.8 0.8 0.2 0.0 0.60 0.25 0.15 0.36 0.38 0.26 0.48 0.30 0.22 0.43 0.32 0.25 0.14 0.40 0.46 0.18 0.42 0.40 0.02 0.46 0.52 0.00 0.15 0.85 0.7 0.3 0.0 0.5 0.3 0.2 0.30 0.35 0.35 0.35 0.35 0.30 0.32 0.35 0.33 0.03 0.42 0.55 0.07 0.48 0.45 0.02 0.38 0.60 0.0 0.1 0.9</probabilities>
+        </cpt>
+        <cpt id="Vulnerability">
+            <state id="Low" />
+            <state id="Medium" />
+            <state id="High" />
+            <parents>Fragility</parents>
+            <probabilities>1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0</probabilities>
+        </cpt>
+        <cpt id="SeismicRisk">
+            <state id="Low" />
+            <state id="Medium" />
+            <state id="High" />
+            <parents>SeismicHazard Vulnerability</parents>
+            <probabilities>0.75 0.15 0.10 0.55 0.25 0.20 0.3 0.3 0.4 0.25 0.45 0.30 0.08 0.60 0.32 0.02 0.65 0.33 0.8 0.1 0.1 0.15 0.60 0.25 0.02 0.02 0.96</probabilities>
+        </cpt>
+    </nodes>
+    <extensions>
+        <genie version="1.0" app="GeNIe 4.0.1922.0 ACADEMIC" name="SeismicRisk">
+            <node id="ConstructionQuality">
+                <name>ConstructionQuality</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 100 120 140</position>
+            </node>
+            <node id="Distance">
+                <name>Distance</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>300 100 380 140</position>
+            </node>
+            <node id="LiveLoad">
+                <name>LiveLoad</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>160 100 240 140</position>
+            </node>
+            <node id="Magnitude">
+                <name>Magnitude</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 100 500 140</position>
+            </node>
+            <node id="ShakingIntensity">
+                <name>ShakingIntensity</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>360 220 460 260</position>
+            </node>
+            <node id="StrengthDegradation">
+                <name>StrengthDegradation</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 220 140 260</position>
+            </node>
+            <node id="SeismicHazard">
+                <name>SeismicHazard</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>300 340 400 380</position>
+            </node>
+            <node id="Fragility">
+                <name>Fragility</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>140 340 220 380</position>
+            </node>
+            <node id="Vulnerability">
+                <name>Vulnerability</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>140 460 220 500</position>
+            </node>
+            <node id="SeismicRisk">
+                <name>SeismicRisk</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 580 320 620</position>
+            </node>
+        </genie>
+    </extensions>
+</smile>

@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This network was created in BNBENCH -->
+<smile version="1.0" id="bnbench" numsamples="100000" discsamples="100000">
+    <nodes>
+        <cpt id="MusselCultivation">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <state id="Very_high" />
+            <probabilities>0.1 0.6 0.25 0.05</probabilities>
+        </cpt>
+        <cpt id="BottomSubstrate">
+            <state id="Hard" />
+            <state id="Soft" />
+            <probabilities>0.7 0.3</probabilities>
+        </cpt>
+        <cpt id="TNExchange">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <probabilities>0.4 0.45 0.15</probabilities>
+        </cpt>
+        <cpt id="AgriculturalLand">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <probabilities>0.25 0.45 0.3</probabilities>
+        </cpt>
+        <cpt id="TPExchange">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <probabilities>0.25 0.6 0.15</probabilities>
+        </cpt>
+        <cpt id="LeisureBoating">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <probabilities>0.65 0.1 0.25</probabilities>
+        </cpt>
+        <cpt id="TrawlingFrequency">
+            <state id="High" />
+            <state id="Low" />
+            <probabilities>0.5 0.5</probabilities>
+        </cpt>
+        <cpt id="RadiativeForcing">
+            <state id="Current" />
+            <state id="RF45" />
+            <state id="RF85" />
+            <probabilities>0.3333333 0.3333333 0.3333333</probabilities>
+        </cpt>
+        <cpt id="DevelopedLand">
+            <state id="High" />
+            <state id="Low" />
+            <probabilities>0.35 0.65</probabilities>
+        </cpt>
+        <cpt id="Turbidity">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>BottomSubstrate TrawlingFrequency</parents>
+            <probabilities>0.01 0.69 0.3 0.01 0.74 0.25 0.35 0.25 0.4 0.25 0.35 0.4</probabilities>
+        </cpt>
+        <cpt id="WaterTemperatureShallow">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>RadiativeForcing</parents>
+            <probabilities>0.1 0.45 0.45 0.3 0.25 0.45 0.3 0.1 0.6</probabilities>
+        </cpt>
+        <cpt id="Wind">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>RadiativeForcing</parents>
+            <probabilities>0.3 0.35 0.35 0.3 0.2 0.5 0.5 0.1 0.4</probabilities>
+        </cpt>
+        <cpt id="Noise">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>LeisureBoating</parents>
+            <probabilities>0.6 0.1 0.3 0.4 0.3 0.3 0.5 0.2 0.3</probabilities>
+        </cpt>
+        <cpt id="WaterTemperatureDeep">
+            <state id="High" />
+            <state id="Low" />
+            <parents>RadiativeForcing</parents>
+            <probabilities>0.45 0.55 0.75 0.25 0.85 0.15</probabilities>
+        </cpt>
+        <cpt id="SeafloorDisturbance">
+            <state id="High" />
+            <state id="Low" />
+            <parents>BottomSubstrate TrawlingFrequency</parents>
+            <probabilities>0.05 0.95 0.05 0.95 0.95 0.05 0.6 0.4</probabilities>
+        </cpt>
+        <cpt id="Precipitation">
+            <state id="High" />
+            <state id="Low" />
+            <parents>RadiativeForcing</parents>
+            <probabilities>0.25 0.75 0.35 0.65 0.75 0.25</probabilities>
+        </cpt>
+        <cpt id="AnchorDamageRisk">
+            <state id="High" />
+            <state id="Low" />
+            <parents>LeisureBoating</parents>
+            <probabilities>0.99 0.01 0.01 0.99 0.5 0.5</probabilities>
+        </cpt>
+        <cpt id="Discharge">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>Precipitation</parents>
+            <probabilities>0.15 0.45 0.4 0.01 0.9 0.09</probabilities>
+        </cpt>
+        <cpt id="SedimentLoad">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>AgriculturalLand DevelopedLand Discharge</parents>
+            <probabilities>0.45 0.35 0.2 0.25 0.6 0.15 0.2 0.5 0.3 0.98 0.01 0.01 0.2 0.1 0.7 0.2 0.1 0.7 0.35 0.5 0.15 0.01 0.94 0.05 0.024995 0.44991 0.525095 0.94 0.03 0.03 0.01 0.98 0.01 0.35 0.1 0.55 0.45 0.2 0.35 0.05 0.65 0.3 0.01 0.19 0.8 0.94 0.01 0.05 0.01 0.8 0.19 0.4 0.1 0.5</probabilities>
+        </cpt>
+        <cpt id="TPLoad">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>AgriculturalLand DevelopedLand Discharge TPExchange</parents>
+            <probabilities>0.9 0.05 0.05 0.01 0.98 0.01 0.05 0.05 0.9 0.9 0.05 0.05 0.01 0.98 0.01 0.05 0.05 0.9 0.9 0.05 0.05 0.01 0.98 0.01 0.05 0.05 0.9 0.9 0.05 0.05 0.01 0.98 0.01 0.05 0.05 0.9 0.9 0.05 0.05 0.01 0.98 0.01 0.05 0.05 0.9 0.9 0.05 0.05 0.1 0.8 0.1 0.05 0.05 0.9 0.9 0.05 0.05 0.025 0.95 0.025 0.05 0.05 0.9 0.9 0.05 0.05 0.01 0.98 0.01 0.05 0.05 0.9 0.8 0.1 0.1 0.01 0.98 0.01 0.15 0.15 0.7 0.9 0.05 0.05 0.025 0.95 0.025 0.05 0.05 0.9 0.8 0.1 0.1 0.02 0.96 0.02 0.05 0.05 0.9 0.8 0.1 0.1 0.01 0.98 0.01 0.15 0.15 0.7 0.9 0.05 0.05 0.025 0.95 0.025 0.05 0.05 0.9 0.9 0.05 0.05 0.025 0.95 0.025 0.15 0.15 0.7 0.9 0.05 0.05 0.025 0.95 0.025 0.15 0.15 0.7 0.9 0.05 0.05 0.01 0.98 0.01 0.05 0.05 0.9 0.8 0.1 0.1 0.025 0.95 0.025 0.15 0.15 0.7 0.9 0.05 0.05 0.02 0.96 0.02 0.15 0.15 0.7</probabilities>
+        </cpt>
+        <cpt id="TNLoad">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>AgriculturalLand DevelopedLand Discharge TNExchange</parents>
+            <probabilities>0.95 0.025 0.025 0.01 0.98 0.01 0.2 0.01 0.79 0.95 0.025 0.025 0.025 0.95 0.025 0.025 0.025 0.95 0.95 0.025 0.025 0.025 0.95 0.025 0.2 0.01 0.79 0.95 0.025 0.025 0.01 0.98 0.01 0.45 0.1 0.45 0.95 0.025 0.025 0.025 0.95 0.025 0.01 0.01 0.98 0.95 0.025 0.025 0.025 0.95 0.025 0.2 0.01 0.79 0.92 0.04 0.04 0.025 0.95 0.025 0.2 0.01 0.79 0.8 0.1 0.1 0.01 0.94 0.05 0.025 0.025 0.95 0.92 0.04 0.04 0.01 0.98 0.01 0.2 0.01 0.79 0.92 0.04 0.04 0.025 0.95 0.025 0.45 0.1 0.45 0.8 0.1 0.1 0.025 0.95 0.025 0.01 0.01 0.98 0.92 0.04 0.04 0.01 0.98 0.01 0.2 0.01 0.79 0.9 0.05 0.05 0.01 0.98 0.01 0.2 0.01 0.79 0.7 0.15 0.15 0.03 0.94 0.03 0.025 0.025 0.95 0.95 0.025 0.025 0.03 0.94 0.03 0.2 0.01 0.79 0.9 0.05 0.05 0.01 0.98 0.01 0.45 0.1 0.45 0.7 0.15 0.15 0.03 0.94 0.03 0.01 0.01 0.98 0.95 0.025 0.025 0.025 0.95 0.025 0.2 0.01 0.79</probabilities>
+        </cpt>
+        <cpt id="DIN">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>TNLoad</parents>
+            <probabilities>0.5 0.2 0.3 0.05 0.55 0.4 0.1 0.5 0.4</probabilities>
+        </cpt>
+        <cpt id="POM">
+            <state id="High" />
+            <state id="Low" />
+            <parents>MusselCultivation SedimentLoad</parents>
+            <probabilities>0.4 0.6 0.35 0.65 0.375 0.625 0.5 0.5 0.4 0.6 0.45 0.55 0.5 0.5 0.4 0.6 0.45 0.55 0.35 0.65 0.3 0.7 0.325 0.675</probabilities>
+        </cpt>
+        <cpt id="DIP">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>TPLoad</parents>
+            <probabilities>0.25 0.4 0.35 0.05 0.8 0.15 0.1 0.45 0.45</probabilities>
+        </cpt>
+        <cpt id="NutrientEnrichmentRisk">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>DIN DIP POM</parents>
+            <probabilities>0.25 0.05 0.7 0.225 0.075 0.7 0.2 0.2 0.6 0.2 0.25 0.55 0.25 0.1 0.65 0.225 0.15 0.625 0.1 0.6 0.3 0.1 0.6 0.3 0.1 0.75 0.15 0.05 0.8 0.15 0.1 0.65 0.25 0.1 0.7 0.2 0.2 0.1 0.7 0.15 0.2 0.65 0.2 0.3 0.5 0.15 0.35 0.5 0.2 0.2 0.6 0.15 0.25 0.6</probabilities>
+        </cpt>
+        <cpt id="Phytoplankton">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>MusselCultivation NutrientEnrichmentRisk WaterTemperatureShallow</parents>
+            <probabilities>0.2 0.4 0.4 0.1 0.5 0.4 0.15 0.45 0.4 0.1 0.8 0.1 0.1 0.8 0.1 0.1 0.8 0.1 0.15 0.6 0.25 0.1 0.65 0.25 0.1 0.65 0.25 0.2 0.4 0.4 0.1 0.5 0.4 0.15 0.45 0.4 0.1 0.8 0.1 0.1 0.8 0.1 0.1 0.8 0.1 0.15 0.6 0.25 0.1 0.65 0.25 0.1 0.65 0.25 0.2 0.4 0.4 0.1 0.5 0.4 0.15 0.45 0.4 0.1 0.8 0.1 0.1 0.8 0.1 0.1 0.8 0.1 0.15 0.6 0.25 0.1 0.65 0.25 0.1 0.65 0.25 0.05 0.55 0.4 0.1 0.75 0.15 0.1 0.75 0.15 0.1 0.8 0.1 0.1 0.8 0.1 0.1 0.8 0.1 0.01 0.65 0.34 0.01 0.7 0.29 0.01 0.65 0.34</probabilities>
+        </cpt>
+        <cpt id="OxygenDeep">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>POM Phytoplankton</parents>
+            <probabilities>0.05 0.45 0.5 0.15 0.25 0.6 0.05 0.25 0.7 0.15 0.3 0.55 0.3 0.1 0.6 0.2 0.1 0.7</probabilities>
+        </cpt>
+        <cpt id="Transparency">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>LeisureBoating POM Phytoplankton Wind</parents>
+            <probabilities>0.01 0.75 0.24 0.01 0.75 0.24 0.01 0.75 0.24 0.175 0.4 0.425 0.3 0.25 0.45 0.2 0.4 0.4 0.175 0.5 0.325 0.3 0.35 0.35 0.2 0.5 0.3 0.01 0.75 0.24 0.01 0.75 0.24 0.01 0.75 0.24 0.25 0.25 0.5 0.35 0.15 0.5 0.3 0.25 0.45 0.25 0.3775 0.3725 0.35 0.25 0.4 0.3 0.35 0.35 0.01 0.75 0.24 0.01 0.75 0.24 0.01 0.75 0.24 0.3 0.3 0.4 0.4 0.15 0.45 0.3 0.3 0.4 0.275 0.4 0.325 0.4 0.25 0.35 0.275 0.4 0.325 0.01 0.75 0.24 0.01 0.75 0.24 0.01 0.75 0.24 0.35 0.15 0.5 0.49 0.01 0.5 0.4 0.1 0.5 0.3 0.3 0.4 0.45 0.15 0.4 0.4 0.25 0.35 0.01 0.75 0.24 0.01 0.75 0.24 0.01 0.75 0.24 0.25 0.35 0.4 0.35 0.2 0.45 0.3 0.3 0.4 0.25 0.45 0.3 0.4 0.2 0.4 0.275 0.425 0.3 0.01 0.75 0.24 0.01 0.75 0.24 0.01 0.75 0.24 0.3 0.2 0.5 0.4 0.1 0.5 0.35 0.2 0.45 0.3 0.3 0.4 0.4 0.2 0.4 0.35 0.3 0.35</probabilities>
+        </cpt>
+        <cpt id="OxygenShallow">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>Phytoplankton WaterTemperatureShallow</parents>
+            <probabilities>0.1 0.15 0.75 0.6 0.1 0.3 0.4 0.05 0.55 0.15 0.4 0.45 0.9 0.05 0.05 0.9 0.05 0.05 0.15 0.4 0.45 0.9 0.05 0.05 0.75 0.2 0.05</probabilities>
+        </cpt>
+        <cpt id="HabitatQuality">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>OxygenDeep SeafloorDisturbance Turbidity</parents>
+            <probabilities>0.05 0.75 0.2 0.5 0.2 0.3 0.1 0.55 0.35 0.5 0.3 0.2 0.8 0.05 0.15 0.55 0.25 0.2 0.3 0.4 0.3 0.25 0.5 0.25 0.05 0.75 0.2 0.2 0.7 0.1 0.4 0.3 0.3 0.3 0.55 0.15 0.01 0.9 0.09 0.25 0.45 0.3 0.05 0.75 0.2 0.3 0.5 0.2 0.55 0.2 0.25 0.35 0.4 0.25</probabilities>
+        </cpt>
+        <cpt id="Zooplankton">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>OxygenShallow Phytoplankton WaterTemperatureShallow</parents>
+            <probabilities>0.79 0.055 0.155 0.6 0.105 0.295 0.75 0.055 0.195 0.06 0.7 0.24 0.11 0.65 0.24 0.11 0.65 0.24 0.55 0.2 0.25 0.35 0.25 0.4 0.5 0.2 0.3 0.035 0.9 0.065 0.035 0.875 0.09 0.035 0.875 0.09 0.035 0.9 0.065 0.035 0.875 0.09 0.035 0.875 0.09 0.035 0.9 0.065 0.035 0.875 0.09 0.035 0.875 0.09 0.64 0.155 0.205 0.45 0.2 0.35 0.6 0.15 0.25 0.06 0.75 0.19 0.06 0.7 0.24 0.06 0.7 0.24 0.45 0.3 0.25 0.25 0.35 0.4 0.4 0.3 0.3</probabilities>
+        </cpt>
+        <cpt id="Cod">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>HabitatQuality Noise</parents>
+            <probabilities>0.34 0.26 0.4 0.4 0.2 0.4 0.4 0.2 0.4 0.055 0.675 0.27 0.105 0.625 0.27 0.105 0.625 0.27 0.165 0.52 0.315 0.225 0.45 0.325 0.225 0.45 0.325</probabilities>
+        </cpt>
+        <cpt id="Prey">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>SeafloorDisturbance Zooplankton</parents>
+            <probabilities>0.3333333 0.3333333 0.3333333 0.3333333 0.3333333 0.3333333 0.3333333 0.3333333 0.3333333 0.3333333 0.3333333 0.3333333 0.3333333 0.3333333 0.3333333 0.3333333 0.3333333 0.3333333</probabilities>
+        </cpt>
+        <cpt id="NorthernShrimp">
+            <state id="Decrease" />
+            <state id="Increase" />
+            <state id="No_change" />
+            <parents>Cod Prey TrawlingFrequency WaterTemperatureDeep</parents>
+            <probabilities>0.85 0.05 0.1 0.95 0.01 0.04 0.15 0.65 0.2 0.3 0.5 0.2 0.85 0.05 0.1 0.95 0.01 0.04 0.15 0.65 0.2 0.3 0.5 0.2 0.75 0.05 0.2 0.9 0.01 0.09 0.25 0.6 0.15 0.2 0.6 0.2 0.25 0.2 0.55 0.2 0.15 0.65 0.05 0.75 0.2 0.2 0.6 0.2 0.25 0.2 0.55 0.2 0.15 0.65 0.05 0.75 0.2 0.2 0.6 0.2 0.3 0.2 0.5 0.3 0.15 0.55 0.1 0.75 0.15 0.15 0.6 0.25 0.4 0.2 0.4 0.5 0.15 0.35 0.1 0.7 0.2 0.2 0.55 0.25 0.4 0.2 0.4 0.5 0.15 0.35 0.1 0.7 0.2 0.2 0.55 0.25 0.45 0.15 0.4 0.55 0.15 0.3 0.15 0.65 0.2 0.2 0.55 0.25</probabilities>
+        </cpt>
+        <cpt id="IntermediateFishPredators">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>Cod Noise</parents>
+            <probabilities>0.08 0.74 0.18 0.1 0.7 0.2 0.1 0.7 0.2 0.625 0.125 0.25 0.65 0.1 0.25 0.65 0.1 0.25 0.2375 0.3125 0.45 0.2625 0.2875 0.45 0.2625 0.2875 0.45</probabilities>
+        </cpt>
+        <cpt id="Mesograzers">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>IntermediateFishPredators</parents>
+            <probabilities>0.05 0.8 0.15 0.8 0.05 0.15 0.3 0.2 0.5</probabilities>
+        </cpt>
+        <cpt id="FilamentousAlgae">
+            <state id="High" />
+            <state id="Low" />
+            <state id="Medium" />
+            <parents>Mesograzers NutrientEnrichmentRisk WaterTemperatureShallow</parents>
+            <probabilities>0.625 0.175 0.2 0.4 0.2 0.4 0.425 0.2 0.375 0.01 0.98 0.01 0.01 0.98 0.01 0.01 0.98 0.01 0.2 0.3 0.5 0.125 0.7 0.175 0.125 0.5 0.375 0.94 0.015 0.045 0.645 0.015 0.34 0.7 0.015 0.285 0.125 0.7 0.175 0.05 0.85 0.1 0.075 0.8 0.125 0.6 0.11 0.29 0.475 0.325 0.2 0.5 0.225 0.275 0.8 0.075 0.125 0.4 0.15 0.45 0.5 0.1 0.4 0.05 0.75 0.2 0.01 0.9 0.09 0.05 0.85 0.1 0.325 0.225 0.45 0.225 0.5 0.275 0.225 0.375 0.4</probabilities>
+        </cpt>
+        <cpt id="Eelgrass">
+            <state id="Decrease" />
+            <state id="Increase" />
+            <state id="No_change" />
+            <parents>AnchorDamageRisk FilamentousAlgae Transparency</parents>
+            <probabilities>0.7 0.05 0.25 0.9 0.02 0.08 0.9 0.02 0.08 0.35 0.2 0.45 0.9 0.05 0.05 0.75 0.1 0.15 0.45 0.1 0.45 0.9 0.02 0.08 0.8 0.05 0.15 0.6 0.05 0.35 0.9 0.02 0.08 0.9 0.02 0.08 0.3 0.2 0.5 0.85 0.05 0.1 0.8 0.1 0.1 0.35 0.15 0.5 0.9 0.02 0.08 0.85 0.05 0.1</probabilities>
+        </cpt>
+    </nodes>
+    <extensions>
+        <genie version="1.0" app="GeNIe 4.0.1922.0 ACADEMIC" name="Network1">
+            <node id="MusselCultivation">
+                <name>MusselCultivation</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 100 100 140</position>
+            </node>
+            <node id="BottomSubstrate">
+                <name>BottomSubstrate</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 100 200 140</position>
+            </node>
+            <node id="TNExchange">
+                <name>TNExchange</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 100 300 140</position>
+            </node>
+            <node id="AgriculturalLand">
+                <name>AgriculturalLand</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 100 400 140</position>
+            </node>
+            <node id="TPExchange">
+                <name>TPExchange</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 100 500 140</position>
+            </node>
+            <node id="LeisureBoating">
+                <name>LeisureBoating</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>520 100 600 140</position>
+            </node>
+            <node id="TrawlingFrequency">
+                <name>TrawlingFrequency</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>620 100 700 140</position>
+            </node>
+            <node id="RadiativeForcing">
+                <name>RadiativeForcing</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>720 100 800 140</position>
+            </node>
+            <node id="DevelopedLand">
+                <name>DevelopedLand</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>820 100 900 140</position>
+            </node>
+            <node id="Turbidity">
+                <name>Turbidity</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 200 100 240</position>
+            </node>
+            <node id="WaterTemperatureShallow">
+                <name>WaterTemperatureShallow</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 200 200 240</position>
+            </node>
+            <node id="Wind">
+                <name>Wind</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 200 300 240</position>
+            </node>
+            <node id="Noise">
+                <name>Noise</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 200 400 240</position>
+            </node>
+            <node id="WaterTemperatureDeep">
+                <name>WaterTemperatureDeep</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 200 500 240</position>
+            </node>
+            <node id="SeafloorDisturbance">
+                <name>SeafloorDisturbance</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>520 200 600 240</position>
+            </node>
+            <node id="Precipitation">
+                <name>Precipitation</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>620 200 700 240</position>
+            </node>
+            <node id="AnchorDamageRisk">
+                <name>AnchorDamageRisk</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>720 200 800 240</position>
+            </node>
+            <node id="Discharge">
+                <name>Discharge</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 300 100 340</position>
+            </node>
+            <node id="SedimentLoad">
+                <name>SedimentLoad</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 400 100 440</position>
+            </node>
+            <node id="TPLoad">
+                <name>TPLoad</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 400 200 440</position>
+            </node>
+            <node id="TNLoad">
+                <name>TNLoad</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 400 300 440</position>
+            </node>
+            <node id="DIN">
+                <name>DIN</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 500 100 540</position>
+            </node>
+            <node id="POM">
+                <name>POM</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 500 200 540</position>
+            </node>
+            <node id="DIP">
+                <name>DIP</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 500 300 540</position>
+            </node>
+            <node id="NutrientEnrichmentRisk">
+                <name>NutrientEnrichmentRisk</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 600 100 640</position>
+            </node>
+            <node id="Phytoplankton">
+                <name>Phytoplankton</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 700 100 740</position>
+            </node>
+            <node id="OxygenDeep">
+                <name>OxygenDeep</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 800 100 840</position>
+            </node>
+            <node id="Transparency">
+                <name>Transparency</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 800 200 840</position>
+            </node>
+            <node id="OxygenShallow">
+                <name>OxygenShallow</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 800 300 840</position>
+            </node>
+            <node id="HabitatQuality">
+                <name>HabitatQuality</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 900 100 940</position>
+            </node>
+            <node id="Zooplankton">
+                <name>Zooplankton</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 900 200 940</position>
+            </node>
+            <node id="Cod">
+                <name>Cod</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 1000 100 1040</position>
+            </node>
+            <node id="Prey">
+                <name>Prey</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 1000 200 1040</position>
+            </node>
+            <node id="NorthernShrimp">
+                <name>NorthernShrimp</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 1100 100 1140</position>
+            </node>
+            <node id="IntermediateFishPredators">
+                <name>IntermediateFishPredators</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 1100 200 1140</position>
+            </node>
+            <node id="Mesograzers">
+                <name>Mesograzers</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 1200 100 1240</position>
+            </node>
+            <node id="FilamentousAlgae">
+                <name>FilamentousAlgae</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 1300 100 1340</position>
+            </node>
+            <node id="Eelgrass">
+                <name>Eelgrass</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 1400 100 1440</position>
+            </node>
+        </genie>
+    </extensions>
+</smile>

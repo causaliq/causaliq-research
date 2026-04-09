@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This network was created in BNBENCH -->
+<smile version="1.0" id="bnbench" numsamples="100000" discsamples="100000">
+    <nodes>
+        <cpt id="FlowVelocity">
+            <state id="High" />
+            <state id="Moderate" />
+            <state id="Low" />
+            <probabilities>0.6 0.25 0.15</probabilities>
+        </cpt>
+        <cpt id="OperatingPressure">
+            <state id="High" />
+            <state id="Moderate" />
+            <state id="Low" />
+            <probabilities>0.7 0.18 0.12</probabilities>
+        </cpt>
+        <cpt id="ShearingForce">
+            <state id="High" />
+            <state id="Moderate" />
+            <state id="Low" />
+            <parents>FlowVelocity OperatingPressure</parents>
+            <probabilities>0.4 0.4 0.2 0.1 0.2 0.7 0.05 0.1 0.85 0.15 0.65 0.2 0.05 0.05 0.9 0.01 0.05 0.94 0.0 0.2 0.8 0.05 0.05 0.9 0.03 0.01 0.96</probabilities>
+        </cpt>
+        <cpt id="InorganicDeposits">
+            <state id="Absent" />
+            <state id="Present" />
+            <probabilities>0.56 0.44</probabilities>
+        </cpt>
+        <cpt id="MixedDeposits">
+            <state id="Absent" />
+            <state id="Present" />
+            <probabilities>0.57 0.43</probabilities>
+        </cpt>
+        <cpt id="OrganicDeposits">
+            <state id="Absent" />
+            <state id="Present" />
+            <probabilities>0.6667 0.3333</probabilities>
+        </cpt>
+        <cpt id="SuspendedDeposits">
+            <state id="High" />
+            <state id="Moderate" />
+            <state id="Low" />
+            <parents>InorganicDeposits MixedDeposits OrganicDeposits</parents>
+            <probabilities>0.1 0.1 0.8 0.1 0.2 0.7 0.85 0.1 0.05 0.7 0.05 0.25 0.4 0.2 0.4 0.6 0.2 0.2 0.75 0.01 0.24 0.95 0.005 0.045</probabilities>
+        </cpt>
+        <cpt id="SolidDeposits">
+            <state id="High" />
+            <state id="Moderate" />
+            <state id="Low" />
+            <parents>FlowVelocity SuspendedDeposits</parents>
+            <probabilities>0.4 0.3 0.3 0.5 0.3 0.2 0.01 0.05 0.94 0.6 0.2 0.2 0.4 0.3 0.3 0.1 0.5 0.4 0.7 0.2 0.1 0.5 0.2 0.3 0.3333333 0.3333333 0.3333333</probabilities>
+        </cpt>
+        <cpt id="Chloride">
+            <state id="High" />
+            <state id="Moderate" />
+            <state id="Low" />
+            <probabilities>0.456 0.1 0.444</probabilities>
+        </cpt>
+        <cpt id="MEG">
+            <state id="Absent" />
+            <state id="Present" />
+            <probabilities>0.3 0.7</probabilities>
+        </cpt>
+        <cpt id="OperatingTemperature">
+            <state id="High" />
+            <state id="Moderate" />
+            <state id="Low" />
+            <probabilities>0.1582576 0.6747927 0.1669497</probabilities>
+        </cpt>
+        <cpt id="PartialPressureCO2">
+            <state id="High" />
+            <state id="Moderate" />
+            <state id="Low" />
+            <probabilities>0.578 0.1 0.322</probabilities>
+        </cpt>
+        <cpt id="pH">
+            <state id="Acidic" />
+            <state id="Neutral" />
+            <state id="Basic" />
+            <parents>OperatingTemperature PartialPressureCO2</parents>
+            <probabilities>0.7 0.2 0.1 0.6 0.2 0.2 0.0 0.2 0.8 0.4 0.3 0.3 0.35 0.15 0.5 0.2 0.2 0.6 0.45 0.25 0.3 0.2 0.1 0.7 0.03 0.01 0.96</probabilities>
+        </cpt>
+        <cpt id="UnderDepositGalvanicCell">
+            <state id="Poor" />
+            <state id="Fair" />
+            <state id="Good" />
+            <state id="Excellent" />
+            <parents>Chloride MEG pH</parents>
+            <probabilities>0.5 0.35 0.1 0.05 0.0001 0.001 0.01 0.9889 0.7 0.2 0.08 0.02 0.5 0.35 0.1 0.05 0.0001 0.001 0.01 0.9889 0.7 0.2 0.08 0.02 0.2 0.2 0.35 0.25 0.0001 0.001 0.01 0.9889 0.7 0.2 0.08 0.02 0.2 0.2 0.35 0.25 0.0001 0.001 0.01 0.9889 0.7 0.2 0.08 0.02 0.0001 0.001 0.01 0.9889 0.7 0.2 0.08 0.02 0.7 0.2 0.08 0.02 0.0001 0.001 0.01 0.9889 0.7 0.2 0.08 0.02 0.7 0.2 0.08 0.02</probabilities>
+        </cpt>
+        <cpt id="UDCCorrRate">
+            <state id="High" />
+            <state id="Moderate" />
+            <state id="Low" />
+            <parents>ShearingForce SolidDeposits UnderDepositGalvanicCell</parents>
+            <probabilities>0.91 0.08 0.01 0.88 0.1 0.02 0.43 0.47 0.1 0.43 0.47 0.1 0.88 0.07 0.05 0.78 0.22 0.0 0.34 0.66 0.0 0.34 0.66 0.0 0.78 0.22 0.0 0.88 0.09 0.03 0.45 0.32 0.23 0.45 0.32 0.23 0.98 0.0 0.02 0.98 0.01 0.01 0.43 0.37 0.2 0.43 0.37 0.2 0.43 0.52 0.05 0.99 0.0 0.01 0.88 0.0 0.12 0.88 0.0 0.12 0.78 0.22 0.0 0.56 0.4 0.04 0.88 0.0 0.12 0.88 0.0 0.12 0.12 0.78 0.1 0.88 0.12 0.0 0.56 0.1 0.34 0.56 0.1 0.34 0.55 0.4 0.05 0.89 0.09 0.02 0.22 0.56 0.22 0.22 0.56 0.22 0.78 0.2 0.02 0.45 0.5 0.05 0.73 0.16 0.11 0.73 0.16 0.11</probabilities>
+        </cpt>
+        <cpt id="WallThicknessLoss">
+            <state id="Yes" />
+            <state id="No" />
+            <parents>UDCCorrRate</parents>
+            <probabilities>0.88 0.12 0.02 0.98 0.19 0.81</probabilities>
+        </cpt>
+        <cpt id="DefectDepth">
+            <state id="Yes" />
+            <state id="No" />
+            <parents>WallThicknessLoss</parents>
+            <probabilities>0.9 0.1 0.1 0.9</probabilities>
+        </cpt>
+        <cpt id="DefectLength">
+            <state id="Yes" />
+            <state id="No" />
+            <parents>UDCCorrRate</parents>
+            <probabilities>0.88 0.12 0.56 0.44 0.02 0.98</probabilities>
+        </cpt>
+        <cpt id="OD">
+            <state id="High" />
+            <state id="Low" />
+            <probabilities>0.92 0.08</probabilities>
+        </cpt>
+        <cpt id="SteelGrade">
+            <state id="High" />
+            <state id="Low" />
+            <probabilities>0.78 0.22</probabilities>
+        </cpt>
+        <cpt id="BurstPressure">
+            <state id="High" />
+            <state id="Low" />
+            <parents>DefectDepth DefectLength OD SteelGrade</parents>
+            <probabilities>0.0 1.0 0.27 0.73 0.12 0.88 0.58 0.42 0.1 0.9 0.18 0.82 0.01 0.99 0.22 0.78 0.1 0.9 0.45 0.55 0.02 0.98 0.39 0.61 0.12 0.88 0.81 0.19 0.44 0.56 0.34 0.66</probabilities>
+        </cpt>
+        <cpt id="PipeFailure">
+            <state id="Yes" />
+            <state id="No" />
+            <parents>BurstPressure OperatingPressure</parents>
+            <probabilities>0.44 0.56 0.88 0.12 0.78 0.22 0.77 0.23 0.324 0.676 0.12 0.88</probabilities>
+        </cpt>
+    </nodes>
+    <extensions>
+        <genie version="1.0" app="GeNIe 4.0.1922.0 ACADEMIC" name="Network1">
+            <node id="FlowVelocity">
+                <name>FlowVelocity</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 20 140 60</position>
+            </node>
+            <node id="OperatingPressure">
+                <name>OperatingPressure</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>180 20 300 60</position>
+            </node>
+            <node id="ShearingForce">
+                <name>ShearingForce</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>460 140 580 180</position>
+            </node>
+            <node id="InorganicDeposits">
+                <name>InorganicDeposits</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>340 20 460 60</position>
+            </node>
+            <node id="MixedDeposits">
+                <name>MixedDeposits</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>500 20 620 60</position>
+            </node>
+            <node id="OrganicDeposits">
+                <name>OrganicDeposits</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>660 20 780 60</position>
+            </node>
+            <node id="SuspendedDeposits">
+                <name>SuspendedDeposits</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>620 140 740 180</position>
+            </node>
+            <node id="SolidDeposits">
+                <name>SolidDeposits</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>540 260 660 300</position>
+            </node>
+            <node id="Chloride">
+                <name>Chloride</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>820 20 940 60</position>
+            </node>
+            <node id="MEG">
+                <name>MEG</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>980 20 1100 60</position>
+            </node>
+            <node id="OperatingTemperature">
+                <name>OperatingTemperature</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>1140 20 1260 60</position>
+            </node>
+            <node id="PartialPressureCO2">
+                <name>PartialPressureCO2</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>1300 20 1420 60</position>
+            </node>
+            <node id="pH">
+                <name>pH</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>780 140 900 180</position>
+            </node>
+            <node id="UnderDepositGalvanicCell">
+                <name>UnderDepositGalvanicCell</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>700 260 820 300</position>
+            </node>
+            <node id="UDCCorrRate">
+                <name>UDCCorrRate</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>620 380 740 420</position>
+            </node>
+            <node id="WallThicknessLoss">
+                <name>WallThicknessLoss</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>540 500 660 540</position>
+            </node>
+            <node id="DefectDepth">
+                <name>DefectDepth</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>620 620 740 660</position>
+            </node>
+            <node id="DefectLength">
+                <name>DefectLength</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>700 500 820 540</position>
+            </node>
+            <node id="OD">
+                <name>OD</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>1460 20 1580 60</position>
+            </node>
+            <node id="SteelGrade">
+                <name>SteelGrade</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>1620 20 1740 60</position>
+            </node>
+            <node id="BurstPressure">
+                <name>BurstPressure</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>620 740 740 780</position>
+            </node>
+            <node id="PipeFailure">
+                <name>PipeFailure</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>620 860 740 900</position>
+            </node>
+        </genie>
+    </extensions>
+</smile>

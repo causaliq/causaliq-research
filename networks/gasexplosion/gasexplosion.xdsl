@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This network was created in BNBENCH -->
+<smile version="1.0" id="bnbench" numsamples="100000" discsamples="100000">
+    <nodes>
+        <cpt id="AccidentalViolations">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <parents>IllegalCommand OrganizeProductionInViolationOfLawsAndRegulations</parents>
+            <probabilities>0.903 0.097 0.793 0.207 0.905 0.095 0.789 0.211</probabilities>
+        </cpt>
+        <cpt id="CreateAFalseImpressionToDeceiveTheRegulators">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <parents>SecurityManagementConfusion</parents>
+            <probabilities>0.875 0.125 0.706 0.294</probabilities>
+        </cpt>
+        <cpt id="DecisionErrors">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <parents>IllegalCommand OrganizeProductionInViolationOfLawsAndRegulations TechnicalEnvironment</parents>
+            <probabilities>1.0 0.0 1.0 0.0 0.882 0.118 0.75 0.25 0.846 0.154 0.75 0.25 1.0 0.0 1.0 0.0</probabilities>
+        </cpt>
+        <cpt id="DeparmentsAndInstitutionsAreNotComplete">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <parents>SafetySupervisionIsInadequate</parents>
+            <probabilities>0.74 0.26 0.68 0.32</probabilities>
+        </cpt>
+        <cpt id="HabitualViolations">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <parents>MentalStates PhysicalIntellectualDisability</parents>
+            <probabilities>0.645 0.355 0.333 0.667 0.333 0.667 0.0 1.0</probabilities>
+        </cpt>
+        <cpt id="IllegalCommand">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <probabilities>0.6 0.4</probabilities>
+        </cpt>
+        <cpt id="InadequateEmergencyPlan">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <probabilities>0.79 0.21</probabilities>
+        </cpt>
+        <cpt id="InsufficientCracdownOnIllegalActivities">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <probabilities>0.78 0.22</probabilities>
+        </cpt>
+        <cpt id="InsufficientSupervisionOfWorkSafety">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <probabilities>0.56 0.44</probabilities>
+        </cpt>
+        <cpt id="MentalStates">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <parents>SafetyEducationAndTraning</parents>
+            <probabilities>1.0 0.0 0.857 0.143</probabilities>
+        </cpt>
+        <cpt id="OrganizeProductionInViolationOfLawsAndRegulations">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <parents>DeparmentsAndInstitutionsAreNotComplete SecurityManagementConfusion</parents>
+            <probabilities>0.619 0.381 0.52 0.48 0.545 0.455 0.389 0.611</probabilities>
+        </cpt>
+        <cpt id="PerceptualErrors">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <parents>IllegalCommand</parents>
+            <probabilities>0.917 0.083 0.85 0.15</probabilities>
+        </cpt>
+        <cpt id="PhysicalIntellectualDisability">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <parents>InadequateEmergencyPlan SafetyEducationAndTraning SecurityManagementConfusion</parents>
+            <probabilities>1.0 0.0 0.974 0.026 1.0 0.0 0.875 0.125 1.0 0.0 1.0 0.0 0.667 0.333 1.0 0.0</probabilities>
+        </cpt>
+        <cpt id="SafetyEducationAndTraning">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <parents>SafetySupervisionIsInadequate</parents>
+            <probabilities>0.78 0.22 0.66 0.34</probabilities>
+        </cpt>
+        <cpt id="SafetySupervisionIsInadequate">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <probabilities>0.5 0.5</probabilities>
+        </cpt>
+        <cpt id="SecurityManagementConfusion">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <parents>InsufficientCracdownOnIllegalActivities SafetySupervisionIsInadequate</parents>
+            <probabilities>0.417 0.583 0.233 0.767 0.0 1.0 0.25 0.75</probabilities>
+        </cpt>
+        <cpt id="SkillBasedErrors">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <parents>CreateAFalseImpressionToDeceiveTheRegulators IllegalCommand TechnicalEnvironment</parents>
+            <probabilities>0.969 0.031 0.9 0.1 0.957 0.043 0.7274549 0.2725451 1.0 0.0 0.833 0.167 0.75 0.25 0.5 0.5</probabilities>
+        </cpt>
+        <cpt id="TechnicalEnvironment">
+            <state id="Non_occurence" />
+            <state id="Occurence" />
+            <parents>InsufficientSupervisionOfWorkSafety</parents>
+            <probabilities>0.75 0.25 0.659 0.341</probabilities>
+        </cpt>
+    </nodes>
+    <extensions>
+        <genie version="1.0" app="bnbench" name="gasexplosion">
+            <node id="AccidentalViolations">
+                <name>AccidentalViolations</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>100 50 176 86</position>
+            </node>
+            <node id="CreateAFalseImpressionToDeceiveTheRegulators">
+                <name>CreateAFalseImpressionToDeceiveTheRegulators</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>250 50 326 86</position>
+            </node>
+            <node id="DecisionErrors">
+                <name>DecisionErrors</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>400 50 476 86</position>
+            </node>
+            <node id="DeparmentsAndInstitutionsAreNotComplete">
+                <name>DeparmentsAndInstitutionsAreNotComplete</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>550 50 626 86</position>
+            </node>
+            <node id="HabitualViolations">
+                <name>HabitualViolations</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>700 50 776 86</position>
+            </node>
+            <node id="IllegalCommand">
+                <name>IllegalCommand</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>850 50 926 86</position>
+            </node>
+            <node id="InadequateEmergencyPlan">
+                <name>InadequateEmergencyPlan</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>100 170 176 206</position>
+            </node>
+            <node id="InsufficientCracdownOnIllegalActivities">
+                <name>InsufficientCracdownOnIllegalActivities</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>250 170 326 206</position>
+            </node>
+            <node id="InsufficientSupervisionOfWorkSafety">
+                <name>InsufficientSupervisionOfWorkSafety</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>400 170 476 206</position>
+            </node>
+            <node id="MentalStates">
+                <name>MentalStates</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>550 170 626 206</position>
+            </node>
+            <node id="OrganizeProductionInViolationOfLawsAndRegulations">
+                <name>OrganizeProductionInViolationOfLawsAndRegulations</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>700 170 776 206</position>
+            </node>
+            <node id="PerceptualErrors">
+                <name>PerceptualErrors</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>850 170 926 206</position>
+            </node>
+            <node id="PhysicalIntellectualDisability">
+                <name>PhysicalIntellectualDisability</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>100 290 176 326</position>
+            </node>
+            <node id="SafetyEducationAndTraning">
+                <name>SafetyEducationAndTraning</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>250 290 326 326</position>
+            </node>
+            <node id="SafetySupervisionIsInadequate">
+                <name>SafetySupervisionIsInadequate</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>400 290 476 326</position>
+            </node>
+            <node id="SecurityManagementConfusion">
+                <name>SecurityManagementConfusion</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>550 290 626 326</position>
+            </node>
+            <node id="SkillBasedErrors">
+                <name>SkillBasedErrors</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>700 290 776 326</position>
+            </node>
+            <node id="TechnicalEnvironment">
+                <name>TechnicalEnvironment</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>850 290 926 326</position>
+            </node>
+        </genie>
+    </extensions>
+</smile>

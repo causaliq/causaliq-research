@@ -1,0 +1,440 @@
+{
+    "schema_version": "2.0",
+    "network": "macrophytes",
+    "domain": "freshwater_ecosystem_macrophyte_management",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a freshwater ecosystem model that assesses how mechanical macrophyte removal affects ecosystem structure via resource supply and disturbance pathways, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "macrophytes",
+        "source_reference": "Thiemer, K., Schneider, S. C., & Demars, B. O. (2021). Mechanical removal of macrophytes in freshwater ecosystems: Implications for ecosystem structure and function. Science of the Total Environment, 782, 146671.",
+        "source_url": "https://doi.org/10.1016/j.scitotenv.2021.146671",
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "Expert-elicited Bayesian network modelling short-term consequences of mechanical macrophyte removal on ecosystem structure, built using NETICA v6.07. The model synthesises how macrophyte removal affects phytoplankton bloom risk through two primary pathways: resource supply (light, nutrients, bioturbation) and disturbance (hydrodynamics and trophic cascades). Contains 15 nodes and 20 edges across three freshwater ecosystem types. CPTs based on qualitative expert knowledge for illustrative purposes. Three EcosystemServices states (Birds, Boating, Invasive species) have zero prior probability. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This model assesses how mechanical removal of aquatic plants affects phytoplankton bloom risk in freshwater ecosystems through two pathways: resource supply and disturbance.",
+            "The endpoint is phytoplankton abundance, which is controlled by resource availability (light, nutrients, bioturbation) and disturbance frequency (flow regime and grazing by zooplankton).",
+            "The ecosystem type (standing water with floating or submerged plants, or flowing water with submerged plants) determines baseline conditions for flow, light, and invertebrate habitat.",
+            "The management goal (ecosystem service) determines the degree of plant removal: full removal benefits recreational users and flood prevention, partial removal benefits fisheries, and no removal benefits nutrient retention and bird habitat.",
+            "Plant removal is the central intervention node that affects flow regime, light availability, invertebrate habitat, and predator-prey dynamics simultaneously.",
+            "A trophic cascade operates through piscivorous fish: when plants are removed, piscivorous fish lose cover and their predation on planktivorous fish increases, releasing zooplankton from planktivore predation and increasing grazing pressure on phytoplankton.",
+            "Benthic fish foraging increases when epiphytic invertebrates decline (due to plant removal), causing more bioturbation and sediment nutrient release, which increases phytoplankton resources.",
+            "Light availability increases with plant removal because macrophytes shade the water column, and increased light promotes phytoplankton growth.",
+            "Nutrient loading is an external driver representing the trophic status of the ecosystem (oligotrophic to eutrophic) and contributes to resource availability for phytoplankton.",
+            "High resources combined with low disturbance produce the highest phytoplankton abundance and the greatest bloom risk.",
+            "The model illustrates that full macrophyte removal in a eutrophic lake with submerged plants and piscivorous fish leads to 100% probability of high phytoplankton abundance.",
+            "Partial removal can maintain intermediate ecosystem states by preserving some habitat structure while achieving management goals.",
+            "All CPTs were derived from expert knowledge based on a review of 98 studies across 25 countries, used for illustrative purposes."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "states",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references",
+                "llm_name"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "BenthicFishForaging",
+            "display_name": "Benthic Fish Foraging",
+            "type": "ordinal",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "trophic_interaction",
+            "short_description": "Intensity of fish foraging on benthic substrate.",
+            "extended_description": "Benthic fish foraging represents the proportion of fish feeding on bottom-dwelling invertebrates rather than on invertebrates attached to plants. When epiphytic invertebrates are abundant (due to macrophyte presence), fish forage among plants and benthic foraging is low. When plants are removed and epiphytic invertebrates decline, fish shift to foraging on benthic substrates, increasing bioturbation and nutrient resuspension from sediments. The relationship is inversely deterministic with epiphytic invertebrate availability.",
+            "sensitivity_hints": "Inversely determined by epiphytic invertebrate availability. Higher benthic foraging increases bioturbation and nutrient release to the water column.",
+            "related_domain_knowledge": [
+                "Fish foraging mode shifts between epibenthic and benthic feeding depending on habitat structure.",
+                "Bioturbation by benthic-feeding fish resuspends sediment-bound nutrients, particularly phosphorus."
+            ],
+            "references": [
+                "Carpenter et al. (1998)",
+                "Fausch et al. (1997)"
+            ],
+            "llm_name": "BenthicGrazingIntensity"
+        },
+        {
+            "name": "Disturbance",
+            "display_name": "Disturbance",
+            "type": "ordinal",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "ecosystem_process",
+            "short_description": "Level of hydrological and biological disturbance affecting phytoplankton.",
+            "extended_description": "Disturbance represents the combined effect of hydrological conditions and zooplankton grazing pressure on phytoplankton. High flow increases physical disturbance by reducing water residence time, while high zooplankton abundance increases biological disturbance through grazing. Low disturbance favours phytoplankton accumulation and bloom formation. The interaction between flow and zooplankton determines the overall disturbance level experienced by phytoplankton.",
+            "sensitivity_hints": "Determined by flow regime and zooplankton grazing. Low disturbance combined with high resources creates conditions most favourable for phytoplankton blooms.",
+            "related_domain_knowledge": [
+                "Phytoplankton blooms require sufficient water residence time to develop.",
+                "Zooplankton grazing is a key biological control mechanism for phytoplankton biomass."
+            ],
+            "references": [
+                "Reynolds (2000)",
+                "Bernes et al. (2015)"
+            ],
+            "llm_name": "HydrologicalDisturbance"
+        },
+        {
+            "name": "Ecosystem",
+            "display_name": "Ecosystem",
+            "type": "categorical",
+            "states": [
+                "Standing floating",
+                "Standing submerged",
+                "Flowing submerged"
+            ],
+            "role": "exogenous",
+            "category": "ecosystem_context",
+            "short_description": "Type of freshwater ecosystem — standing or flowing water with different macrophyte forms.",
+            "extended_description": "Ecosystem type distinguishes three freshwater habitats: lakes dominated by floating macrophytes (standing floating), lakes dominated by submerged macrophytes (standing submerged), and rivers dominated by submerged macrophytes (flowing submerged). Ecosystem type determines baseline flow conditions, light penetration, and invertebrate habitat structure. Standing waters have lower flow, floating plants further reduce light, and submerged plants support richer epiphytic invertebrate communities. The prior is uniform across the three types.",
+            "sensitivity_hints": "Controls baseline conditions for flow, light, and invertebrate habitat. Flowing submerged ecosystems have highest baseline flow disturbance.",
+            "related_domain_knowledge": [
+                "Lakes dominated by floating macrophytes have very low underwater light and flow.",
+                "River ecosystems have naturally higher flow that limits phytoplankton development."
+            ],
+            "references": [],
+            "llm_name": "AquaticHabitatType"
+        },
+        {
+            "name": "EcosystemServices",
+            "display_name": "Ecosystem Services",
+            "type": "categorical",
+            "states": [
+                "Flooding",
+                "Birds",
+                "Nutrient retention",
+                "Angling",
+                "Swimming",
+                "Boating",
+                "Hydropower",
+                "Irrigation",
+                "Invasive species"
+            ],
+            "role": "exogenous",
+            "category": "management_context",
+            "short_description": "Primary ecosystem service motivating macrophyte management.",
+            "extended_description": "Ecosystem services represent the human use or management objective that drives the decision to remove macrophytes. Angling is the most common motivation (40%) and requires partial removal to maintain fish habitat. Hydropower (20%) and flooding (10%) require more complete removal. Nutrient retention (10%) favours no removal to maintain macrophyte nutrient uptake capacity. Swimming (10%) and irrigation (10%) require partial to full removal. Three services (birds, boating, invasive species) have zero prior probability in this model but are included for completeness.",
+            "sensitivity_hints": "Determines the degree of plant removal. Angling dominates at 40% probability. Birds, boating, and invasive species have zero prior probability.",
+            "related_domain_knowledge": [
+                "Macrophyte management is primarily motivated by flood prevention and recreational activities.",
+                "Conservation objectives (birds, nutrient retention) generally favour reduced or no removal."
+            ],
+            "references": [
+                "Baattrup-Pedersen et al. (2003)",
+                "Verhofstad & Bakker (2019)",
+                "Bickel & Closs (2009)",
+                "Klaassen & Nolet (2007)"
+            ],
+            "llm_name": "ManagementGoal"
+        },
+        {
+            "name": "EpiphyticInvertebrates",
+            "display_name": "Epiphytic Invertebrates",
+            "type": "ordinal",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "biotic_structure",
+            "short_description": "Abundance of invertebrates living on macrophyte surfaces.",
+            "extended_description": "Epiphytic invertebrates are organisms (chironomids, mayflies, snails, etc.) that colonise macrophyte surfaces for feeding, shelter, and reproduction. Their abundance depends on the ecosystem type and degree of plant removal. Submerged macrophytes in both standing and flowing waters support high epiphytic invertebrate densities. Full removal of plants dramatically reduces epiphytic invertebrates, especially in standing floating systems where reduced habitat area has the strongest impact. Partial removal in submerged systems retains most invertebrate habitat.",
+            "sensitivity_hints": "Strongly reduced by full plant removal. Submerged macrophytes support higher invertebrate densities than floating ones. Partial removal in standing floating systems has intermediate effect.",
+            "related_domain_knowledge": [
+                "Macrophyte removal instantly reduces invertebrate abundance by 20-70% in rivers.",
+                "Invertebrate taxa using macrophytes directly as substrate (e.g. Simuliidae, Chironomidae) are most affected."
+            ],
+            "references": [
+                "Kaenel et al. (1998)",
+                "Lusardi et al. (2018)",
+                "Habib & Yousuf (2014)"
+            ],
+            "llm_name": "PlantDwellingInvertebrates"
+        },
+        {
+            "name": "Flow",
+            "display_name": "Flow",
+            "type": "ordinal",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "hydrology",
+            "short_description": "Water flow velocity and regime.",
+            "extended_description": "Flow represents the hydrological conditions in the water body, from low (stagnant) to high (fast-flowing). Macrophytes naturally reduce flow velocity by creating friction and providing shelter. Removal of macrophytes increases flow, particularly in naturally flowing systems (rivers). In standing waters (lakes), flow remains low regardless of plant removal. Full removal in flowing submerged ecosystems produces high flow, while partial removal produces medium flow. Flow directly influences zooplankton abundance and daily disturbance.",
+            "sensitivity_hints": "Standing water ecosystems have persistently low flow regardless of removal. Flowing submerged ecosystems show the strongest flow increase with plant removal.",
+            "related_domain_knowledge": [
+                "Macrophyte removal in rivers increases flow velocity by 18-60%.",
+                "Flow velocity determines water residence time, which is critical for plankton development."
+            ],
+            "references": [
+                "Verschoren et al. (2017)",
+                "Kaenel et al. (2000)",
+                "Lusardi et al. (2018)"
+            ],
+            "llm_name": "WaterFlowRegime"
+        },
+        {
+            "name": "Light",
+            "display_name": "Light",
+            "type": "binary",
+            "states": [
+                "Low",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "physical_environment",
+            "short_description": "Underwater light availability.",
+            "extended_description": "Light represents the amount of photosynthetically active radiation reaching the water column below the macrophyte canopy. Dense macrophyte cover, especially floating plants, severely reduces underwater light. Plant removal increases light availability, benefiting phytoplankton growth. In standing floating ecosystems, light goes from zero to high with full removal. In submerged ecosystems (both standing and flowing), partial removal is sufficient to substantially increase light. Light is one of three factors determining phytoplankton resource availability.",
+            "sensitivity_hints": "Standing floating ecosystems show the strongest light limitation due to surface shading. Full removal always produces high light regardless of ecosystem type.",
+            "related_domain_knowledge": [
+                "Floating macrophytes block nearly all light from reaching the water column.",
+                "Increased light availability following removal is a primary mechanism promoting phytoplankton blooms."
+            ],
+            "references": [
+                "Kuiper et al. (2017)",
+                "Hilt et al. (2006)"
+            ],
+            "llm_name": "UnderwaterLightLevel"
+        },
+        {
+            "name": "NutrientLoading",
+            "display_name": "Nutrient Loading",
+            "type": "ordinal",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "exogenous",
+            "category": "water_chemistry",
+            "short_description": "External nutrient input level to the water body.",
+            "extended_description": "Nutrient loading represents the supply of dissolved nutrients (primarily nitrogen and phosphorus) from external sources such as agriculture, sewage, or atmospheric deposition. Low loading corresponds to oligotrophic conditions, and high loading to eutrophic conditions. The prior distribution favours low loading (52.5%), with medium (27.5%) and high (20%) less common. Nutrient loading directly contributes to phytoplankton resource availability. In combination with increased light and bioturbation following plant removal, high nutrient loading greatly increases bloom risk.",
+            "sensitivity_hints": "Low nutrient loading is most common (52.5%). High nutrient loading combined with plant removal creates the greatest phytoplankton bloom risk.",
+            "related_domain_knowledge": [
+                "Eutrophication from agricultural runoff is a major driver of aquatic plant nuisance growth.",
+                "Nutrient loading determines the trophic status and productivity potential of freshwater ecosystems."
+            ],
+            "references": [
+                "Hilt et al. (2006)",
+                "Verhofstad et al. (2017)"
+            ],
+            "llm_name": "NutrientInputLevel"
+        },
+        {
+            "name": "Phytoplankton",
+            "display_name": "Phytoplankton",
+            "type": "ordinal",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "endpoint",
+            "short_description": "Phytoplankton abundance — the bloom risk endpoint.",
+            "extended_description": "Phytoplankton abundance is the terminal endpoint of the model, representing the risk of algal bloom following macrophyte removal. It is jointly determined by resource availability (light, nutrients, bioturbation) and disturbance level (flow, zooplankton grazing). High resources with low disturbance produce high phytoplankton abundance (bloom). The model indicates that full macrophyte removal in a eutrophic lake with submerged plants leads to 100% probability of high phytoplankton abundance, while partial removal yields 59.4% probability.",
+            "sensitivity_hints": "Joint outcome of resources and disturbance pathways. Full removal in eutrophic submerged lakes produces certain bloom conditions; partial removal substantially reduces risk.",
+            "related_domain_knowledge": [
+                "Phytoplankton blooms from cyanobacteria can produce toxins harmful to humans and animals.",
+                "Macrophyte removal in eutrophic waters can trigger regime shifts to phytoplankton-dominated states."
+            ],
+            "references": [
+                "Kuiper et al. (2017)",
+                "Bicudo et al. (2007)",
+                "Zhu et al. (2019)"
+            ],
+            "llm_name": "AlgalBloomRisk"
+        },
+        {
+            "name": "PiscivorousFish",
+            "display_name": "Piscivorous Fish",
+            "type": "binary",
+            "states": [
+                "Absent",
+                "Present"
+            ],
+            "role": "exogenous",
+            "category": "biotic_structure",
+            "short_description": "Presence or absence of piscivorous (fish-eating) fish.",
+            "extended_description": "Piscivorous fish are predatory fish species (e.g. pike, perch) that prey on smaller planktivorous fish. Their presence or absence determines whether a top-down trophic cascade can operate following macrophyte removal. When piscivorous fish are present and plants are removed (reducing shelter for planktivorous fish), predation on planktivorous fish increases, releasing zooplankton from predation and enhancing biological control of phytoplankton. The prior is uniform (50% present, 50% absent).",
+            "sensitivity_hints": "Determines whether the trophic cascade pathway is active. With piscivorous fish absent, plant removal cannot trigger top-down control of phytoplankton.",
+            "related_domain_knowledge": [
+                "Piscivorous fish are key regulators in the trophic cascade controlling phytoplankton biomass.",
+                "Biomanipulation using piscivorous fish is an established lake management technique."
+            ],
+            "references": [
+                "Carpenter et al. (1998)",
+                "Bernes et al. (2015)"
+            ],
+            "llm_name": "PredatoryFishPresence"
+        },
+        {
+            "name": "PiscivorousFishPredation",
+            "display_name": "Piscivorous Fish Predation",
+            "type": "binary",
+            "states": [
+                "Low",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "trophic_interaction",
+            "short_description": "Level of predation by piscivorous fish on planktivorous fish.",
+            "extended_description": "Piscivorous fish predation represents the intensity of top-predator pressure on planktivorous fish. It depends on both the presence of piscivorous fish and the degree of plant removal. When piscivorous fish are absent, predation is always low. When present, predation increases with plant removal because macrophytes provide structural refuge for planktivorous fish: partial removal leads to moderate predation potential (50/50), while full removal exposes planktivorous fish to maximum predation.",
+            "sensitivity_hints": "Requires piscivorous fish to be present. Predation increases with the degree of plant removal as shelter habitat is lost.",
+            "related_domain_knowledge": [
+                "Macrophyte beds provide critical refuge for small fish from predators.",
+                "Removal of aquatic vegetation simplifies habitat and increases predation efficiency."
+            ],
+            "references": [
+                "Bickel & Closs (2009)",
+                "Engel (1990)"
+            ],
+            "llm_name": "TopPredatorPressure"
+        },
+        {
+            "name": "PlanktivorousFish",
+            "display_name": "Planktivorous Fish",
+            "type": "binary",
+            "states": [
+                "Low",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "biotic_structure",
+            "short_description": "Abundance of planktivorous (plankton-eating) fish.",
+            "extended_description": "Planktivorous fish are small fish species that feed on zooplankton and are themselves prey for piscivorous fish. Their abundance is inversely determined by piscivorous fish predation: high predation leads to low planktivorous fish and vice versa. When planktivorous fish are abundant, they suppress zooplankton through predation, reducing biological disturbance to phytoplankton. This node is a key link in the trophic cascade connecting macrophyte removal to phytoplankton dynamics.",
+            "sensitivity_hints": "Inversely determined by piscivorous fish predation. High planktivorous fish abundance suppresses zooplankton, indirectly favouring phytoplankton.",
+            "related_domain_knowledge": [
+                "Planktivorous fish preferentially consume larger zooplankton species, shifting community composition.",
+                "Reduction of planktivorous fish through biomanipulation can increase zooplankton grazing on phytoplankton."
+            ],
+            "references": [
+                "Bernes et al. (2015)",
+                "Garner et al. (1996)"
+            ],
+            "llm_name": "SmallFishAbundance"
+        },
+        {
+            "name": "PlantRemoval",
+            "display_name": "Plant Removal",
+            "type": "ordinal",
+            "states": [
+                "None",
+                "Partial",
+                "Full"
+            ],
+            "role": "endogenous",
+            "category": "management_intervention",
+            "short_description": "Degree of macrophyte removal — none, partial, or full.",
+            "extended_description": "Plant removal represents the management intervention of mechanically cutting or removing aquatic plants. The degree of removal (none, partial, full) is determined by the ecosystem service objective. Plant removal is the central hub node in the model, directly affecting flow regime, light availability, epiphytic invertebrate habitat, and piscivorous fish predation effectiveness. It propagates through the entire network, simultaneously altering both the resource supply and disturbance pathways that control phytoplankton. Partial removal is most common (~58% in the marginal distribution).",
+            "sensitivity_hints": "Central intervention node affecting most downstream variables. Determined by management goal (ecosystem service). Partial removal is most frequent.",
+            "related_domain_knowledge": [
+                "Considerable resources are spent worldwide on macrophyte removal every year.",
+                "Partial removal maintains habitat heterogeneity while achieving management goals."
+            ],
+            "references": [
+                "Thiemer et al. (2021)",
+                "Hussner et al. (2017)"
+            ],
+            "llm_name": "VegetationManagement"
+        },
+        {
+            "name": "Resources",
+            "display_name": "Resources",
+            "type": "ordinal",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "ecosystem_process",
+            "short_description": "Resource availability for phytoplankton growth.",
+            "extended_description": "Resources represent the combined availability of the factors needed for phytoplankton growth: light, dissolved nutrients, and nutrients resuspended by benthic fish bioturbation. High light, high nutrient loading, and high benthic fish foraging jointly produce the highest resource availability. When all three inputs are low (macrophytes present, oligotrophic, low bioturbation), resources are minimal. Resource availability is one of the two direct determinants of phytoplankton abundance.",
+            "sensitivity_hints": "Jointly determined by light, nutrient loading, and benthic fish foraging. High nutrient loading with high light produces highest resources, with benthic foraging providing an additional boost.",
+            "related_domain_knowledge": [
+                "Phytoplankton growth requires light for photosynthesis and dissolved nutrients for biomass production.",
+                "Benthic fish activity resuspends sediment-bound phosphorus, making it available for phytoplankton."
+            ],
+            "references": [
+                "Reynolds (2000)",
+                "Riis & Biggs (2001)"
+            ],
+            "llm_name": "PhytoplanktonResources"
+        },
+        {
+            "name": "Zooplankton",
+            "display_name": "Zooplankton",
+            "type": "ordinal",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "biotic_structure",
+            "short_description": "Zooplankton abundance.",
+            "extended_description": "Zooplankton are microscopic aquatic organisms (cladocerans, copepods, rotifers) that graze on phytoplankton and are themselves eaten by planktivorous fish. Their abundance depends on flow conditions and planktivore predation pressure. High zooplankton abundance requires low flow (sufficient water residence time for reproduction) and low planktivorous fish predation. When zooplankton are abundant, they increase biological disturbance to phytoplankton through grazing, reducing bloom risk. Macrophyte removal can either increase or decrease zooplankton depending on the interplay of the trophic cascade and flow changes.",
+            "sensitivity_hints": "Requires low flow and low planktivore pressure for high abundance. The net effect of plant removal on zooplankton depends on the balance between increased flow and the trophic cascade.",
+            "related_domain_knowledge": [
+                "Zooplankton grazing is a major control on phytoplankton biomass in lakes.",
+                "Macrophytes provide refuge for zooplankton from fish predation."
+            ],
+            "references": [
+                "Garner et al. (1996)",
+                "Mangas-Ramirez & Elias-Gutierrez (2004)",
+                "Choi et al. (2014)"
+            ],
+            "llm_name": "MicroGrazerAbundance"
+        }
+    ]
+}

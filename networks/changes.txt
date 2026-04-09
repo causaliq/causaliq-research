@@ -1,0 +1,22 @@
+The following changes have been made to network specifications and datasets which affects replicability of results:
+
+Barley:
+2026-04-06: Manually ensure state names in gene
+
+Corical:
+2026-04-07: change CPTs to avoid single-valued variables (see md file in folder)
+
+Corrosion:
+2026-04-08: change CPTs to avoid single-valued variables (see md file in folder)
+
+Diarrhoea:
+2026-03-21: Correct variable name from DIA_HadDiahorrea to DIA_HadDiarrhoea
+
+Hailfinder:
+2026-04-07: Generate results for FGES_BASE4 for 10K for seeds 5 to 24
+
+Polymorphic:
+2026-04-08: change CPTs to avoid single-valued variables (see md file in folder)
+
+Sports
+2026-03-21: Correct variable name from HTshotOnTarget to HTshotsOnTarget

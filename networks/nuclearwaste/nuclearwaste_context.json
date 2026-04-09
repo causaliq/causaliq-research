@@ -1,0 +1,313 @@
+{
+    "schema_version": "2.0",
+    "network": "nuclearwaste",
+    "domain": "nuclear_waste_repository_safety",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a nuclear waste repository safety assessment model, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "nuclearwaste",
+        "source_reference": "Tosoni2019",
+        "source_url": "https://doi.org/10.1016/j.ress.2019.03.019",
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "The Nuclear Waste network models safety assessment of a near-surface nuclear waste repository, developed by Tosoni, Salo, Govaerts, and Zio (2019). It captures relationships between earthquake events, degradation mechanisms of engineered barriers, radionuclide transport parameters, and the resulting dose rate to the public. Contains 10 nodes and 11 edges. Variables are a mix of binary and ternary. The DoseRate node has 8 parents, making it a highly connected outcome node. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a model of safety assessment for a near-surface nuclear waste repository.",
+            "The model captures two main causal themes: (1) structural degradation of the engineered barrier system, and (2) radionuclide transport through degraded barriers to the biosphere.",
+            "Earthquake is an exogenous hazard event that triggers both barrier degradation (physical damage) and monolith degradation (structural cracking).",
+            "Crack aperture is an exogenous engineered barrier property that determines hydraulic conductivity through the barrier material.",
+            "Chemical degradation, diffusion coefficient, distribution coefficient, and water flux are exogenous geochemical and hydrogeological parameters governing radionuclide transport.",
+            "Barrier degradation and monolith degradation are intermediate nodes representing the physical state of the engineered containment system after earthquake loading.",
+            "Hydraulic conductivity is determined by the crack aperture in the barrier material, governing water flow through the barrier.",
+            "Dose rate is the terminal outcome node integrating all degradation and transport parameters to assess whether the regulatory dose limit to the public is violated.",
+            "DoseRate has 8 parent nodes, making it the most highly connected node in the network.",
+            "Most variables are binary, reflecting threshold-based assessments; hydraulic conductivity and monolith degradation are ternary."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "BarrierDegradation",
+            "display_name": "Barrier Degradation Rate",
+            "type": "categorical",
+            "states": [
+                "Fast",
+                "Slow"
+            ],
+            "role": "endogenous",
+            "category": "barrier_integrity",
+            "short_description": "Rate of physical degradation of the engineered barrier system.",
+            "extended_description": "The rate at which the engineered barrier system of the nuclear waste repository physically degrades over time. Determined by earthquake loading: seismic events can cause cracking, displacement, and loss of structural integrity in barrier materials such as concrete and clay. Fast degradation compromises the barrier's ability to contain radionuclides, increasing the likelihood of dose rate violations.",
+            "sensitivity_hints": "Driven solely by earthquake events. Directly affects dose rate outcome. Represents physical (as opposed to chemical) barrier damage.",
+            "related_domain_knowledge": [
+                "Engineered barriers in nuclear waste repositories include concrete vaults, clay liners, and backfill materials.",
+                "Earthquake-induced cracking is a primary concern for near-surface repository integrity.",
+                "Barrier degradation rate depends on the severity and frequency of seismic events.",
+                "Fast degradation may lead to preferential flow paths for radionuclide migration."
+            ],
+            "references": [
+                "Tosoni2019"
+            ],
+            "llm_name": "barrier_degradation_rate"
+        },
+        {
+            "name": "ChemicalDegradation",
+            "display_name": "Chemical Degradation Rate",
+            "type": "categorical",
+            "states": [
+                "Fast",
+                "Slow"
+            ],
+            "role": "exogenous",
+            "category": "barrier_integrity",
+            "short_description": "Rate of chemical degradation of the barrier materials.",
+            "extended_description": "The rate of chemical degradation of the engineered barrier materials, encompassing processes such as leaching, carbonation, sulphate attack, and alkali-aggregate reaction in concrete barriers. An exogenous parameter representing the long-term chemical environment. Fast chemical degradation increases porosity and permeability of the barrier, facilitating radionuclide transport and contributing to higher dose rates.",
+            "sensitivity_hints": "Exogenous geochemical parameter. Directly affects dose rate outcome. Independent of earthquake loading.",
+            "related_domain_knowledge": [
+                "Concrete in nuclear waste repositories is subject to chemical attack from groundwater and waste-form leachate.",
+                "Carbonation reduces the pH of the pore solution, potentially mobilising sorbed radionuclides.",
+                "Sulphate attack causes expansion and cracking of concrete barriers.",
+                "Chemical degradation timescales range from decades to millennia depending on the barrier material and environment."
+            ],
+            "references": [
+                "Tosoni2019"
+            ],
+            "llm_name": "chemical_degradation_rate"
+        },
+        {
+            "name": "CrackAperture",
+            "display_name": "Crack Aperture Size",
+            "type": "categorical",
+            "states": [
+                "Micro",
+                "Macro"
+            ],
+            "role": "exogenous",
+            "category": "barrier_integrity",
+            "short_description": "Size of cracks in the engineered barrier material.",
+            "extended_description": "The characteristic aperture size of cracks in the engineered barrier material, distinguishing between micro-cracks (hairline fractures with limited hydraulic significance) and macro-cracks (larger fractures that create significant flow paths). An exogenous barrier property that determines the hydraulic conductivity of the cracked barrier and also directly influences the dose rate outcome through its effect on radionuclide transport pathways.",
+            "sensitivity_hints": "Exogenous barrier property. Determines hydraulic conductivity. Also directly affects dose rate. Key parameter linking barrier structural state to transport properties.",
+            "related_domain_knowledge": [
+                "Micro-cracks (<0.1 mm) have limited effect on hydraulic conductivity in concrete.",
+                "Macro-cracks (>0.1 mm) can increase hydraulic conductivity by several orders of magnitude.",
+                "Crack aperture is influenced by loading history, shrinkage, and thermal cycling.",
+                "Self-healing of cracks through carbonation can reduce apertures over long timescales."
+            ],
+            "references": [
+                "Tosoni2019"
+            ],
+            "llm_name": "crack_aperture_size"
+        },
+        {
+            "name": "DiffusionCoefficient",
+            "display_name": "Diffusion Coefficient",
+            "type": "categorical",
+            "states": [
+                "Low",
+                "High"
+            ],
+            "role": "exogenous",
+            "category": "transport_parameter",
+            "short_description": "Effective diffusion coefficient for radionuclide transport through the barrier.",
+            "extended_description": "The effective diffusion coefficient governing the rate of radionuclide migration through the barrier material by molecular diffusion. An exogenous hydrogeological parameter. A high diffusion coefficient means radionuclides can migrate more rapidly through the intact barrier matrix, contributing to higher dose rates even in the absence of advective flow through cracks.",
+            "sensitivity_hints": "Exogenous transport parameter. Directly affects dose rate outcome. Represents the diffusive component of radionuclide transport.",
+            "related_domain_knowledge": [
+                "Diffusion is the dominant transport mechanism in intact, low-permeability barrier materials.",
+                "Effective diffusion coefficients in concrete are typically 10^-12 to 10^-10 m^2/s.",
+                "Diffusion coefficients depend on the barrier material's porosity, tortuosity, and saturation.",
+                "Some radionuclides (e.g., tritium, iodine) have higher effective diffusion coefficients due to lower sorption."
+            ],
+            "references": [
+                "Tosoni2019"
+            ],
+            "llm_name": "diffusion_coefficient"
+        },
+        {
+            "name": "DistributionCoefficient",
+            "display_name": "Distribution Coefficient (Kd)",
+            "type": "categorical",
+            "states": [
+                "Low",
+                "High"
+            ],
+            "role": "exogenous",
+            "category": "transport_parameter",
+            "short_description": "Distribution coefficient governing radionuclide sorption onto barrier materials.",
+            "extended_description": "The distribution coefficient (Kd) quantifying the partitioning of radionuclides between the solid barrier material and the pore water. An exogenous geochemical parameter. A low distribution coefficient means radionuclides are poorly sorbed and travel faster through the barrier, increasing dose rates. A high Kd retards radionuclide migration, providing additional containment time.",
+            "sensitivity_hints": "Exogenous geochemical parameter. Directly affects dose rate outcome. Governs radionuclide retardation in the barrier.",
+            "related_domain_knowledge": [
+                "Kd values are radionuclide-specific and depend on the host material chemistry and pH.",
+                "Caesium and strontium typically have moderate-to-high Kd values in cement-based materials.",
+                "Low Kd values are associated with anionic species like iodide and pertechnetate.",
+                "Changes in pH due to chemical degradation can alter Kd values significantly."
+            ],
+            "references": [
+                "Tosoni2019"
+            ],
+            "llm_name": "distribution_coefficient"
+        },
+        {
+            "name": "DoseRate",
+            "display_name": "Dose Rate Compliance",
+            "type": "categorical",
+            "states": [
+                "Violated",
+                "Not Violated"
+            ],
+            "role": "endogenous",
+            "category": "safety_outcome",
+            "short_description": "Whether the regulatory dose rate limit to the public is violated.",
+            "extended_description": "The terminal outcome node representing whether the regulatory dose rate limit to the public is violated due to radionuclide releases from the nuclear waste repository. Determined by the combined effects of all eight parent variables: barrier degradation, chemical degradation, crack aperture, diffusion coefficient, distribution coefficient, hydraulic conductivity, monolith degradation, and water flux. A 'Violated' state indicates the safety case is compromised and the repository design fails to meet regulatory requirements.",
+            "sensitivity_hints": "Terminal output node with 8 parents. Integrates all degradation and transport parameters. Represents the ultimate safety metric for the repository. Most highly connected node in the network.",
+            "related_domain_knowledge": [
+                "Regulatory dose limits for nuclear waste repositories are typically 0.1-0.3 mSv/year to the most exposed individual.",
+                "Dose rate depends on the radionuclide inventory, release rate, transport pathway, and biosphere uptake.",
+                "Safety assessments must demonstrate compliance over timescales of thousands to hundreds of thousands of years.",
+                "Multiple barrier failure (degradation of several barriers simultaneously) is the primary concern for dose rate violation."
+            ],
+            "references": [
+                "Tosoni2019"
+            ],
+            "llm_name": "dose_rate_compliance"
+        },
+        {
+            "name": "Earthquake",
+            "display_name": "Earthquake Severity",
+            "type": "categorical",
+            "states": [
+                "BDBE",
+                "Major"
+            ],
+            "role": "exogenous",
+            "category": "external_hazard",
+            "short_description": "Severity of earthquake event affecting the repository site.",
+            "extended_description": "The severity of the earthquake event affecting the nuclear waste repository site, categorised as either a beyond design basis earthquake (BDBE) or a major earthquake. An exogenous external hazard that triggers physical degradation of both the engineered barriers and the monolithic waste form. BDBE events are less severe than major earthquakes. The seismic hazard is a key scenario driver in nuclear waste repository safety assessments.",
+            "sensitivity_hints": "Exogenous hazard event. Drives barrier degradation and monolith degradation. Does not depend on any repository properties. Key scenario variable.",
+            "related_domain_knowledge": [
+                "BDBE (Beyond Design Basis Earthquake) exceeds the design seismic loading but may not cause catastrophic failure.",
+                "Major earthquakes can cause significant structural damage to repository barriers.",
+                "Seismic hazard at repository sites is characterised by probabilistic seismic hazard analysis (PSHA).",
+                "Nuclear waste repositories are sited to avoid areas of high seismicity where possible."
+            ],
+            "references": [
+                "Tosoni2019"
+            ],
+            "llm_name": "earthquake_severity"
+        },
+        {
+            "name": "HydraulicConductivity",
+            "display_name": "Hydraulic Conductivity",
+            "type": "categorical",
+            "states": [
+                "Low",
+                "Medium",
+                "High"
+            ],
+            "role": "endogenous",
+            "category": "transport_parameter",
+            "short_description": "Hydraulic conductivity of the barrier material governing water flow.",
+            "extended_description": "The hydraulic conductivity of the engineered barrier material, governing the rate of advective water flow through the barrier. Determined by the crack aperture size: larger cracks create higher-conductivity flow paths. A key transport parameter that directly influences the dose rate by controlling how rapidly contaminated water can migrate through the barrier system to the biosphere.",
+            "sensitivity_hints": "Driven solely by crack aperture. Directly affects dose rate outcome. Represents the advective component of water and radionuclide transport. Ternary variable capturing the nonlinear relationship between crack size and flow.",
+            "related_domain_knowledge": [
+                "Hydraulic conductivity of intact concrete is typically 10^-12 to 10^-10 m/s.",
+                "A single macro-crack can increase effective hydraulic conductivity by orders of magnitude.",
+                "Hydraulic conductivity is the primary parameter controlling advective radionuclide transport.",
+                "The cubic law relates crack aperture to hydraulic conductivity: flow rate proportional to aperture cubed."
+            ],
+            "references": [
+                "Tosoni2019"
+            ],
+            "llm_name": "hydraulic_conductivity"
+        },
+        {
+            "name": "MonolithDegradation",
+            "display_name": "Monolith Degradation Rate",
+            "type": "categorical",
+            "states": [
+                "Very Fast",
+                "Fast",
+                "Slow"
+            ],
+            "role": "endogenous",
+            "category": "barrier_integrity",
+            "short_description": "Rate of degradation of the monolithic waste form.",
+            "extended_description": "The rate of degradation of the monolithic waste form (typically cemented or vitrified waste) within the repository. Determined by earthquake loading: seismic events can crack and fragment the monolith, increasing its surface area and accelerating radionuclide leaching. Directly affects the dose rate by controlling the radionuclide source term available for transport through the barrier system.",
+            "sensitivity_hints": "Driven solely by earthquake events. Directly affects dose rate outcome. Represents degradation of the waste form itself, as opposed to the surrounding barriers. Ternary variable reflecting three degradation regimes.",
+            "related_domain_knowledge": [
+                "Monolithic waste forms (cement, glass) immobilise radionuclides by chemical incorporation.",
+                "Earthquake-induced fracturing increases the monolith surface area exposed to leaching.",
+                "Very fast degradation implies extensive fragmentation with high leach rates.",
+                "Monolith degradation rate interacts with water flux to determine the actual radionuclide release rate."
+            ],
+            "references": [
+                "Tosoni2019"
+            ],
+            "llm_name": "monolith_degradation_rate"
+        },
+        {
+            "name": "WaterFlux",
+            "display_name": "Water Flux",
+            "type": "categorical",
+            "states": [
+                "Low",
+                "High"
+            ],
+            "role": "exogenous",
+            "category": "transport_parameter",
+            "short_description": "Rate of water flux through the repository environment.",
+            "extended_description": "The rate of water flux through the near-field repository environment, representing the volume of water available to contact the waste form and transport radionuclides through the barrier system. An exogenous hydrogeological parameter determined by the site's groundwater conditions, precipitation, and drainage design. High water flux increases radionuclide dissolution and advective transport, contributing to higher dose rates.",
+            "sensitivity_hints": "Exogenous hydrogeological parameter. Directly affects dose rate outcome. Represents the driving force for advective radionuclide transport. Independent of barrier properties.",
+            "related_domain_knowledge": [
+                "Water flux in near-surface repositories is strongly influenced by infiltration from rainfall.",
+                "Repository cap and drainage systems are designed to minimise water flux through the waste.",
+                "Higher water flux accelerates both dissolution of the waste form and transport of radionuclides.",
+                "Climate change may alter long-term water flux by changing precipitation patterns."
+            ],
+            "references": [
+                "Tosoni2019"
+            ],
+            "llm_name": "water_flux_rate"
+        }
+    ]
+}

@@ -1,0 +1,1382 @@
+{
+    "schema_version": "2.0",
+    "network": "corical",
+    "domain": "vaccine_risk_benefit_analysis",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a COVID-19 vaccine risk-benefit model, with disguised variable names to prevent memorisation.",
+    "provenance": {
+        "source_network": "corical",
+        "source_reference": "Lau, C. L., Mayfield, H. J., Sinclair, J. E., Brown, S. J., Waller, M., Enjeti, A. K., ... & Litt, J. (2021). Risk-benefit analysis of the AstraZeneca COVID-19 vaccine in Australia using a Bayesian network modelling framework. Vaccine, 39(51), 7429-7440.",
+        "source_url": null,
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "moderate",
+        "notes": "The CORICAL (COVID Risk Calculator) network was developed to support public health decision-making about AstraZeneca vaccination during the COVID-19 pandemic in Australia. It models the trade-off between rare vaccine-induced thrombotic complications and the protective benefit against COVID-19 infection and death. 20 variables and 26 edges."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This network models a risk-benefit trade-off for an adenoviral vector vaccine against a respiratory pandemic pathogen.",
+            "Consider causal ordering: patient demographics and external conditions → biological mechanisms → intermediate health events → fatal outcomes.",
+            "The vaccine has two pathways: BENEFIT (protection against infection and death) and RISK (rare thrombotic side effect).",
+            "Demographic factors (age, sex) influence multiple downstream variables through different mechanisms.",
+            "The pathogen strain affects both infection risk and vaccine effectiveness.",
+            "Community transmission intensity modulates the absolute risk of infection.",
+            "Background (non-vaccine, non-infection) clotting events occur naturally and their rate depends on age.",
+            "Infection itself can cause thrombotic events (clotting) as a complication, separate from vaccine side effects.",
+            "Multiple independent pathways lead to mortality: direct infection death, vaccine-associated clotting death, infection-associated clotting death, and background clotting death.",
+            "There are three distinct thrombotic risk pathways: vaccine-induced, infection-induced, and background."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original variable names from the source publication.",
+            "Any hint about the specific academic paper, tool name, or Australian policy context.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, conditional rates, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "base_rate",
+                "conditional_rates",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "SARSCoV2Variant",
+            "display_name": "Pathogen Variant Strain",
+            "aliases": [
+                "SARSCoV2Variant",
+                "variant",
+                "virus_strain"
+            ],
+            "type": "binary",
+            "states": [
+                "Alpha_Wild",
+                "Delta"
+            ],
+            "role": "exogenous",
+            "category": "pathogen",
+            "short_description": "Which variant strain of the respiratory pathogen is dominant in the population.",
+            "extended_description": "Binary indicator of the dominant circulating variant of the respiratory pathogen. Earlier strains (Alpha/Wild-type) have lower transmissibility and different immune escape properties compared to the more transmissible Delta variant. The variant affects both the baseline risk of symptomatic infection and the effectiveness of vaccination. During the study period, Delta (95% prevalence) was displacing earlier strains.",
+            "base_rate": {
+                "Alpha_Wild": 0.05,
+                "Delta": 0.95
+            },
+            "sensitivity_hints": "The pathogen variant affects two downstream mechanisms: intrinsic infection risk and vaccine effectiveness. It does not influence demographic factors, background clotting rates, or community transmission levels.",
+            "related_domain_knowledge": [
+                "Viral variants differ in transmissibility, immune evasion, and virulence.",
+                "Vaccine effectiveness often decreases against newer, more immune-evasive variants.",
+                "Variant prevalence is an exogenous epidemiological condition, not influenced by individual patient factors.",
+                "Delta variant was more transmissible but vaccine effectiveness against severe disease remained high."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "pathogen_strain"
+        },
+        {
+            "name": "Sex",
+            "display_name": "Biological Sex",
+            "aliases": [
+                "Sex",
+                "gender",
+                "biological_sex"
+            ],
+            "type": "binary",
+            "states": [
+                "Female",
+                "Male"
+            ],
+            "role": "exogenous",
+            "category": "demographic",
+            "short_description": "Biological sex of the individual.",
+            "extended_description": "Binary indicator of patient biological sex. Sex influences the risk profile for infection-associated thrombotic complications and COVID-19 mortality. Males generally have higher infection fatality rates and different thrombotic risk profiles compared to females. The population is assumed to be 50/50 male/female.",
+            "base_rate": {
+                "Female": 0.5,
+                "Male": 0.5
+            },
+            "sensitivity_hints": "Sex influences infection-associated thrombotic events and infection mortality but does NOT affect vaccine side effects, background clotting rates, or vaccine effectiveness in this model.",
+            "related_domain_knowledge": [
+                "Males have higher COVID-19 case fatality rates across most age groups.",
+                "Sex-based differences in thrombotic risk are well-documented in haematology.",
+                "Biological sex is independent of vaccination status, pathogen variant, and community transmission.",
+                "Sex affects downstream complications of infection, not the probability of infection itself."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "biological_sex"
+        },
+        {
+            "name": "AZVaccineDoses",
+            "display_name": "Adenoviral Vaccine Dose Count",
+            "aliases": [
+                "AZVaccineDoses",
+                "vaccine_doses",
+                "vaccination_status"
+            ],
+            "type": "categorical",
+            "states": [
+                "None",
+                "One",
+                "Two"
+            ],
+            "role": "exogenous",
+            "category": "intervention",
+            "short_description": "Number of adenoviral vector vaccine doses received (none, one, or two).",
+            "extended_description": "Categorical indicator of the number of adenoviral vector vaccine doses received. Vaccination is the central intervention in this risk-benefit model. Vaccination has both benefits (protection against symptomatic infection and death) and risks (rare thrombotic syndrome). The risk-benefit profile differs between first and second doses, and between unvaccinated and vaccinated individuals. Approximately 30% unvaccinated, 35% one dose, 35% two doses.",
+            "base_rate": {
+                "None": 0.3,
+                "One": 0.35,
+                "Two": 0.35
+            },
+            "sensitivity_hints": "Vaccine dose count is the KEY intervention variable. It influences BOTH protective effectiveness (benefit) AND thrombotic side effect risk (harm). It does not affect demographic factors, background clotting, or community transmission. Consider its dual role carefully.",
+            "related_domain_knowledge": [
+                "Adenoviral vector vaccines carry a rare risk of vaccine-induced thrombosis with thrombocytopenia.",
+                "Protective effectiveness increases with dose number but so does cumulative exposure to side effect risk.",
+                "First-dose TTS risk is substantially higher than second-dose risk.",
+                "Vaccine effectiveness against death is higher than effectiveness against infection.",
+                "Unvaccinated individuals (zero doses) have zero vaccine effectiveness and zero vaccine side effect risk."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "adenoviral_vaccine_doses"
+        },
+        {
+            "name": "Age",
+            "display_name": "Patient Age Cohort",
+            "aliases": [
+                "Age",
+                "age_group",
+                "age_band"
+            ],
+            "type": "ordinal",
+            "states": [
+                "0-9",
+                "10-19",
+                "20-29",
+                "30-39",
+                "40-49",
+                "50-59",
+                "60-69",
+                "70+"
+            ],
+            "role": "exogenous",
+            "category": "demographic",
+            "short_description": "Age group of the individual in decade bands.",
+            "extended_description": "Ordinal variable representing patient age in decade-wide cohorts from 0-9 through 70+. Age is a critical risk modifier in this model, influencing background clotting rates, vaccine-associated thrombotic risk, baseline symptomatic infection risk, and infection fatality rate. Older age groups have dramatically higher infection fatality rates but lower vaccine-associated TTS risk. The age distribution reflects the Australian population structure.",
+            "base_rate": {
+                "0-9": 0.123,
+                "10-19": 0.123,
+                "20-29": 0.14,
+                "30-39": 0.145,
+                "40-49": 0.127,
+                "50-59": 0.121,
+                "60-69": 0.104,
+                "70+": 0.114
+            },
+            "sensitivity_hints": "Age is a MAJOR hub variable with multiple downstream effects through different mechanisms. It influences background clotting, vaccine side effects, infection risk, AND infection fatality. The effect on fatality is dramatic—70+ age group has ~100x higher infection fatality than young adults.",
+            "related_domain_knowledge": [
+                "COVID-19 infection fatality rate increases exponentially with age.",
+                "Background cerebral and portal venous thrombosis rates increase with age.",
+                "Vaccine-associated TTS risk varies by age group (higher in younger adults for first dose).",
+                "Age-dependent risk profiles are central to age-stratified vaccination policy.",
+                "Age is independent of vaccination status, pathogen variant, and transmission intensity."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "age_cohort"
+        },
+        {
+            "name": "IntensityOfCommunityTransmission",
+            "display_name": "Community Transmission Intensity",
+            "aliases": [
+                "IntensityOfCommunityTransmission",
+                "transmission_level",
+                "community_spread"
+            ],
+            "type": "categorical",
+            "states": [
+                "None",
+                "ATAGI_Low",
+                "ATAGI_Med",
+                "ATAGI_High",
+                "One_Percent",
+                "Two_Percent",
+                "NSW_200_Daily",
+                "NSW_1000_Daily",
+                "VIC_1000_Daily",
+                "QLD_1000_Daily"
+            ],
+            "role": "exogenous",
+            "category": "epidemiological",
+            "short_description": "Intensity of pathogen transmission in the community, from none to high outbreak levels.",
+            "extended_description": "Categorical variable representing the level of pathogen circulation in the community, ranging from no transmission to high outbreak scenarios. This is a critical context variable—the benefit of vaccination increases dramatically with higher community transmission, as the absolute risk of infection (and hence death) rises. At zero transmission, vaccine benefit is zero and only vaccine risk remains. Multiple scenario levels represent different public health policy thresholds and regional outbreak intensities. Assumed uniform prior across scenarios.",
+            "base_rate": {
+                "None": 0.1,
+                "ATAGI_Low": 0.1,
+                "ATAGI_Med": 0.1,
+                "ATAGI_High": 0.1,
+                "One_Percent": 0.1,
+                "Two_Percent": 0.1,
+                "NSW_200_Daily": 0.1,
+                "NSW_1000_Daily": 0.1,
+                "VIC_1000_Daily": 0.1,
+                "QLD_1000_Daily": 0.1
+            },
+            "sensitivity_hints": "Community transmission intensity is the KEY context variable that determines whether vaccine benefits outweigh risks. At zero transmission, vaccination has no benefit. It directly modulates infection risk conditioned on individual susceptibility and vaccine protection status.",
+            "related_domain_knowledge": [
+                "The risk-benefit calculus for vaccination depends critically on exposure probability.",
+                "In low-transmission settings, the rare vaccine side effects may outweigh the small infection risk.",
+                "In high-transmission settings, infection risk dominates and vaccination benefit is clear.",
+                "Transmission intensity is an exogenous community-level factor, not influenced by individual patient characteristics.",
+                "Different geographic regions experienced different transmission intensities simultaneously."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "population_exposure_level"
+        },
+        {
+            "name": "BackgroundCSVTOver6Weeks",
+            "display_name": "Background Cerebral Venous Thrombosis Risk",
+            "aliases": [
+                "BackgroundCSVTOver6Weeks",
+                "background_csvt",
+                "baseline_cerebral_clot"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "background_thrombotic",
+            "short_description": "Whether a background (non-vaccine, non-infection) cerebral sinus venous thrombosis event occurs over 6 weeks.",
+            "extended_description": "Binary indicator of spontaneous cerebral sinus venous thrombosis (CSVT) occurring over a 6-week window, unrelated to vaccination or infection. Background CSVT rates vary by age group, with older individuals at slightly higher risk. These events are very rare (approximately 0.4-0.8 per million per 6 weeks) but included to contextualise the relative magnitude of vaccine-associated and infection-associated thrombotic risks.",
+            "conditional_rates": {
+                "age_0_9": 3.8e-07,
+                "age_10_19": 3.8e-07,
+                "age_20_29": 6.4e-07,
+                "age_30_39": 6.4e-07,
+                "age_40_49": 6.4e-07,
+                "age_50_59": 7.5e-07,
+                "age_60_69": 7.5e-07,
+                "age_70_plus": 7.3e-07
+            },
+            "sensitivity_hints": "Background CSVT is influenced only by age. It is independent of vaccination, infection, pathogen variant, and community transmission. The very low base rates mean this is a rare baseline comparison event.",
+            "related_domain_knowledge": [
+                "CSVT is a rare cerebrovascular event with approximately 7% case fatality rate.",
+                "Background rates provide a comparison against vaccine-induced and infection-induced thrombotic events.",
+                "Age is the primary determinant of background cerebral venous thrombosis risk.",
+                "Background thrombotic risk is independent of vaccination status and infection risk."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "baseline_cerebral_clot_risk"
+        },
+        {
+            "name": "VaccineAssociatedTTS",
+            "display_name": "Vaccine-Induced Thrombotic Syndrome",
+            "aliases": [
+                "VaccineAssociatedTTS",
+                "vaccine_tts",
+                "vitt"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "vaccine_adverse_event",
+            "short_description": "Whether vaccine-induced thrombosis with thrombocytopenia syndrome occurs following vaccination.",
+            "extended_description": "Binary indicator of vaccine-associated thrombosis with thrombocytopenia syndrome (TTS), a rare but serious immune-mediated clotting disorder triggered by adenoviral vector vaccination. Risk depends on both vaccine dose count and patient age. First-dose risk (~25 per million) is substantially higher than second-dose risk (~1.8 per million). Unvaccinated individuals have zero TTS risk. This adverse event is the primary risk factor weighed against vaccine benefits.",
+            "conditional_rates": {
+                "no_vaccine_any_age": 0.0,
+                "first_dose_most_ages": 2.5e-05,
+                "first_dose_60_69": 1.6e-05,
+                "first_dose_70_plus": 1.85e-05,
+                "second_dose_any_age": 1.8e-06
+            },
+            "sensitivity_hints": "TTS is a COLLIDER caused jointly by vaccine dose count and age. It represents the vaccine RISK side. Unvaccinated individuals cannot develop vaccine-associated TTS. Consider the v-structure: vaccine doses and age are independent exogenous causes.",
+            "related_domain_knowledge": [
+                "TTS is an immune-mediated response to adenoviral vector vaccines, not seen with mRNA vaccines.",
+                "The syndrome involves simultaneous thrombosis and low platelet count (thrombocytopenia).",
+                "Risk is substantially higher after the first dose than the second dose.",
+                "TTS case fatality rate is approximately 5%.",
+                "This adverse event drove age-stratified vaccination policy in several countries."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "vaccine_induced_coagulopathy"
+        },
+        {
+            "name": "BackgroundPVTOver6Weeks",
+            "display_name": "Background Portal Vein Thrombosis Risk",
+            "aliases": [
+                "BackgroundPVTOver6Weeks",
+                "background_pvt",
+                "baseline_portal_clot"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "background_thrombotic",
+            "short_description": "Whether a background (non-vaccine, non-infection) portal vein thrombosis event occurs over 6 weeks.",
+            "extended_description": "Binary indicator of spontaneous portal vein thrombosis (PVT) occurring over a 6-week window, unrelated to vaccination or infection. Background PVT rates increase with age, from zero in children to approximately 2 per million per 6 weeks in elderly adults. These events provide a baseline comparison for infection-associated and vaccine-associated thrombotic risks.",
+            "conditional_rates": {
+                "age_0_9": 0.0,
+                "age_10_19": 0.0,
+                "age_20_29": 2e-07,
+                "age_30_39": 2.6e-07,
+                "age_40_49": 5.6e-07,
+                "age_50_59": 9.1e-07,
+                "age_60_69": 1.76e-06,
+                "age_70_plus": 1.96e-06
+            },
+            "sensitivity_hints": "Background PVT is influenced only by age. It is independent of vaccination, infection, pathogen variant, and community transmission. Zero risk in children and adolescents.",
+            "related_domain_knowledge": [
+                "PVT affects the portal venous system (liver blood supply) and has a case fatality rate of approximately 27%.",
+                "Background PVT rates increase sharply with age, especially after age 50.",
+                "Portal vein thrombosis can also occur as a complication of COVID-19 infection (modelled separately).",
+                "Background rates provide context for understanding the incremental risk from infection or vaccination."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "baseline_portal_clot_risk"
+        },
+        {
+            "name": "VaccineEffectivenessAgainstDeathIfInfected",
+            "display_name": "Vaccine Protection Against Death",
+            "aliases": [
+                "VaccineEffectivenessAgainstDeathIfInfected",
+                "ve_death",
+                "mortality_protection"
+            ],
+            "type": "binary",
+            "states": [
+                "Effective",
+                "Not_Effective"
+            ],
+            "role": "endogenous",
+            "category": "vaccine_efficacy",
+            "short_description": "Whether vaccination is effective in preventing death if the individual becomes infected.",
+            "extended_description": "Binary indicator of whether vaccination successfully prevents death in a breakthrough infection scenario. Effectiveness depends on both the number of vaccine doses received and the pathogen variant. Two doses provide higher protection than one dose. Protection is lower against the Delta variant than earlier strains. Unvaccinated individuals have zero protection. This variable modulates the infection fatality rate.",
+            "conditional_rates": {
+                "zero_doses_any_variant": 0.0,
+                "one_dose_alpha": 0.8,
+                "one_dose_delta": 0.69,
+                "two_doses_alpha": 0.95,
+                "two_doses_delta": 0.9
+            },
+            "sensitivity_hints": "Vaccine mortality protection is a COLLIDER caused by vaccine dose count and pathogen variant (v-structure: two independent exogenous causes). It represents part of the vaccine BENEFIT side and directly modulates infection fatality.",
+            "related_domain_knowledge": [
+                "Vaccine effectiveness against death is generally higher than effectiveness against infection.",
+                "Protection increases with dose number (one dose < two doses).",
+                "Newer variants often partially evade vaccine-induced immunity but protection against death remains substantial.",
+                "This reflects conditional protection—only relevant when an individual is actually infected.",
+                "Zero doses means zero protection by definition."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "vaccine_mortality_protection"
+        },
+        {
+            "name": "VaccineEffectivenessAgainstSymptomaticInfection",
+            "display_name": "Vaccine Protection Against Symptomatic Infection",
+            "aliases": [
+                "VaccineEffectivenessAgainstSymptomaticInfection",
+                "ve_infection",
+                "infection_protection"
+            ],
+            "type": "binary",
+            "states": [
+                "Effective",
+                "Not_Effective"
+            ],
+            "role": "endogenous",
+            "category": "vaccine_efficacy",
+            "short_description": "Whether vaccination is effective in preventing symptomatic infection.",
+            "extended_description": "Binary indicator of whether vaccination successfully prevents symptomatic infection. Effectiveness depends on vaccine dose count and pathogen variant. Two doses provide higher protection than one dose. Protection is lower against the Delta variant. This variable determines whether an individual's vaccination status reduces their infection risk in the context of community transmission.",
+            "conditional_rates": {
+                "zero_doses_any_variant": 0.0,
+                "one_dose_alpha": 0.6,
+                "one_dose_delta": 0.333,
+                "two_doses_alpha": 0.8,
+                "two_doses_delta": 0.61
+            },
+            "sensitivity_hints": "Vaccine infection protection is a COLLIDER caused by vaccine dose count and pathogen variant (v-structure). It is part of the vaccine BENEFIT pathway and modulates the effective infection risk.",
+            "related_domain_knowledge": [
+                "Effectiveness against symptomatic infection is lower than effectiveness against death.",
+                "Breakthrough infections can still occur in vaccinated individuals but with reduced probability.",
+                "Delta variant significantly reduced vaccine effectiveness against infection compared to Alpha.",
+                "This effectiveness modulates the adjusted infection risk given community transmission."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "vaccine_infection_protection"
+        },
+        {
+            "name": "RiskOfSymptomaticInfection",
+            "display_name": "Baseline Symptomatic Infection Risk",
+            "aliases": [
+                "RiskOfSymptomaticInfection",
+                "infection_risk",
+                "baseline_infection"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "infection",
+            "short_description": "Baseline risk of symptomatic infection based on age and pathogen variant, before accounting for vaccination or transmission intensity.",
+            "extended_description": "Binary indicator of baseline susceptibility to symptomatic infection, determined by patient age and the circulating pathogen variant. This represents the intrinsic infection risk profile before adjustment for community transmission intensity and vaccination status. Younger adults (20-49) generally have higher symptomatic infection rates than children or the elderly, though the pattern varies by variant.",
+            "conditional_rates": {
+                "age_0_9_alpha": 0.042,
+                "age_20_29_alpha": 0.159,
+                "age_50_59_alpha": 0.098,
+                "age_70_plus_alpha": 0.113,
+                "age_0_9_delta": 0.092,
+                "age_20_29_delta": 0.154,
+                "age_70_plus_delta": 0.043
+            },
+            "sensitivity_hints": "Baseline infection risk is a COLLIDER caused by age and pathogen variant (v-structure). This is an intermediate variable—it feeds into the adjusted risk that also accounts for community transmission and vaccination.",
+            "related_domain_knowledge": [
+                "Symptomatic infection rates vary by age group due to immune system differences.",
+                "More transmissible variants increase baseline susceptibility across all age groups.",
+                "This baseline risk is separate from the community exposure probability.",
+                "Children may have lower symptomatic rates despite similar exposure due to immune factors."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "infection_susceptibility"
+        },
+        {
+            "name": "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus",
+            "display_name": "Adjusted Symptomatic Infection Risk",
+            "aliases": [
+                "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus",
+                "adjusted_infection_risk",
+                "effective_infection_risk"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "infection",
+            "short_description": "Adjusted risk of symptomatic infection accounting for community transmission, baseline susceptibility, and vaccine protection.",
+            "extended_description": "Binary indicator of symptomatic infection risk after accounting for all three modifying factors: community transmission intensity (exposure probability), baseline infection susceptibility (age and variant), and vaccine protection against infection. This is a KEY hub variable in the network—it integrates the community exposure context with individual susceptibility and vaccine protection to produce the effective infection probability. It drives all downstream infection-related outcomes.",
+            "sensitivity_hints": "This is a COLLIDER with three parents from different causal pathways (community transmission, baseline susceptibility, vaccine protection). It is the central mediating node for all infection-related outcomes. Zero community transmission → zero adjusted risk regardless of other factors.",
+            "related_domain_knowledge": [
+                "Effective infection risk = f(exposure probability, susceptibility, vaccine protection).",
+                "All three parent factors must be considered jointly—vaccination reduces risk only if there is community transmission.",
+                "This adjusted risk drives all downstream infection complications (death, thrombotic events).",
+                "In zero-transmission settings, this node is always 'No' regardless of susceptibility or vaccination."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "adjusted_infection_risk"
+        },
+        {
+            "name": "DieFromBackgroundPVT",
+            "display_name": "Death from Background Portal Vein Thrombosis",
+            "aliases": [
+                "DieFromBackgroundPVT",
+                "background_pvt_death",
+                "baseline_portal_fatality"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "mortality",
+            "short_description": "Whether the individual dies from a background portal vein thrombotic event.",
+            "extended_description": "Binary indicator of death from spontaneous (background) portal vein thrombosis. Conditional on having a background PVT event, the case fatality rate is approximately 27%. This node has a single parent: the background PVT event occurrence. It represents the terminal outcome of the background portal thrombosis pathway.",
+            "conditional_rates": {
+                "given_no_pvt": 0.0,
+                "given_pvt": 0.27
+            },
+            "sensitivity_hints": "Simple causal chain: age → background PVT → death from PVT. This pathway is independent of vaccination and infection.",
+            "related_domain_knowledge": [
+                "Portal vein thrombosis has a case fatality rate of approximately 27%.",
+                "Death probability is conditional only on having the thrombotic event.",
+                "This pathway provides context for the relative severity of different thrombotic events."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "baseline_portal_clot_fatality"
+        },
+        {
+            "name": "DieFromBackgroundCSVT",
+            "display_name": "Death from Background Cerebral Venous Thrombosis",
+            "aliases": [
+                "DieFromBackgroundCSVT",
+                "background_csvt_death",
+                "baseline_cerebral_fatality"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "mortality",
+            "short_description": "Whether the individual dies from a background cerebral sinus venous thrombotic event.",
+            "extended_description": "Binary indicator of death from spontaneous (background) cerebral sinus venous thrombosis. Conditional on having a background CSVT event, the case fatality rate is approximately 7%. This is notably lower than the case fatality for portal vein thrombosis or vaccine-associated TTS.",
+            "conditional_rates": {
+                "given_no_csvt": 0.0,
+                "given_csvt": 0.07
+            },
+            "sensitivity_hints": "Simple causal chain: age → background CSVT → death from CSVT. This pathway is independent of vaccination and infection.",
+            "related_domain_knowledge": [
+                "Cerebral venous thrombosis has a lower case fatality (~7%) than portal vein thrombosis (~27%).",
+                "CSVT can also be caused by COVID-19 infection (modelled as a separate pathway).",
+                "Background CSVT death provides a baseline comparison for vaccine-induced and infection-induced clotting deaths."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "baseline_cerebral_clot_fatality"
+        },
+        {
+            "name": "DieFromVaccineAssociatedTTS",
+            "display_name": "Death from Vaccine-Induced Thrombotic Syndrome",
+            "aliases": [
+                "DieFromVaccineAssociatedTTS",
+                "tts_death",
+                "vaccine_clot_fatality"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "mortality",
+            "short_description": "Whether the individual dies from vaccine-associated thrombosis with thrombocytopenia syndrome.",
+            "extended_description": "Binary indicator of death from vaccine-induced TTS. Conditional on developing TTS, the case fatality rate is approximately 5%. This represents the terminal outcome of the vaccine risk pathway: vaccination → TTS → death from TTS. This mortality risk must be weighed against the mortality risk from COVID-19 infection.",
+            "conditional_rates": {
+                "given_no_tts": 0.0,
+                "given_tts": 0.05
+            },
+            "sensitivity_hints": "Simple causal chain: vaccine doses + age → TTS → death from TTS. This is the vaccine RISK terminal outcome. Compare against infection fatality to assess the risk-benefit trade-off.",
+            "related_domain_knowledge": [
+                "TTS case fatality rate (~5%) is lower than COVID-associated PVT fatality (~20%) or CSVT fatality (~17%).",
+                "Early recognition and treatment of TTS can improve survival.",
+                "This mortality risk exists only for vaccinated individuals who develop TTS.",
+                "The absolute risk of TTS death is extremely low: ~1.25 per million first doses."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "vaccine_coagulopathy_fatality"
+        },
+        {
+            "name": "Covid19AssociatedPVT",
+            "display_name": "Infection-Associated Portal Vein Thrombosis",
+            "aliases": [
+                "Covid19AssociatedPVT",
+                "covid_pvt",
+                "infection_portal_clot"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "infection_complication",
+            "short_description": "Whether infection-associated portal vein thrombosis occurs as a complication of symptomatic infection.",
+            "extended_description": "Binary indicator of portal vein thrombosis occurring as a complication of symptomatic respiratory infection. The risk depends on having an active symptomatic infection (adjusted infection risk) and on biological sex, with males at higher risk (482 per million) than females (318 per million). This represents one of the infection-related thrombotic complications that vaccination helps prevent.",
+            "conditional_rates": {
+                "no_infection": 0.0,
+                "infection_female": 0.000318,
+                "infection_male": 0.000483
+            },
+            "sensitivity_hints": "Infection-associated PVT is a COLLIDER caused by adjusted infection risk and biological sex (v-structure). It represents a thrombotic complication of infection that vaccination prevents by reducing infection risk.",
+            "related_domain_knowledge": [
+                "COVID-19 infection is associated with a hypercoagulable state causing various thrombotic events.",
+                "Males have higher rates of infection-associated portal vein thrombosis than females.",
+                "Vaccination prevents this complication indirectly by reducing infection probability.",
+                "Infection-associated PVT rates are substantially higher than background PVT rates."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "infection_portal_thrombosis"
+        },
+        {
+            "name": "DieFromCovid19",
+            "display_name": "Death from Infection",
+            "aliases": [
+                "DieFromCovid19",
+                "covid_death",
+                "infection_fatality"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "mortality",
+            "short_description": "Whether the individual dies directly from the respiratory infection.",
+            "extended_description": "Binary indicator of death from symptomatic respiratory infection (excluding thrombotic complications). This is the primary mortality outcome in the model, determined by four factors: age (dramatic exponential increase in fatality), adjusted infection risk (must be infected to die), biological sex (males at higher risk), and vaccine mortality protection (vaccination reduces fatality even in breakthrough infections). The 70+ age group has fatality rates exceeding 20%, while children have near-zero fatality.",
+            "conditional_rates": {
+                "no_infection_any_context": 0.0,
+                "infection_age_70_male_unvaccinated": 0.217,
+                "infection_age_70_female_unvaccinated": 0.191,
+                "infection_age_50_male_unvaccinated": 0.00375,
+                "infection_age_30_male_unvaccinated": 0.0008,
+                "infection_age_0_9_any": 0.0
+            },
+            "sensitivity_hints": "Infection fatality is a COLLIDER with four parents: age, adjusted infection risk, sex, and vaccine mortality protection. Multiple v-structures converge here. This is the primary BENEFIT outcome—vaccination prevents this death.",
+            "related_domain_knowledge": [
+                "Infection fatality rate increases exponentially with age—the strongest risk factor.",
+                "Males have higher infection fatality rates than females across most age groups.",
+                "Vaccination dramatically reduces infection fatality even when breakthrough infection occurs.",
+                "Children have near-zero infection fatality regardless of vaccination status.",
+                "This is the primary outcome that makes vaccination beneficial in high-transmission settings."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "infection_fatality"
+        },
+        {
+            "name": "Covid19AssociatedCSVT",
+            "display_name": "Infection-Associated Cerebral Venous Thrombosis",
+            "aliases": [
+                "Covid19AssociatedCSVT",
+                "covid_csvt",
+                "infection_cerebral_clot"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "infection_complication",
+            "short_description": "Whether infection-associated cerebral sinus venous thrombosis occurs as a complication of symptomatic infection.",
+            "extended_description": "Binary indicator of cerebral sinus venous thrombosis occurring as a complication of symptomatic respiratory infection. Risk depends on having an active symptomatic infection and on biological sex. Females have higher infection-associated CSVT risk (54 per million) than males (29 per million)—the opposite sex-direction compared to portal vein thrombosis. This represents another thrombotic complication that vaccination helps prevent.",
+            "conditional_rates": {
+                "no_infection": 0.0,
+                "infection_female": 5.42e-05,
+                "infection_male": 2.89e-05
+            },
+            "sensitivity_hints": "Infection-associated CSVT is a COLLIDER caused by adjusted infection risk and biological sex (v-structure). Note the sex-direction is OPPOSITE to portal vein thrombosis—females are at higher risk here.",
+            "related_domain_knowledge": [
+                "Cerebral venous thrombosis is a recognised neurological complication of COVID-19.",
+                "The sex-distribution differs from portal vein thrombosis—females have higher CSVT risk.",
+                "Infection-associated CSVT rates are substantially higher than background CSVT rates.",
+                "Vaccination prevents this complication indirectly by reducing infection probability."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "infection_cerebral_thrombosis"
+        },
+        {
+            "name": "DieFromCovid19AssociatedCSVT",
+            "display_name": "Death from Infection-Associated Cerebral Venous Thrombosis",
+            "aliases": [
+                "DieFromCovid19AssociatedCSVT",
+                "covid_csvt_death",
+                "infection_cerebral_clot_fatality"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "mortality",
+            "short_description": "Whether the individual dies from infection-associated cerebral sinus venous thrombosis.",
+            "extended_description": "Binary indicator of death from COVID-19-associated cerebral sinus venous thrombosis. Conditional on developing infection-associated CSVT, the case fatality rate is approximately 17.4%. This is substantially higher than background CSVT case fatality (7%), reflecting the more severe coagulopathy associated with infection.",
+            "conditional_rates": {
+                "given_no_csvt": 0.0,
+                "given_csvt": 0.174
+            },
+            "sensitivity_hints": "Simple causal chain: adjusted infection risk + sex → infection-associated CSVT → death from CSVT. Case fatality is higher than background CSVT death rate.",
+            "related_domain_knowledge": [
+                "Infection-associated CSVT has a higher case fatality (~17%) than background CSVT (~7%).",
+                "The worse prognosis may reflect the systemic inflammatory and coagulopathic state of infection.",
+                "This mortality pathway is preventable through vaccination (by reducing infection risk)."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "infection_cerebral_clot_fatality"
+        },
+        {
+            "name": "DieFromCovid19AssociatedPVT",
+            "display_name": "Death from Infection-Associated Portal Vein Thrombosis",
+            "aliases": [
+                "DieFromCovid19AssociatedPVT",
+                "covid_pvt_death",
+                "infection_portal_clot_fatality"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "mortality",
+            "short_description": "Whether the individual dies from infection-associated portal vein thrombosis.",
+            "extended_description": "Binary indicator of death from COVID-19-associated portal vein thrombosis. Conditional on developing infection-associated PVT, the case fatality rate is approximately 19.8%. This is lower than background PVT case fatality (27%), possibly reflecting earlier detection in hospitalised COVID-19 patients.",
+            "conditional_rates": {
+                "given_no_pvt": 0.0,
+                "given_pvt": 0.198
+            },
+            "sensitivity_hints": "Simple causal chain: adjusted infection risk + sex → infection-associated PVT → death from PVT. This is the terminal node of the infection-portal thrombosis mortality pathway.",
+            "related_domain_knowledge": [
+                "Infection-associated PVT case fatality (~20%) is lower than background PVT (~27%), possibly due to earlier detection.",
+                "This mortality pathway is preventable through vaccination (by reducing infection risk).",
+                "Portal vein thrombosis fatality is higher than cerebral venous thrombosis fatality in the infection context."
+            ],
+            "references": [
+                "Lau2021_CORICAL"
+            ],
+            "llm_name": "infection_portal_clot_fatality"
+        }
+    ],
+    "constraints": {
+        "forbidden_edges": [
+            [
+                "infection_fatality",
+                "adjusted_infection_risk"
+            ],
+            [
+                "infection_fatality",
+                "age_cohort"
+            ],
+            [
+                "infection_fatality",
+                "vaccine_mortality_protection"
+            ],
+            [
+                "vaccine_coagulopathy_fatality",
+                "vaccine_induced_coagulopathy"
+            ],
+            [
+                "vaccine_coagulopathy_fatality",
+                "adenoviral_vaccine_doses"
+            ],
+            [
+                "baseline_cerebral_clot_fatality",
+                "baseline_cerebral_clot_risk"
+            ],
+            [
+                "baseline_portal_clot_fatality",
+                "baseline_portal_clot_risk"
+            ],
+            [
+                "infection_cerebral_clot_fatality",
+                "infection_cerebral_thrombosis"
+            ],
+            [
+                "infection_portal_clot_fatality",
+                "infection_portal_thrombosis"
+            ],
+            [
+                "adjusted_infection_risk",
+                "population_exposure_level"
+            ],
+            [
+                "adjusted_infection_risk",
+                "infection_susceptibility"
+            ],
+            [
+                "biological_sex",
+                "age_cohort"
+            ],
+            [
+                "pathogen_strain",
+                "age_cohort"
+            ],
+            [
+                "population_exposure_level",
+                "pathogen_strain"
+            ],
+            [
+                "population_exposure_level",
+                "adenoviral_vaccine_doses"
+            ],
+            [
+                "baseline_cerebral_clot_risk",
+                "adenoviral_vaccine_doses"
+            ],
+            [
+                "baseline_portal_clot_risk",
+                "adenoviral_vaccine_doses"
+            ]
+        ],
+        "partial_order": [
+            [
+                "age_cohort",
+                "baseline_cerebral_clot_risk"
+            ],
+            [
+                "age_cohort",
+                "baseline_portal_clot_risk"
+            ],
+            [
+                "age_cohort",
+                "vaccine_induced_coagulopathy"
+            ],
+            [
+                "age_cohort",
+                "infection_susceptibility"
+            ],
+            [
+                "age_cohort",
+                "infection_fatality"
+            ],
+            [
+                "adenoviral_vaccine_doses",
+                "vaccine_induced_coagulopathy"
+            ],
+            [
+                "adenoviral_vaccine_doses",
+                "vaccine_mortality_protection"
+            ],
+            [
+                "adenoviral_vaccine_doses",
+                "vaccine_infection_protection"
+            ],
+            [
+                "pathogen_strain",
+                "vaccine_mortality_protection"
+            ],
+            [
+                "pathogen_strain",
+                "vaccine_infection_protection"
+            ],
+            [
+                "pathogen_strain",
+                "infection_susceptibility"
+            ],
+            [
+                "population_exposure_level",
+                "adjusted_infection_risk"
+            ],
+            [
+                "infection_susceptibility",
+                "adjusted_infection_risk"
+            ],
+            [
+                "vaccine_infection_protection",
+                "adjusted_infection_risk"
+            ],
+            [
+                "adjusted_infection_risk",
+                "infection_fatality"
+            ],
+            [
+                "adjusted_infection_risk",
+                "infection_portal_thrombosis"
+            ],
+            [
+                "adjusted_infection_risk",
+                "infection_cerebral_thrombosis"
+            ],
+            [
+                "biological_sex",
+                "infection_fatality"
+            ],
+            [
+                "biological_sex",
+                "infection_portal_thrombosis"
+            ],
+            [
+                "biological_sex",
+                "infection_cerebral_thrombosis"
+            ],
+            [
+                "vaccine_mortality_protection",
+                "infection_fatality"
+            ],
+            [
+                "vaccine_induced_coagulopathy",
+                "vaccine_coagulopathy_fatality"
+            ],
+            [
+                "baseline_cerebral_clot_risk",
+                "baseline_cerebral_clot_fatality"
+            ],
+            [
+                "baseline_portal_clot_risk",
+                "baseline_portal_clot_fatality"
+            ],
+            [
+                "infection_cerebral_thrombosis",
+                "infection_cerebral_clot_fatality"
+            ],
+            [
+                "infection_portal_thrombosis",
+                "infection_portal_clot_fatality"
+            ]
+        ],
+        "tiers": {
+            "exogenous": [
+                "pathogen_strain",
+                "biological_sex",
+                "adenoviral_vaccine_doses",
+                "age_cohort",
+                "population_exposure_level"
+            ],
+            "biological_mechanisms": [
+                "baseline_cerebral_clot_risk",
+                "baseline_portal_clot_risk",
+                "vaccine_induced_coagulopathy",
+                "vaccine_mortality_protection",
+                "vaccine_infection_protection",
+                "infection_susceptibility"
+            ],
+            "intermediate_outcomes": [
+                "adjusted_infection_risk",
+                "infection_portal_thrombosis",
+                "infection_cerebral_thrombosis"
+            ],
+            "terminal_outcomes": [
+                "infection_fatality",
+                "vaccine_coagulopathy_fatality",
+                "baseline_cerebral_clot_fatality",
+                "baseline_portal_clot_fatality",
+                "infection_cerebral_clot_fatality",
+                "infection_portal_clot_fatality"
+            ]
+        },
+        "notes": "Constraints reflect biomedical reasoning: demographic and epidemiological context → biological mechanisms and vaccine effects → infection and complication events → mortality outcomes. Outcomes cannot cause their upstream determinants."
+    },
+    "causal_principles": [
+        {
+            "id": "vaccine_dual_role",
+            "statement": "Vaccination simultaneously creates a BENEFIT (protection against infection and death) and a RISK (rare thrombotic adverse event). Both pathways must be evaluated jointly.",
+            "references": [
+                "Lau2021_CORICAL"
+            ]
+        },
+        {
+            "id": "transmission_modulates_benefit",
+            "statement": "The absolute benefit of vaccination is proportional to community transmission intensity. In zero-transmission settings, vaccine benefit is zero and only risk remains.",
+            "references": [
+                "Lau2021_CORICAL"
+            ]
+        },
+        {
+            "id": "age_stratified_risk",
+            "statement": "Age has opposing effects on the risk-benefit balance: older age increases infection fatality (favouring vaccination) but younger age has higher vaccine-associated TTS risk (disfavouring vaccination).",
+            "references": [
+                "Lau2021_CORICAL"
+            ]
+        },
+        {
+            "id": "three_thrombotic_pathways",
+            "statement": "Thrombotic events arise from three distinct causal pathways: background (age-dependent), vaccine-induced (dose and age-dependent), and infection-associated (infection and sex-dependent). Each has independent causal mechanisms.",
+            "references": [
+                "Lau2021_CORICAL"
+            ]
+        },
+        {
+            "id": "outcomes_do_not_cause_exposures",
+            "statement": "Mortality and complication outcomes cannot cause their upstream determinants. Causal flow is from exposures and conditions to health events to fatal outcomes.",
+            "references": [
+                "Epidemiology_Principles"
+            ]
+        },
+        {
+            "id": "infection_required_for_complications",
+            "statement": "Infection-associated complications (death, thrombotic events) require active symptomatic infection. Without infection, these downstream events have zero probability.",
+            "references": [
+                "Lau2021_CORICAL"
+            ]
+        }
+    ],
+    "ground_truth": {
+        "num_nodes": 20,
+        "num_edges": 26,
+        "edges": [
+            [
+                "Age",
+                "BackgroundCSVTOver6Weeks"
+            ],
+            [
+                "Age",
+                "BackgroundPVTOver6Weeks"
+            ],
+            [
+                "Age",
+                "VaccineAssociatedTTS"
+            ],
+            [
+                "Age",
+                "RiskOfSymptomaticInfection"
+            ],
+            [
+                "Age",
+                "DieFromCovid19"
+            ],
+            [
+                "AZVaccineDoses",
+                "VaccineAssociatedTTS"
+            ],
+            [
+                "AZVaccineDoses",
+                "VaccineEffectivenessAgainstDeathIfInfected"
+            ],
+            [
+                "AZVaccineDoses",
+                "VaccineEffectivenessAgainstSymptomaticInfection"
+            ],
+            [
+                "SARSCoV2Variant",
+                "VaccineEffectivenessAgainstDeathIfInfected"
+            ],
+            [
+                "SARSCoV2Variant",
+                "VaccineEffectivenessAgainstSymptomaticInfection"
+            ],
+            [
+                "SARSCoV2Variant",
+                "RiskOfSymptomaticInfection"
+            ],
+            [
+                "IntensityOfCommunityTransmission",
+                "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus"
+            ],
+            [
+                "RiskOfSymptomaticInfection",
+                "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus"
+            ],
+            [
+                "VaccineEffectivenessAgainstSymptomaticInfection",
+                "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus"
+            ],
+            [
+                "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus",
+                "Covid19AssociatedPVT"
+            ],
+            [
+                "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus",
+                "Covid19AssociatedCSVT"
+            ],
+            [
+                "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus",
+                "DieFromCovid19"
+            ],
+            [
+                "Sex",
+                "Covid19AssociatedPVT"
+            ],
+            [
+                "Sex",
+                "Covid19AssociatedCSVT"
+            ],
+            [
+                "Sex",
+                "DieFromCovid19"
+            ],
+            [
+                "VaccineEffectivenessAgainstDeathIfInfected",
+                "DieFromCovid19"
+            ],
+            [
+                "BackgroundCSVTOver6Weeks",
+                "DieFromBackgroundCSVT"
+            ],
+            [
+                "BackgroundPVTOver6Weeks",
+                "DieFromBackgroundPVT"
+            ],
+            [
+                "VaccineAssociatedTTS",
+                "DieFromVaccineAssociatedTTS"
+            ],
+            [
+                "Covid19AssociatedCSVT",
+                "DieFromCovid19AssociatedCSVT"
+            ],
+            [
+                "Covid19AssociatedPVT",
+                "DieFromCovid19AssociatedPVT"
+            ]
+        ],
+        "v_structures": [
+            {
+                "canonical": [
+                    "AZVaccineDoses",
+                    "VaccineAssociatedTTS",
+                    "Age"
+                ],
+                "experiment": [
+                    "adenoviral_vaccine_doses",
+                    "vaccine_induced_coagulopathy",
+                    "age_cohort"
+                ],
+                "description": "Vaccine dose count and age are independent causes of vaccine-induced thrombotic syndrome."
+            },
+            {
+                "canonical": [
+                    "AZVaccineDoses",
+                    "VaccineEffectivenessAgainstDeathIfInfected",
+                    "SARSCoV2Variant"
+                ],
+                "experiment": [
+                    "adenoviral_vaccine_doses",
+                    "vaccine_mortality_protection",
+                    "pathogen_strain"
+                ],
+                "description": "Vaccine dose count and pathogen variant are independent causes of mortality protection effectiveness."
+            },
+            {
+                "canonical": [
+                    "AZVaccineDoses",
+                    "VaccineEffectivenessAgainstSymptomaticInfection",
+                    "SARSCoV2Variant"
+                ],
+                "experiment": [
+                    "adenoviral_vaccine_doses",
+                    "vaccine_infection_protection",
+                    "pathogen_strain"
+                ],
+                "description": "Vaccine dose count and pathogen variant are independent causes of infection protection effectiveness."
+            },
+            {
+                "canonical": [
+                    "Age",
+                    "RiskOfSymptomaticInfection",
+                    "SARSCoV2Variant"
+                ],
+                "experiment": [
+                    "age_cohort",
+                    "infection_susceptibility",
+                    "pathogen_strain"
+                ],
+                "description": "Age and pathogen variant are independent causes of baseline infection susceptibility."
+            },
+            {
+                "canonical": [
+                    "IntensityOfCommunityTransmission",
+                    "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus",
+                    "RiskOfSymptomaticInfection"
+                ],
+                "experiment": [
+                    "population_exposure_level",
+                    "adjusted_infection_risk",
+                    "infection_susceptibility"
+                ],
+                "description": "Community transmission and baseline susceptibility are independent determinants of adjusted infection risk."
+            },
+            {
+                "canonical": [
+                    "IntensityOfCommunityTransmission",
+                    "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus",
+                    "VaccineEffectivenessAgainstSymptomaticInfection"
+                ],
+                "experiment": [
+                    "population_exposure_level",
+                    "adjusted_infection_risk",
+                    "vaccine_infection_protection"
+                ],
+                "description": "Community transmission and vaccine infection protection are independent determinants of adjusted infection risk."
+            },
+            {
+                "canonical": [
+                    "RiskOfSymptomaticInfection",
+                    "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus",
+                    "VaccineEffectivenessAgainstSymptomaticInfection"
+                ],
+                "experiment": [
+                    "infection_susceptibility",
+                    "adjusted_infection_risk",
+                    "vaccine_infection_protection"
+                ],
+                "description": "Baseline susceptibility and vaccine protection are independent determinants of adjusted infection risk."
+            },
+            {
+                "canonical": [
+                    "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus",
+                    "Covid19AssociatedPVT",
+                    "Sex"
+                ],
+                "experiment": [
+                    "adjusted_infection_risk",
+                    "infection_portal_thrombosis",
+                    "biological_sex"
+                ],
+                "description": "Adjusted infection risk and biological sex are independent causes of infection-associated portal vein thrombosis."
+            },
+            {
+                "canonical": [
+                    "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus",
+                    "Covid19AssociatedCSVT",
+                    "Sex"
+                ],
+                "experiment": [
+                    "adjusted_infection_risk",
+                    "infection_cerebral_thrombosis",
+                    "biological_sex"
+                ],
+                "description": "Adjusted infection risk and biological sex are independent causes of infection-associated cerebral venous thrombosis."
+            },
+            {
+                "canonical": [
+                    "Age",
+                    "DieFromCovid19",
+                    "Sex"
+                ],
+                "experiment": [
+                    "age_cohort",
+                    "infection_fatality",
+                    "biological_sex"
+                ],
+                "description": "Age and sex are independent demographic causes of infection fatality (among the four parents)."
+            },
+            {
+                "canonical": [
+                    "Age",
+                    "DieFromCovid19",
+                    "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus"
+                ],
+                "experiment": [
+                    "age_cohort",
+                    "infection_fatality",
+                    "adjusted_infection_risk"
+                ],
+                "description": "Age and adjusted infection risk are independent causes of infection fatality."
+            },
+            {
+                "canonical": [
+                    "Age",
+                    "DieFromCovid19",
+                    "VaccineEffectivenessAgainstDeathIfInfected"
+                ],
+                "experiment": [
+                    "age_cohort",
+                    "infection_fatality",
+                    "vaccine_mortality_protection"
+                ],
+                "description": "Age and vaccine mortality protection are independent causes of infection fatality."
+            },
+            {
+                "canonical": [
+                    "Sex",
+                    "DieFromCovid19",
+                    "VaccineEffectivenessAgainstDeathIfInfected"
+                ],
+                "experiment": [
+                    "biological_sex",
+                    "infection_fatality",
+                    "vaccine_mortality_protection"
+                ],
+                "description": "Sex and vaccine mortality protection are independent causes of infection fatality."
+            },
+            {
+                "canonical": [
+                    "RiskOfSymptomaticInfectionUnderCurrentTransmissionAndVaccinationStatus",
+                    "DieFromCovid19",
+                    "VaccineEffectivenessAgainstDeathIfInfected"
+                ],
+                "experiment": [
+                    "adjusted_infection_risk",
+                    "infection_fatality",
+                    "vaccine_mortality_protection"
+                ],
+                "description": "Adjusted infection risk and vaccine mortality protection are independent causes of infection fatality."
+            }
+        ],
+        "conditional_independencies": [
+            {
+                "statement": "SARSCoV2Variant ⊥ Sex",
+                "experiment_names": "pathogen_strain ⊥ biological_sex",
+                "description": "Pathogen variant is independent of biological sex (both exogenous)."
+            },
+            {
+                "statement": "SARSCoV2Variant ⊥ Age",
+                "experiment_names": "pathogen_strain ⊥ age_cohort",
+                "description": "Pathogen variant is independent of patient age (both exogenous)."
+            },
+            {
+                "statement": "AZVaccineDoses ⊥ Age",
+                "experiment_names": "adenoviral_vaccine_doses ⊥ age_cohort",
+                "description": "Vaccination status is independent of patient age (both exogenous in this model)."
+            },
+            {
+                "statement": "AZVaccineDoses ⊥ IntensityOfCommunityTransmission",
+                "experiment_names": "adenoviral_vaccine_doses ⊥ population_exposure_level",
+                "description": "Vaccination status is independent of community transmission intensity."
+            },
+            {
+                "statement": "BackgroundCSVTOver6Weeks ⊥ BackgroundPVTOver6Weeks | Age",
+                "experiment_names": "baseline_cerebral_clot_risk ⊥ baseline_portal_clot_risk | age_cohort",
+                "description": "Background cerebral and portal thrombosis are conditionally independent given age (common cause)."
+            },
+            {
+                "statement": "VaccineAssociatedTTS ⊥ VaccineEffectivenessAgainstDeathIfInfected | AZVaccineDoses",
+                "experiment_names": "vaccine_induced_coagulopathy ⊥ vaccine_mortality_protection | adenoviral_vaccine_doses",
+                "description": "Vaccine-induced TTS is conditionally independent of mortality protection given dose count (Age influences TTS but not VE against death in this model, and SARSCoV2Variant influences VE but not TTS)."
+            },
+            {
+                "statement": "DieFromBackgroundCSVT ⊥ DieFromVaccineAssociatedTTS",
+                "experiment_names": "baseline_cerebral_clot_fatality ⊥ vaccine_coagulopathy_fatality",
+                "description": "Background CSVT death and vaccine TTS death are marginally independent (distinct causal pathways)."
+            },
+            {
+                "statement": "Covid19AssociatedPVT ⊥ VaccineAssociatedTTS",
+                "experiment_names": "infection_portal_thrombosis ⊥ vaccine_induced_coagulopathy",
+                "description": "Infection-associated PVT and vaccine-associated TTS are marginally independent (different thrombotic pathways)."
+            }
+        ]
+    }
+}

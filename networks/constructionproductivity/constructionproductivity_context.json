@@ -1,0 +1,1188 @@
+{
+    "schema_version": "2.0",
+    "network": "constructionproductivity",
+    "domain": "construction_management",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a construction productivity prediction model for building projects, with disguised variable names to prevent memorisation.",
+    "provenance": {
+        "source_network": "constructionproductivity",
+        "source_reference": "Khanh, H. D., & Kim, S. Y. (2022). Construction productivity prediction through Bayesian networks for building projects: Case from Vietnam. Engineering, Construction and Architectural Management, 30(5), 2075-2100.",
+        "source_url": null,
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "Network derived from a study of construction productivity factors in Vietnamese building projects. 18 variables and 19 edges. Low memorisation risk as this is a domain-specific model from a recent publication, unlikely to appear in LLM training corpora as a benchmark."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This network models factors influencing construction labour productivity on building sites.",
+            "Consider causal ordering: exogenous conditions (demographics, environment, finance) → resource availability and worker attributes → proximate work conditions → productivity outcome.",
+            "Project funding affects resource provision (skilled labour, tools, materials).",
+            "Worker demographics (age, gender) and behavioural factors influence work output.",
+            "Environmental conditions (weather) affect worker health and site safety.",
+            "Engineering competence affects planning quality and technology adoption.",
+            "Multiple independent causal pathways converge on the final productivity outcome.",
+            "Some intermediate variables act as mediators between exogenous factors and productivity."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original variable names from the source publication.",
+            "Any hint about the specific academic paper or study context.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, conditional rates, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "base_rate",
+                "conditional_rates",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "AdverseWeather",
+            "display_name": "Adverse Weather Conditions",
+            "aliases": [
+                "AdverseWeather",
+                "weather",
+                "climate"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "exogenous",
+            "category": "environmental",
+            "short_description": "Whether adverse weather conditions (rain, extreme heat, storms) are present on site.",
+            "extended_description": "Binary indicator of unfavourable weather conditions affecting the construction site. Adverse weather includes heavy rain, extreme temperatures, high winds, and storms. In tropical climates such as Vietnam, monsoon seasons and high humidity significantly disrupt outdoor construction work. Approximately 47% of project days experience some form of adverse weather.",
+            "base_rate": {
+                "no": 0.53,
+                "yes": 0.47
+            },
+            "sensitivity_hints": "Weather is an external environmental factor outside management control. It affects worker health and safety but does not directly determine resource availability or worker skills.",
+            "related_domain_knowledge": [
+                "Tropical construction sites face frequent weather disruptions during monsoon seasons.",
+                "Adverse weather affects outdoor activities more than indoor finishing work.",
+                "Weather conditions are independent of project financing or workforce demographics.",
+                "Poor weather increases health risks (heat stress, slips) and may halt work entirely."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "climate_disruption"
+        },
+        {
+            "name": "EngineerQualification",
+            "display_name": "Engineer Qualification Level",
+            "aliases": [
+                "EngineerQualification",
+                "engineer_skill",
+                "technical_leadership"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "exogenous",
+            "category": "human_capital",
+            "short_description": "Whether the site engineer holds adequate professional qualifications and competence.",
+            "extended_description": "Binary indicator of the site engineer's professional qualification level. Qualified engineers possess formal education, relevant certifications, and demonstrated technical competence. In Vietnamese construction, approximately 67% of site engineers meet qualification standards. Engineer quality influences planning, method selection, and technology adoption on site.",
+            "base_rate": {
+                "no": 0.33,
+                "yes": 0.67
+            },
+            "sensitivity_hints": "Engineer qualifications are an upstream human capital factor. They influence planning and method choices but do not directly affect worker demographics or site weather.",
+            "related_domain_knowledge": [
+                "Site engineers determine construction methods and work sequencing.",
+                "Qualified engineers are more likely to adopt modern construction technologies.",
+                "Engineer competence is independent of worker-level factors like age or attitude.",
+                "Professional qualification standards vary across countries and project types."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "engineering_credentials"
+        },
+        {
+            "name": "Sex",
+            "display_name": "Worker Gender Composition",
+            "aliases": [
+                "Sex",
+                "gender",
+                "workforce_gender"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "exogenous",
+            "category": "demographic",
+            "short_description": "Whether the workforce is predominantly male.",
+            "extended_description": "Binary indicator of workforce gender composition. In Vietnamese construction, approximately 53% of workers are male. Gender composition affects the types of tasks workers are assigned to and the overall work pace, particularly for physically demanding activities such as formwork, rebar placement, and concrete pouring.",
+            "base_rate": {
+                "no": 0.47,
+                "yes": 0.53
+            },
+            "sensitivity_hints": "Gender is a demographic factor that may influence task assignment and physical work output. It is independent of project financing, weather, and engineering decisions.",
+            "related_domain_knowledge": [
+                "Construction in developing countries often has significant female workforce participation.",
+                "Task allocation may differ by gender due to physical demands of certain activities.",
+                "Gender composition is an exogenous site characteristic, not influenced by other project factors.",
+                "Gender effects on productivity are mediated through work pace and task assignment."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "worker_gender"
+        },
+        {
+            "name": "Attitude",
+            "display_name": "Worker Attitude and Motivation",
+            "aliases": [
+                "Attitude",
+                "motivation",
+                "work_ethic"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "exogenous",
+            "category": "behavioural",
+            "short_description": "Whether workers display positive attitude and motivation towards their tasks.",
+            "extended_description": "Binary indicator of workforce attitude and intrinsic motivation. Positive attitude encompasses willingness to work, conscientiousness, and commitment to task completion. In Vietnamese building projects, approximately 90% of workers exhibit positive attitudes, reflecting cultural work ethic norms. Worker attitude directly influences work pace and output frequency.",
+            "base_rate": {
+                "no": 0.1,
+                "yes": 0.9
+            },
+            "sensitivity_hints": "Attitude is a behavioural factor that directly influences work output. It is treated as exogenous in this model—not caused by other measured variables. High base rate (90% positive) means most variation in productivity comes from other factors.",
+            "related_domain_knowledge": [
+                "Worker motivation is a key driver of voluntary effort and work pace.",
+                "Attitude is influenced by cultural norms, payment regularity, and working conditions.",
+                "In this model, attitude is treated as an exogenous given, not dependent on other variables.",
+                "Positive attitude alone is insufficient for productivity without adequate resources and skills."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "worker_motivation"
+        },
+        {
+            "name": "Age",
+            "display_name": "Worker Age Group",
+            "aliases": [
+                "Age",
+                "worker_age",
+                "age_group"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "exogenous",
+            "category": "demographic",
+            "short_description": "Whether workers are in a mature age group with potential for accumulated experience.",
+            "extended_description": "Binary indicator of worker age group. Mature workers (approximately 73% of the workforce) bring accumulated site knowledge and familiarity with construction processes. Age influences experience level, which in turn affects workmanship quality. The relationship between age and productivity is mediated through experience and skill accumulation.",
+            "base_rate": {
+                "no": 0.27,
+                "yes": 0.73
+            },
+            "sensitivity_hints": "Age is a demographic factor whose effect on productivity is indirect, mediated through experience. Older workers tend to have more experience but age alone does not determine skill level.",
+            "related_domain_knowledge": [
+                "Age is a proxy for potential experience accumulation in construction trades.",
+                "Younger workers may lack site experience but bring physical stamina.",
+                "The age-productivity relationship is non-linear and mediated by skill development.",
+                "Age is independent of project-level factors like financing or engineering quality."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "worker_age_group"
+        },
+        {
+            "name": "OwnerFinance",
+            "display_name": "Owner Financial Capacity",
+            "aliases": [
+                "OwnerFinance",
+                "project_finance",
+                "funding"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "exogenous",
+            "category": "economic",
+            "short_description": "Whether the project owner has adequate financial resources to support the project.",
+            "extended_description": "Binary indicator of the project owner's financial capacity. Adequate financing (present in approximately 90% of projects) enables procurement of skilled labour, proper tools and equipment, and timely material delivery. Financial constraints ripple through the project, affecting multiple resource-availability variables simultaneously. This is a key upstream economic factor with broad downstream effects.",
+            "base_rate": {
+                "no": 0.1,
+                "yes": 0.9
+            },
+            "sensitivity_hints": "Owner finance is a critical upstream factor that influences multiple resource variables simultaneously. It acts as a common cause of several downstream resource-availability nodes. Consider its role as a potential confounder.",
+            "related_domain_knowledge": [
+                "Project financing determines the ability to hire skilled workers and procure materials.",
+                "Financial constraints cause simultaneous shortages across labour, tools, and materials.",
+                "Owner finance is independent of site-level factors like weather or worker demographics.",
+                "Late payments and cash flow problems are common causes of construction delays."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "project_funding_capacity"
+        },
+        {
+            "name": "SkilledWorkers",
+            "display_name": "Skilled Labour Availability",
+            "aliases": [
+                "SkilledWorkers",
+                "skilled_labour",
+                "workforce_skill"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "resource",
+            "short_description": "Whether adequately skilled construction workers are available on site.",
+            "extended_description": "Binary indicator of skilled labour availability on the construction site. The presence of skilled workers depends on project financing—adequate funding enables hiring and retaining qualified tradespeople. Skilled workers contribute to higher work output through efficient task execution. This variable mediates the effect of project financing on work pace.",
+            "conditional_rates": {
+                "given_poor_finance": {
+                    "no": 0.17,
+                    "yes": 0.83
+                },
+                "given_adequate_finance": {
+                    "no": 0.24,
+                    "yes": 0.76
+                }
+            },
+            "sensitivity_hints": "Skilled labour availability is determined by project financing. It directly influences work pace alongside other resource and behavioural factors.",
+            "related_domain_knowledge": [
+                "Skilled labour shortages are a chronic issue in developing-country construction.",
+                "Financial capacity determines ability to attract and retain skilled tradespeople.",
+                "Skilled workers execute tasks faster and with fewer errors than unskilled labour.",
+                "Labour skill level affects work pace but not directly the technology or planning choices."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "skilled_labour_supply"
+        },
+        {
+            "name": "WorkingTools",
+            "display_name": "Working Tools and Equipment",
+            "aliases": [
+                "WorkingTools",
+                "tools",
+                "equipment"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "resource",
+            "short_description": "Whether adequate working tools and equipment are available on site.",
+            "extended_description": "Binary indicator of tool and equipment adequacy on site. Proper tools depend on project financing for procurement and maintenance. Adequate equipment enables workers to perform tasks efficiently and at a sustained pace. Tool availability is one of several resource factors that jointly determine work output frequency.",
+            "conditional_rates": {
+                "given_poor_finance": {
+                    "no": 0.34,
+                    "yes": 0.66
+                },
+                "given_adequate_finance": {
+                    "no": 0.213,
+                    "yes": 0.787
+                }
+            },
+            "sensitivity_hints": "Tool availability is driven by project financing. It influences work pace alongside labour skills, materials, attitude, and gender composition.",
+            "related_domain_knowledge": [
+                "Inadequate tools force workers to use manual methods, reducing output rate.",
+                "Equipment procurement requires upfront capital investment by the project owner.",
+                "Tool availability is independent of weather conditions and worker demographics.",
+                "Proper tools reduce physical strain and enable consistent work pacing."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "equipment_provision"
+        },
+        {
+            "name": "MaterialPresence",
+            "display_name": "Construction Material Availability",
+            "aliases": [
+                "MaterialPresence",
+                "materials",
+                "material_supply"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "resource",
+            "short_description": "Whether construction materials are available on site when needed.",
+            "extended_description": "Binary indicator of timely material availability on the construction site. Material procurement depends on project financing—adequate funds ensure timely ordering and delivery of concrete, steel, formwork, and other supplies. Material shortages cause idle time and disrupt work continuity, directly reducing work pace and output frequency.",
+            "conditional_rates": {
+                "given_poor_finance": {
+                    "no": 0.373,
+                    "yes": 0.627
+                },
+                "given_adequate_finance": {
+                    "no": 0.113,
+                    "yes": 0.887
+                }
+            },
+            "sensitivity_hints": "Material availability is strongly influenced by project financing. It is one of several factors determining work pace. Material shortages create bottlenecks even when labour and tools are adequate.",
+            "related_domain_knowledge": [
+                "Material shortages are among the most common causes of construction delays.",
+                "Timely procurement requires adequate cash flow from the project owner.",
+                "Material availability is independent of worker characteristics (age, gender, attitude).",
+                "Just-in-time delivery strategies reduce storage costs but increase shortage risk."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "material_supply"
+        },
+        {
+            "name": "HealthStatus",
+            "display_name": "Worker Health Status",
+            "aliases": [
+                "HealthStatus",
+                "health",
+                "worker_wellbeing"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "worker_condition",
+            "short_description": "Whether workers are in good health condition for site work.",
+            "extended_description": "Binary indicator of overall workforce health status. Worker health is affected by environmental conditions—adverse weather (extreme heat, rain, humidity) increases the risk of heat stress, respiratory issues, and physical injuries. Poor health status leads to increased accident rates and reduced capacity for sustained physical work.",
+            "conditional_rates": {
+                "given_no_adverse_weather": {
+                    "no": 0.353,
+                    "yes": 0.647
+                },
+                "given_adverse_weather": {
+                    "no": 0.56,
+                    "yes": 0.44
+                }
+            },
+            "sensitivity_hints": "Health status mediates the effect of weather on site safety. Adverse weather degrades worker health, which in turn increases accident risk. Health does not directly affect resource availability or technology choices.",
+            "related_domain_knowledge": [
+                "Heat stress is a major health concern on tropical construction sites.",
+                "Poor health increases fatigue, reduces alertness, and raises accident probability.",
+                "Worker health is influenced by environmental conditions, not by project financing.",
+                "Health and safety are closely linked—poor health is a precursor to workplace accidents."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "workforce_health"
+        },
+        {
+            "name": "PlanningAndMethod",
+            "display_name": "Construction Planning and Method",
+            "aliases": [
+                "PlanningAndMethod",
+                "planning",
+                "construction_method"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "management",
+            "short_description": "Whether construction planning and method selection are adequate.",
+            "extended_description": "Binary indicator of the quality of construction planning and method selection. Planning quality depends on the engineer's qualifications—qualified engineers develop better work sequences, resource allocation plans, and method statements. Good planning enables adoption of appropriate construction technologies and efficient task execution.",
+            "conditional_rates": {
+                "given_unqualified_engineer": {
+                    "no": 0.27,
+                    "yes": 0.73
+                },
+                "given_qualified_engineer": {
+                    "no": 0.373,
+                    "yes": 0.627
+                }
+            },
+            "sensitivity_hints": "Planning quality is determined by engineering competence. It mediates the effect of engineer qualifications on technology adoption. Planning does not directly influence worker-level factors like health or attitude.",
+            "related_domain_knowledge": [
+                "Construction planning determines work sequencing, resource scheduling, and method selection.",
+                "Poor planning causes rework, idle time, and inefficient resource utilisation.",
+                "Engineer qualifications are the primary determinant of planning quality.",
+                "Planning quality influences which technologies can be effectively deployed on site."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "construction_methodology"
+        },
+        {
+            "name": "Experience",
+            "display_name": "Worker Experience Level",
+            "aliases": [
+                "Experience",
+                "site_experience",
+                "work_history"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "human_capital",
+            "short_description": "Whether workers have significant construction site experience.",
+            "extended_description": "Binary indicator of workforce experience level. Experience accumulates with age—older workers have had more opportunity to develop site-specific skills and knowledge. Experienced workers demonstrate better workmanship through familiarity with construction techniques, material handling, and quality standards.",
+            "conditional_rates": {
+                "given_younger_workers": {
+                    "no": 0.537,
+                    "yes": 0.463
+                },
+                "given_mature_workers": {
+                    "no": 0.297,
+                    "yes": 0.703
+                }
+            },
+            "sensitivity_hints": "Experience is influenced by worker age and in turn determines workmanship quality. It is a key mediator in the age → experience → workmanship → task complexity causal chain.",
+            "related_domain_knowledge": [
+                "Construction experience is primarily gained through on-site practice over years.",
+                "Experienced workers make fewer errors and handle complex tasks more efficiently.",
+                "Age is a necessary but not sufficient condition for experience accumulation.",
+                "Experience effects are mediated through workmanship quality, not directly on productivity."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "site_experience"
+        },
+        {
+            "name": "Workmanship",
+            "display_name": "Workmanship Quality",
+            "aliases": [
+                "Workmanship",
+                "craft_skill",
+                "work_quality"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "quality",
+            "short_description": "Whether workers demonstrate good workmanship and craft quality.",
+            "extended_description": "Binary indicator of workmanship quality on site. Good workmanship depends on worker experience—experienced workers produce higher-quality work with fewer defects. Workmanship quality determines the ability to handle complex tasks; poor workmanship makes complex tasks disproportionately difficult and error-prone, while skilled workers manage complexity more effectively.",
+            "conditional_rates": {
+                "given_inexperienced": {
+                    "no": 0.4,
+                    "yes": 0.6
+                },
+                "given_experienced": {
+                    "no": 0.2,
+                    "yes": 0.8
+                }
+            },
+            "sensitivity_hints": "Workmanship is determined by experience and in turn affects task complexity handling. It is a mediator in the causal chain from worker demographics to task execution capability.",
+            "related_domain_knowledge": [
+                "Workmanship encompasses accuracy, finish quality, and adherence to specifications.",
+                "Poor workmanship leads to rework, which directly reduces net productivity.",
+                "Workmanship quality is distinct from work pace—a worker can be fast but imprecise.",
+                "Skilled workmanship reduces the effective complexity of construction tasks."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "craft_quality"
+        },
+        {
+            "name": "WorkingFrequency",
+            "display_name": "Working Frequency and Pace",
+            "aliases": [
+                "WorkingFrequency",
+                "work_rate",
+                "output_frequency"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "operations",
+            "short_description": "Whether workers maintain a high working frequency and sustained work pace.",
+            "extended_description": "Binary indicator of work output frequency and sustained pace. Working frequency is a convergence point for multiple factors: worker attitude and motivation, material availability, gender composition, skilled labour availability, and tool adequacy all jointly determine how frequently and consistently work is performed. This is a key hub variable with five parent influences.",
+            "sensitivity_hints": "Working frequency is a COLLIDER with five parents from different causal pathways. Multiple independent factors (behavioural, resource, demographic) converge here. Consider v-structure implications when reasoning about conditional independence.",
+            "related_domain_knowledge": [
+                "Work pace depends simultaneously on worker willingness, resource availability, and workforce composition.",
+                "Material shortages or tool inadequacy create idle time regardless of worker motivation.",
+                "Sustained high work frequency requires alignment of multiple enabling factors.",
+                "Working frequency directly affects the final productivity outcome."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "work_pace"
+        },
+        {
+            "name": "TechnologyLevel",
+            "display_name": "Construction Technology Level",
+            "aliases": [
+                "TechnologyLevel",
+                "technology",
+                "tech_level"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "technology",
+            "short_description": "Whether advanced construction technology and methods are employed on site.",
+            "extended_description": "Binary indicator of the level of construction technology deployed on site. Technology adoption depends on the quality of construction planning and method selection—good planning enables identification and deployment of appropriate modern techniques (mechanised formwork, prefabrication, advanced concrete placement). Higher technology levels directly improve productivity through process efficiency.",
+            "conditional_rates": {
+                "given_poor_planning": {
+                    "no": 0.3,
+                    "yes": 0.7
+                },
+                "given_good_planning": {
+                    "no": 0.27,
+                    "yes": 0.73
+                }
+            },
+            "sensitivity_hints": "Technology level is determined by planning and method quality. It directly influences productivity as one of four proximate factors. Technology operates independently of worker health and safety pathways.",
+            "related_domain_knowledge": [
+                "Construction technology ranges from fully manual to highly mechanised methods.",
+                "Technology adoption requires both engineering knowledge and financial investment.",
+                "In developing countries, technology adoption is often constrained by engineer capability.",
+                "Higher technology levels reduce reliance on manual labour intensity for output."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "technical_sophistication"
+        },
+        {
+            "name": "Accidents",
+            "display_name": "Workplace Safety Incidents",
+            "aliases": [
+                "Accidents",
+                "safety_incidents",
+                "workplace_injuries"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "safety",
+            "short_description": "Whether workplace accidents and safety incidents occur on site.",
+            "extended_description": "Binary indicator of workplace accident and safety incident occurrence. Accident likelihood depends on worker health status—workers in poor health (due to adverse weather exposure, fatigue, or illness) are more prone to accidents. Safety incidents disrupt work, cause lost time, and directly reduce construction productivity through work stoppages and reduced workforce availability.",
+            "conditional_rates": {
+                "given_poor_health": {
+                    "no": 0.413,
+                    "yes": 0.587
+                },
+                "given_good_health": {
+                    "no": 0.383,
+                    "yes": 0.617
+                }
+            },
+            "sensitivity_hints": "Accidents are caused by poor worker health and in turn directly affect productivity. They represent the safety pathway from environmental conditions to output. Accidents are independent of resource availability and technology choices (given health status).",
+            "related_domain_knowledge": [
+                "Construction is among the most dangerous industries globally.",
+                "Accidents cause direct productivity loss through work stoppages and lost labour-days.",
+                "Worker health is a precursor to accident risk—fatigued or ill workers are more accident-prone.",
+                "Safety incidents in construction include falls, struck-by events, and equipment injuries."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "site_safety_incidents"
+        },
+        {
+            "name": "TaskComplexity",
+            "display_name": "Task Complexity Level",
+            "aliases": [
+                "TaskComplexity",
+                "task_difficulty",
+                "work_complexity"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "task",
+            "short_description": "Whether current construction tasks are of manageable complexity given workforce capability.",
+            "extended_description": "Binary indicator of effective task complexity relative to workforce capability. Task complexity is moderated by workmanship quality—skilled workers with good workmanship can handle complex tasks more effectively, reducing relative difficulty. When workmanship is poor, even moderately complex tasks become problematic. Task complexity directly affects the final productivity outcome.",
+            "conditional_rates": {
+                "given_poor_workmanship": {
+                    "no": 0.597,
+                    "yes": 0.403
+                },
+                "given_good_workmanship": {
+                    "no": 0.297,
+                    "yes": 0.703
+                }
+            },
+            "sensitivity_hints": "Task complexity is influenced by workmanship quality. It represents the skill-adequacy pathway to productivity. It is independent of the safety and resource pathways (given workmanship).",
+            "related_domain_knowledge": [
+                "Construction task complexity varies from simple excavation to intricate structural work.",
+                "The effective difficulty of a task depends on worker skill relative to task demands.",
+                "Complex tasks require more experienced workers and better workmanship to execute efficiently.",
+                "Task complexity directly reduces output rate when it exceeds workforce capability."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "task_difficulty"
+        },
+        {
+            "name": "Productivity",
+            "display_name": "Construction Productivity",
+            "aliases": [
+                "Productivity",
+                "output",
+                "labour_productivity"
+            ],
+            "type": "binary",
+            "states": [
+                "no",
+                "yes"
+            ],
+            "role": "endogenous",
+            "category": "outcome",
+            "short_description": "Whether construction productivity meets target levels.",
+            "extended_description": "Binary indicator of whether construction labour productivity meets or exceeds target levels. Productivity is the final outcome variable, determined by four proximate factors: workplace accidents (safety pathway), task complexity (skill pathway), technology level (engineering pathway), and working frequency (resource and behavioural pathway). This is the convergence point of all causal chains in the network.",
+            "sensitivity_hints": "Productivity is the terminal outcome node with four parent pathways. It is a COLLIDER where independent causal chains converge. All other variables in the network influence productivity either directly or through mediating chains.",
+            "related_domain_knowledge": [
+                "Construction productivity is typically measured as output per labour-hour.",
+                "Multiple independent factors must align for high productivity—deficiency in any pathway reduces output.",
+                "Productivity is the primary performance metric for construction project management.",
+                "Improving productivity requires simultaneous attention to safety, skills, technology, and resources."
+            ],
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ],
+            "llm_name": "construction_output"
+        }
+    ],
+    "constraints": {
+        "forbidden_edges": [
+            [
+                "construction_output",
+                "site_safety_incidents"
+            ],
+            [
+                "construction_output",
+                "task_difficulty"
+            ],
+            [
+                "construction_output",
+                "technical_sophistication"
+            ],
+            [
+                "construction_output",
+                "work_pace"
+            ],
+            [
+                "site_safety_incidents",
+                "workforce_health"
+            ],
+            [
+                "task_difficulty",
+                "craft_quality"
+            ],
+            [
+                "technical_sophistication",
+                "construction_methodology"
+            ],
+            [
+                "work_pace",
+                "worker_motivation"
+            ],
+            [
+                "work_pace",
+                "material_supply"
+            ],
+            [
+                "work_pace",
+                "skilled_labour_supply"
+            ],
+            [
+                "work_pace",
+                "equipment_provision"
+            ],
+            [
+                "climate_disruption",
+                "project_funding_capacity"
+            ],
+            [
+                "worker_gender",
+                "project_funding_capacity"
+            ],
+            [
+                "worker_motivation",
+                "worker_age_group"
+            ],
+            [
+                "engineering_credentials",
+                "worker_age_group"
+            ]
+        ],
+        "partial_order": [
+            [
+                "project_funding_capacity",
+                "skilled_labour_supply"
+            ],
+            [
+                "project_funding_capacity",
+                "equipment_provision"
+            ],
+            [
+                "project_funding_capacity",
+                "material_supply"
+            ],
+            [
+                "climate_disruption",
+                "workforce_health"
+            ],
+            [
+                "engineering_credentials",
+                "construction_methodology"
+            ],
+            [
+                "worker_age_group",
+                "site_experience"
+            ],
+            [
+                "site_experience",
+                "craft_quality"
+            ],
+            [
+                "worker_motivation",
+                "work_pace"
+            ],
+            [
+                "material_supply",
+                "work_pace"
+            ],
+            [
+                "worker_gender",
+                "work_pace"
+            ],
+            [
+                "skilled_labour_supply",
+                "work_pace"
+            ],
+            [
+                "equipment_provision",
+                "work_pace"
+            ],
+            [
+                "construction_methodology",
+                "technical_sophistication"
+            ],
+            [
+                "workforce_health",
+                "site_safety_incidents"
+            ],
+            [
+                "craft_quality",
+                "task_difficulty"
+            ],
+            [
+                "site_safety_incidents",
+                "construction_output"
+            ],
+            [
+                "task_difficulty",
+                "construction_output"
+            ],
+            [
+                "technical_sophistication",
+                "construction_output"
+            ],
+            [
+                "work_pace",
+                "construction_output"
+            ]
+        ],
+        "tiers": {
+            "exogenous": [
+                "climate_disruption",
+                "engineering_credentials",
+                "worker_gender",
+                "worker_motivation",
+                "worker_age_group",
+                "project_funding_capacity"
+            ],
+            "resource_and_attributes": [
+                "skilled_labour_supply",
+                "equipment_provision",
+                "material_supply",
+                "workforce_health",
+                "construction_methodology",
+                "site_experience"
+            ],
+            "proximate_factors": [
+                "craft_quality",
+                "work_pace",
+                "technical_sophistication",
+                "site_safety_incidents",
+                "task_difficulty"
+            ],
+            "outcome": [
+                "construction_output"
+            ]
+        },
+        "notes": "Constraints reflect construction management reasoning: exogenous conditions → resource availability and worker attributes → proximate work factors → productivity outcome."
+    },
+    "causal_principles": [
+        {
+            "id": "finance_enables_resources",
+            "statement": "Project financing is a common cause of multiple resource-availability variables (labour, tools, materials). Inadequate funding creates simultaneous shortages.",
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ]
+        },
+        {
+            "id": "environment_affects_health",
+            "statement": "Environmental conditions (adverse weather) affect worker health, which in turn influences workplace safety. This is the environmental-safety causal chain.",
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ]
+        },
+        {
+            "id": "age_experience_skill_chain",
+            "statement": "Worker age enables experience accumulation, which develops workmanship quality, which determines ability to handle task complexity. This is a sequential mediation chain.",
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ]
+        },
+        {
+            "id": "engineering_drives_technology",
+            "statement": "Engineer qualifications determine planning and method quality, which enables technology adoption. Technical leadership precedes technology deployment.",
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ]
+        },
+        {
+            "id": "multiple_pathways_to_productivity",
+            "statement": "Productivity is determined by four largely independent pathways: safety (weather → health → accidents), skills (age → experience → workmanship → complexity), technology (engineer → planning → technology), and resources (finance → resources, attitude, gender → work pace).",
+            "references": [
+                "Khanh2022_ConstructionProductivity"
+            ]
+        },
+        {
+            "id": "outcomes_do_not_cause_inputs",
+            "statement": "Productivity outcomes do not cause upstream factors. Causal flow is from conditions and resources to output, not vice versa.",
+            "references": [
+                "Construction_Management_Principles"
+            ]
+        }
+    ],
+    "ground_truth": {
+        "num_nodes": 18,
+        "num_edges": 19,
+        "edges": [
+            [
+                "OwnerFinance",
+                "SkilledWorkers"
+            ],
+            [
+                "OwnerFinance",
+                "WorkingTools"
+            ],
+            [
+                "OwnerFinance",
+                "MaterialPresence"
+            ],
+            [
+                "AdverseWeather",
+                "HealthStatus"
+            ],
+            [
+                "EngineerQualification",
+                "PlanningAndMethod"
+            ],
+            [
+                "Age",
+                "Experience"
+            ],
+            [
+                "Experience",
+                "Workmanship"
+            ],
+            [
+                "Attitude",
+                "WorkingFrequency"
+            ],
+            [
+                "MaterialPresence",
+                "WorkingFrequency"
+            ],
+            [
+                "Sex",
+                "WorkingFrequency"
+            ],
+            [
+                "SkilledWorkers",
+                "WorkingFrequency"
+            ],
+            [
+                "WorkingTools",
+                "WorkingFrequency"
+            ],
+            [
+                "PlanningAndMethod",
+                "TechnologyLevel"
+            ],
+            [
+                "HealthStatus",
+                "Accidents"
+            ],
+            [
+                "Workmanship",
+                "TaskComplexity"
+            ],
+            [
+                "Accidents",
+                "Productivity"
+            ],
+            [
+                "TaskComplexity",
+                "Productivity"
+            ],
+            [
+                "TechnologyLevel",
+                "Productivity"
+            ],
+            [
+                "WorkingFrequency",
+                "Productivity"
+            ]
+        ],
+        "v_structures": [
+            {
+                "canonical": [
+                    "Attitude",
+                    "WorkingFrequency",
+                    "Sex"
+                ],
+                "experiment": [
+                    "worker_motivation",
+                    "work_pace",
+                    "worker_gender"
+                ],
+                "description": "Worker motivation and gender are independent causes of work pace (collider)."
+            },
+            {
+                "canonical": [
+                    "Attitude",
+                    "WorkingFrequency",
+                    "SkilledWorkers"
+                ],
+                "experiment": [
+                    "worker_motivation",
+                    "work_pace",
+                    "skilled_labour_supply"
+                ],
+                "description": "Worker motivation and skilled labour availability are independent causes of work pace."
+            },
+            {
+                "canonical": [
+                    "Attitude",
+                    "WorkingFrequency",
+                    "WorkingTools"
+                ],
+                "experiment": [
+                    "worker_motivation",
+                    "work_pace",
+                    "equipment_provision"
+                ],
+                "description": "Worker motivation and equipment availability are independent causes of work pace."
+            },
+            {
+                "canonical": [
+                    "Sex",
+                    "WorkingFrequency",
+                    "MaterialPresence"
+                ],
+                "experiment": [
+                    "worker_gender",
+                    "work_pace",
+                    "material_supply"
+                ],
+                "description": "Worker gender and material availability are independent causes of work pace."
+            },
+            {
+                "canonical": [
+                    "Accidents",
+                    "Productivity",
+                    "TaskComplexity"
+                ],
+                "experiment": [
+                    "site_safety_incidents",
+                    "construction_output",
+                    "task_difficulty"
+                ],
+                "description": "Safety incidents and task complexity are independent causes of productivity (collider)."
+            },
+            {
+                "canonical": [
+                    "Accidents",
+                    "Productivity",
+                    "TechnologyLevel"
+                ],
+                "experiment": [
+                    "site_safety_incidents",
+                    "construction_output",
+                    "technical_sophistication"
+                ],
+                "description": "Safety incidents and technology level are independent causes of productivity."
+            },
+            {
+                "canonical": [
+                    "Accidents",
+                    "Productivity",
+                    "WorkingFrequency"
+                ],
+                "experiment": [
+                    "site_safety_incidents",
+                    "construction_output",
+                    "work_pace"
+                ],
+                "description": "Safety incidents and work pace are independent causes of productivity."
+            },
+            {
+                "canonical": [
+                    "TaskComplexity",
+                    "Productivity",
+                    "TechnologyLevel"
+                ],
+                "experiment": [
+                    "task_difficulty",
+                    "construction_output",
+                    "technical_sophistication"
+                ],
+                "description": "Task complexity and technology level are independent causes of productivity."
+            },
+            {
+                "canonical": [
+                    "TaskComplexity",
+                    "Productivity",
+                    "WorkingFrequency"
+                ],
+                "experiment": [
+                    "task_difficulty",
+                    "construction_output",
+                    "work_pace"
+                ],
+                "description": "Task complexity and work pace are independent causes of productivity."
+            },
+            {
+                "canonical": [
+                    "TechnologyLevel",
+                    "Productivity",
+                    "WorkingFrequency"
+                ],
+                "experiment": [
+                    "technical_sophistication",
+                    "construction_output",
+                    "work_pace"
+                ],
+                "description": "Technology level and work pace are independent causes of productivity."
+            }
+        ],
+        "conditional_independencies": [
+            {
+                "statement": "AdverseWeather ⊥ Age",
+                "experiment_names": "climate_disruption ⊥ worker_age_group",
+                "description": "Weather conditions are independent of worker age (both exogenous)."
+            },
+            {
+                "statement": "AdverseWeather ⊥ OwnerFinance",
+                "experiment_names": "climate_disruption ⊥ project_funding_capacity",
+                "description": "Weather conditions are independent of project financing (both exogenous)."
+            },
+            {
+                "statement": "EngineerQualification ⊥ OwnerFinance",
+                "experiment_names": "engineering_credentials ⊥ project_funding_capacity",
+                "description": "Engineer qualifications are independent of project financing (both exogenous)."
+            },
+            {
+                "statement": "SkilledWorkers ⊥ WorkingTools | OwnerFinance",
+                "experiment_names": "skilled_labour_supply ⊥ equipment_provision | project_funding_capacity",
+                "description": "Skilled labour and tool availability are conditionally independent given project financing (common cause)."
+            },
+            {
+                "statement": "SkilledWorkers ⊥ MaterialPresence | OwnerFinance",
+                "experiment_names": "skilled_labour_supply ⊥ material_supply | project_funding_capacity",
+                "description": "Skilled labour and material availability are conditionally independent given project financing."
+            },
+            {
+                "statement": "Accidents ⊥ TechnologyLevel",
+                "experiment_names": "site_safety_incidents ⊥ technical_sophistication",
+                "description": "Safety incidents and technology level are marginally independent (different causal chains)."
+            },
+            {
+                "statement": "HealthStatus ⊥ Experience",
+                "experiment_names": "workforce_health ⊥ site_experience",
+                "description": "Worker health and experience are marginally independent (different causal chains from different exogenous roots)."
+            },
+            {
+                "statement": "Accidents ⊥ TaskComplexity | HealthStatus, Workmanship",
+                "experiment_names": "site_safety_incidents ⊥ task_difficulty | workforce_health, craft_quality",
+                "description": "Accidents and task complexity are conditionally independent given their respective parents."
+            }
+        ]
+    }
+}

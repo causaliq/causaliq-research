@@ -1,0 +1,900 @@
+{
+    "schema_version": "2.0",
+    "network": "estuary",
+    "domain": "estuary_ecological_health",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for an estuary ecological health assessment model, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "estuary",
+        "source_reference": "Zeldis2022",
+        "source_url": "https://doi.org/10.3389/fmars.2022.898992",
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "The Estuary network models the Estuary Trophic Index (ETI) Tool 3 Bayesian Belief Network for predicting and scoring ecological health of New Zealand estuaries, developed by Zeldis and Plew (2022). It captures relationships between estuary physiographic drivers (type, flushing, nutrient/sediment loads), primary indicators (macroalgae, phytoplankton), secondary indicators (sediment health, oxygen, macrobenthos, seagrass), and an integrated ETI score. Contains 30 nodes and 39 edges. Designed for shallow tidal lagoons, tidal river estuaries and coastal lakes. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a model of estuary ecological health assessment using the Estuary Trophic Index (ETI), scoring estuaries from 0 (healthy) to 1 (grossly eutrophic).",
+            "The causal structure follows three main pathways: (1) nutrient pathway: potential TN concentration drives macroalgae and phytoplankton responses, (2) sediment pathway: sediment load and trapping efficiency drive sediment deposition, muddiness and organic carbon, and (3) scoring pathway: primary and secondary indicator scores combine into an overall ETI score and band.",
+            "Driver nodes (blue in the original BBN) are exogenous: estuary type, flushing time, intertidal area, closure duration, water column stratification, salinity, seasonality, potential TN concentration, and sediment load.",
+            "Primary indicators are potentially nuisance primary producers (macroalgae and phytoplankton) with demonstrably increasing responses to nutrient enrichment.",
+            "Secondary indicators are ecological symptoms of impairment: sediment organic carbon, sediment redox depth, dissolved oxygen, macrobenthos health, and seagrass condition.",
+            "Macroalgae is a central hub node that influences multiple downstream secondary indicators including sediment carbon, sediment redox, macrobenthos and seagrass.",
+            "Standardised nodes convert indicator values from their original units to a normalised 0-1 scale with four equal bands, prior to input to scoring nodes.",
+            "The ETI primary score uses intertidal area to select between macroalgae and phytoplankton: phytoplankton dominates when intertidal area is less than 5 percent, macroalgae dominates when greater than 40 percent, and the worst of both is used between 5 and 40 percent.",
+            "The ETI secondary score averages standardised secondary indicators: sediment redox, macrobenthos, sediment carbon, seagrass, oxygen (type-dependent), with estuary type and salinity conditioning the calculation.",
+            "The final ETI score is (primary score + secondary score) / 2, and the ETI band maps the 10-level score to four health bands A-D.",
+            "Relationships are derived primarily from observational and model-based information from New Zealand and international studies, not expert opinion.",
+            "Salinity below 5 inhibits macroalgal growth and modifies phytoplankton standardisation.",
+            "Estuary type conditions macroalgal response and sediment trapping efficiency."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "ClosureDuration",
+            "display_name": "Estuary Mouth Closure Duration",
+            "type": "categorical",
+            "states": [
+                "Open",
+                "Short close",
+                "Long close"
+            ],
+            "role": "exogenous",
+            "category": "physiographic_driver",
+            "short_description": "Duration of estuary mouth closure to the sea.",
+            "extended_description": "The closure state of the estuary mouth, indicating whether the estuary is permanently open or intermittently closed for short or long durations. Intermittently closed/open estuaries (ICOEs) are a subtype of tidal lagoon or tidal river that may open and close regularly but are normally open, distinguished from coastal lakes which are normally closed. Closure behaviour affects sediment trapping efficiency by modifying tidal exchange and residence time.",
+            "sensitivity_hints": "Exogenous driver. Directly influences sediment trapping efficiency. Does not depend on any other nodes.",
+            "related_domain_knowledge": [
+                "Estuary mouth closure reduces tidal exchange and increases sediment trapping.",
+                "Coastal lakes are normally closed to the sea, while ICOEs open and close on a regular basis.",
+                "Long closure periods increase residence time and sediment accumulation.",
+                "Closure state is a key physiographic property used in ETI susceptibility assessment."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Plew2020"
+            ],
+            "llm_name": "closure_duration"
+        },
+        {
+            "name": "EstuaryType",
+            "display_name": "Estuary Morphological Type",
+            "type": "categorical",
+            "states": [
+                "Coastal lake",
+                "Tidal lagoon",
+                "Tidal river"
+            ],
+            "role": "exogenous",
+            "category": "physiographic_driver",
+            "short_description": "Morphological classification of the estuary.",
+            "extended_description": "The morphological type of the estuary, following the New Zealand classification system for trophic susceptibility assessment. Coastal lakes are freshwater-dominated systems normally closed to the sea. Tidal lagoons (SIDEs) are shallow intertidally-dominated estuaries. Tidal rivers (SSRTREs) are shallow, short residence-time tidal river estuaries. Estuary type determines susceptibility to eutrophication and sedimentation, conditioning macroalgal response, sediment trapping efficiency, and the ETI secondary score calculation.",
+            "sensitivity_hints": "Exogenous driver. Conditions macroalgal response, sediment trapping efficiency, and secondary score calculation.",
+            "related_domain_knowledge": [
+                "Estuary type accounts for variable influence of physiography on eutrophication expression.",
+                "Tidal lagoons with large intertidal areas are susceptible to macroalgal blooms.",
+                "Tidal rivers with short flushing times and low salinity are less susceptible to macroalgae but may still have poor sediment health.",
+                "Deep subtidally-dominated estuaries are excluded from this model."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Hume2018",
+                "Plew2020"
+            ],
+            "llm_name": "estuary_type"
+        },
+        {
+            "name": "Flushing",
+            "display_name": "Flushing Time",
+            "type": "ordinal",
+            "states": [
+                "0 to 3",
+                "3 to 6",
+                "6 to 10",
+                "More than 10"
+            ],
+            "role": "exogenous",
+            "category": "physiographic_driver",
+            "short_description": "Estuary flushing time in days.",
+            "extended_description": "The flushing time of the estuary in days, calculated from dilution modelling using tidal prism and freshwater inflow data. Short flushing times (0-3 days) rapidly export nutrients and phytoplankton, while long flushing times (>10 days) allow phytoplankton blooms to develop and increase susceptibility to oxygen depletion. Flushing time is a key determinant of phytoplankton biomass and water column oxygen conditions.",
+            "sensitivity_hints": "Exogenous driver. Directly influences phytoplankton biomass and dissolved oxygen. Does not depend on any other nodes.",
+            "related_domain_knowledge": [
+                "Flushing time is calculated using ETI Tool 1 dilution modelling.",
+                "Long flushing times support phytoplankton accumulation and bloom development.",
+                "Short flushing times rapidly export phytoplankton biomass.",
+                "Flushing interacts with stratification and phytoplankton to determine oxygen levels."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Plew2018",
+                "Plew2020"
+            ],
+            "llm_name": "flushing_time"
+        },
+        {
+            "name": "Intertidal",
+            "display_name": "Percent Intertidal Area",
+            "type": "ordinal",
+            "states": [
+                "0 to 5",
+                "5 to 40",
+                "40 to 100"
+            ],
+            "role": "exogenous",
+            "category": "physiographic_driver",
+            "short_description": "Percentage of total estuary area that is intertidal.",
+            "extended_description": "The percentage of total estuary area that is intertidal, a key morphological characteristic that determines the relative importance of macroalgae versus phytoplankton as primary indicators. Estuaries with large intertidal areas (>40%) are shallow and well-mixed, favouring macroalgal blooms. Estuaries with little intertidal area (<5%) are deeper and often stratified, where phytoplankton is the dominant primary indicator. Between 5% and 40%, the worst of both indicators is used.",
+            "sensitivity_hints": "Exogenous driver. Controls selection of primary indicator (macroalgae vs phytoplankton) in the ETI primary score calculation.",
+            "related_domain_knowledge": [
+                "Most NZ estuaries with intertidal area less than 20% are tidal rivers.",
+                "Most tidal lagoons have intertidal areas greater than 40%.",
+                "Large intertidal areas provide habitat for macroalgal growth on exposed sediment.",
+                "Small intertidal areas indicate deeper subtidal-dominated systems where phytoplankton is more important."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Plew2020"
+            ],
+            "llm_name": "intertidal_percent"
+        },
+        {
+            "name": "PotentialTNConcentration",
+            "display_name": "Potential Total Nitrogen Concentration",
+            "type": "ordinal",
+            "states": [
+                "0 to 50",
+                "50 to 100",
+                "100 to 150",
+                "150 to 200",
+                "200 to 300",
+                "300 to 400",
+                "400 to 500",
+                "500 to 600",
+                "600 to 700",
+                "700 to 1000",
+                "1000 to 2000"
+            ],
+            "role": "exogenous",
+            "category": "nutrient_driver",
+            "short_description": "Volume-averaged potential total nitrogen concentration in mg/m3.",
+            "extended_description": "Volume-averaged potential total nitrogen (TN) concentration in mg m-3, defined as the concentration that would occur in the absence of uptake by algae or losses/gains due to non-conservative processes such as denitrification. Calculated using ETI Tool 1 dilution modelling from catchment nitrogen loads and estuary hydrodynamics. Nitrogen is assumed to be the limiting nutrient for macroalgal and phytoplankton growth in NZ estuaries. This is the primary nutrient driver of eutrophication in the model.",
+            "sensitivity_hints": "Exogenous nutrient driver. Major driver of both macroalgae and phytoplankton. High-cardinality node with 11 states spanning three orders of magnitude.",
+            "related_domain_knowledge": [
+                "Potential TN greater than 150-200 mg/m3 is likely to elicit macroalgal outgrowth.",
+                "Nitrogen is the limiting nutrient for approximately 81% of NZ estuaries.",
+                "Concentrations increase with agricultural land use intensity in the catchment.",
+                "Potential TN is calculated from GIS land-use models and dilution modelling."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Plew2018",
+                "Plew2020",
+                "Elliott2016"
+            ],
+            "llm_name": "potential_tn_concentration"
+        },
+        {
+            "name": "Salinity",
+            "display_name": "Estuary Salinity",
+            "type": "ordinal",
+            "states": [
+                "0 to 5",
+                "5 to 30",
+                "30 to 36"
+            ],
+            "role": "exogenous",
+            "category": "physiographic_driver",
+            "short_description": "Volume-averaged practical salinity of the estuary.",
+            "extended_description": "Volume-averaged practical salinity of the estuary, calculated from the dilution modelling. Low salinity (<5) indicates freshwater or oligohaline conditions that inhibit macroalgal growth, as marine species such as Agarophyton (formerly Gracilaria) and Ulva require saline environments. Salinity also modifies phytoplankton standardisation, as freshwater systems use different chlorophyll-a thresholds. Saline conditions (>30) indicate marine-dominated estuaries.",
+            "sensitivity_hints": "Exogenous driver. Conditions macroalgal response and phytoplankton standardisation. Low salinity suppresses macroalgal growth.",
+            "related_domain_knowledge": [
+                "Salinity below 5 effectively inhibits macroalgal growth.",
+                "Freshwater systems use different phytoplankton assessment criteria.",
+                "Salinity is calculated from ETI Tool 1 dilution modelling.",
+                "Salinity variation reflects the balance of tidal and freshwater inputs."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Plew2020"
+            ],
+            "llm_name": "salinity"
+        },
+        {
+            "name": "Seasonality",
+            "display_name": "Nutrient Seasonality Ratio",
+            "type": "ordinal",
+            "states": [
+                "<0.5",
+                "0.5 to 6.5",
+                ">0.65"
+            ],
+            "role": "exogenous",
+            "category": "nutrient_driver",
+            "short_description": "Ratio of summer to annual mean potential TN concentration.",
+            "extended_description": "The ratio of summer (February) to annual mean potential total nitrogen concentration. Captures the seasonal pattern of nutrient availability that drives summer phytoplankton blooms, when water column temperature and stratification are higher. In most NZ estuaries, summer potential TN is lower than annual TN, giving seasonality factors less than 1. Summer potential TN is calculated using ratios of February to mean annual river flows and nutrient concentrations.",
+            "sensitivity_hints": "Exogenous driver. Directly influences phytoplankton via seasonal nutrient exposure. Does not depend on any other nodes.",
+            "related_domain_knowledge": [
+                "Summer phytoplankton blooms are driven by higher temperature and stratification.",
+                "Most NZ estuaries have seasonality ratios less than 1.",
+                "Seasonality captures the temporal pattern of nutrient loading relevant to bloom formation.",
+                "Calculated from February to mean annual river flow and nutrient concentration ratios."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Whitehead2019"
+            ],
+            "llm_name": "seasonality_ratio"
+        },
+        {
+            "name": "SedimentLoad",
+            "display_name": "Catchment Sediment Load",
+            "type": "ordinal",
+            "states": [
+                "0 to 1",
+                "1 to 5",
+                "5 to 10",
+                "10 to 20",
+                "20 to 50",
+                "50 to 100",
+                "More than 100"
+            ],
+            "role": "exogenous",
+            "category": "sediment_driver",
+            "short_description": "Annual catchment sediment load to the estuary in kt/yr.",
+            "extended_description": "The annual sediment load delivered to the estuary from its catchment, in kilotonnes per year. Estimated using a GIS-based model considering regional slope, rainfall, land cover, and lithology, with routing through the stream network accounting for entrapment in lakes and reservoirs. Loading bands increase approximately exponentially to encompass the wide range (0 to >100 kt/yr) occurring across NZ estuaries, while retaining sensitivity at lower loads.",
+            "sensitivity_hints": "Exogenous sediment driver. Drives the sediment deposition pathway. Does not depend on any other nodes.",
+            "related_domain_knowledge": [
+                "Sediment loads vary greatly across NZ estuaries depending on catchment geology and land use.",
+                "High sediment loads cause sedimentation effects on benthic ecology.",
+                "Sediment load modelling accounts for entrapment in lakes and reservoirs.",
+                "Loading bands are approximately exponentially spaced."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Hicks2019"
+            ],
+            "llm_name": "sediment_load"
+        },
+        {
+            "name": "WaterColStratification",
+            "display_name": "Water Column Stratification",
+            "type": "binary",
+            "states": [
+                "Yes",
+                "No"
+            ],
+            "role": "exogenous",
+            "category": "physiographic_driver",
+            "short_description": "Whether the estuary water column is stratified.",
+            "extended_description": "A user-input driver indicating whether the estuary water column is stratified. Stratification is critical for oxygen depletion, as stratified conditions prevent vertical mixing and oxygenation of bottom waters during phytoplankton bloom decay. Tidal lagoons are generally not stratified due to their shallow, well-mixed nature. Stratification conditions in coastal lakes and tidal rivers are more difficult to predict.",
+            "sensitivity_hints": "Exogenous driver. Directly influences dissolved oxygen conditions. A binary node.",
+            "related_domain_knowledge": [
+                "Stratification prevents vertical mixing and promotes oxygen depletion.",
+                "Shallow, well-mixed tidal lagoons are typically not stratified.",
+                "Stratification is driven by salinity and temperature gradients.",
+                "When stratification is unknown, equal probability is assigned."
+            ],
+            "references": [
+                "Zeldis2022"
+            ],
+            "llm_name": "water_column_stratification"
+        },
+        {
+            "name": "Macroalgae",
+            "display_name": "Macroalgal Ecological Quality Ratio",
+            "type": "ordinal",
+            "states": [
+                "0.8 to 1",
+                "0.6 to 0.8",
+                "0.4 to 0.6",
+                "0 to 0.4"
+            ],
+            "role": "endogenous",
+            "category": "primary_indicator",
+            "short_description": "Macroalgal Ecological Quality Ratio (EQR) reflecting biomass condition.",
+            "extended_description": "The macroalgal Ecological Quality Ratio (EQR), a measure of macroalgal biomass condition scored from 1 (pristine, low biomass) to 0 (severely eutrophic, high biomass). Derived from potential TN concentration modulated by estuary type and salinity. High EQR (0.8-1) indicates minimal macroalgae, while low EQR (0-0.4) indicates gross macroalgal eutrophication. Macroalgae (mainly Agarophyton and Ulva) are a primary indicator and central hub node, as excessive macroalgal biomass degrades sediment health, displaces seagrass, and impairs macrobenthos.",
+            "sensitivity_hints": "Central hub node. Driven by potential TN, estuary type and salinity. Influences sediment carbon, sediment redox, macrobenthos and seagrass.",
+            "related_domain_knowledge": [
+                "EQR is the standard macroalgal assessment metric used in Europe and NZ.",
+                "Potential TN above 150-200 mg/m3 typically causes EQR below the B/C threshold.",
+                "Low salinity (<5) inhibits macroalgal growth regardless of nutrient levels.",
+                "Macroalgae trap mud, creating positive feedback loops with sediment degradation.",
+                "Macroalgal blooms in NZ estuaries are dominated by Agarophyton and Ulva species."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Robertson2016b",
+                "WFD-UKTAG2014"
+            ],
+            "llm_name": "macroalgae_eqr"
+        },
+        {
+            "name": "MacroalgaeStandardised",
+            "display_name": "Macroalgae Standardised Score",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.25",
+                "0.25 to 0.50",
+                "0.50 to 0.75",
+                "0.75 to 1"
+            ],
+            "role": "endogenous",
+            "category": "standardised_indicator",
+            "short_description": "Normalised macroalgae score from 0 (healthy) to 1 (degraded).",
+            "extended_description": "Standardised (normalised) macroalgae indicator score, converting the macroalgal EQR to a 0-1 scale with four equal bands. This linearises and normalises the indicator value prior to input to the ETI primary score node. Low values (0-0.25) indicate healthy conditions, high values (0.75-1) indicate severe macroalgal eutrophication.",
+            "sensitivity_hints": "Deterministic mapping from macroalgae EQR. Feeds into ETI primary score.",
+            "related_domain_knowledge": [
+                "Standardisation converts EQR bands to a uniform 0-1 scale.",
+                "Required for combining indicators with different original scales.",
+                "Four equal bands match the A-D health banding system."
+            ],
+            "references": [
+                "Zeldis2022"
+            ],
+            "llm_name": "macroalgae_standardised"
+        },
+        {
+            "name": "Phytoplankton",
+            "display_name": "Phytoplankton Chlorophyll-a",
+            "type": "ordinal",
+            "states": [
+                "0 to 5",
+                "5 to 10",
+                "10 to 15",
+                "15 to 25",
+                "25 to 60",
+                "60 to 100"
+            ],
+            "role": "endogenous",
+            "category": "primary_indicator",
+            "short_description": "Phytoplankton biomass as chlorophyll-a concentration in micrograms per litre.",
+            "extended_description": "Phytoplankton biomass expressed as chlorophyll-a concentration (micrograms per litre), the 90th percentile of observations. Driven by potential TN concentration, flushing time, and nutrient seasonality. Short flushing times export phytoplankton before blooms develop, while long flushing times with high nutrients support bloom formation. Phytoplankton blooms are the primary cause of water column oxygen depletion in deeper stratified estuaries.",
+            "sensitivity_hints": "Primary indicator. Driven by potential TN, flushing and seasonality. Influences oxygen conditions.",
+            "related_domain_knowledge": [
+                "Phytoplankton blooms require long enough residence time to accumulate biomass.",
+                "Summer conditions favour bloom formation due to higher temperature and stratification.",
+                "Chlorophyll-a is the standard phytoplankton biomass indicator.",
+                "Phytoplankton is the dominant primary indicator in deep, low-intertidal estuaries."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Plew2020"
+            ],
+            "llm_name": "phytoplankton_chla"
+        },
+        {
+            "name": "PhytoplanktonStandardised",
+            "display_name": "Phytoplankton Standardised Score",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.25",
+                "0.25 to 0.50",
+                "0.50 to 0.75",
+                "0.75 to 1"
+            ],
+            "role": "endogenous",
+            "category": "standardised_indicator",
+            "short_description": "Normalised phytoplankton score from 0 (healthy) to 1 (degraded).",
+            "extended_description": "Standardised (normalised) phytoplankton indicator score, converting chlorophyll-a concentration to a 0-1 scale with four equal bands. The standardisation is conditioned by salinity, as freshwater or oligohaline systems (salinity <5) use different chlorophyll-a thresholds. Low values (0-0.25) indicate healthy conditions, high values (0.75-1) indicate severe phytoplankton blooms.",
+            "sensitivity_hints": "Conditioned by phytoplankton chlorophyll-a and salinity. Feeds into ETI primary score.",
+            "related_domain_knowledge": [
+                "Salinity modifies the standardisation as freshwater systems have different chl-a criteria.",
+                "Low salinity systems use freshwater phytoplankton thresholds.",
+                "Standardisation enables comparison with macroalgae in the primary score."
+            ],
+            "references": [
+                "Zeldis2022"
+            ],
+            "llm_name": "phytoplankton_standardised"
+        },
+        {
+            "name": "SedTrappingEfficiency",
+            "display_name": "Sediment Trapping Efficiency",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.1",
+                "0.1 to 0.5",
+                "0.5 to 0.85",
+                "0.85 to 0.95",
+                "0.95 to 1"
+            ],
+            "role": "endogenous",
+            "category": "intermediate_calculation",
+            "short_description": "Fraction of incoming sediment load retained within the estuary.",
+            "extended_description": "The fraction of the incoming sediment load that is trapped and retained within the estuary, ranging from 0 (complete flushing) to 1 (complete retention). Determined by estuary type and closure duration. Tidal rivers with strong currents have low trapping efficiency, while coastal lakes with long closure have high trapping efficiency. This intermediate node connects the sediment loading pathway to sediment deposition rates.",
+            "sensitivity_hints": "Intermediate calculation node. Driven by closure duration and estuary type. Determines sediment deposition rate.",
+            "related_domain_knowledge": [
+                "Sediment trapping is a key determinant of estuary sedimentation rate.",
+                "Coastal lakes typically have high trapping efficiency due to closure.",
+                "Tidal rivers flush sediment more efficiently due to strong tidal currents.",
+                "Trapping efficiency moderates the impact of catchment sediment loads on the estuary."
+            ],
+            "references": [
+                "Zeldis2022"
+            ],
+            "llm_name": "sediment_trapping_efficiency"
+        },
+        {
+            "name": "SedDeposition",
+            "display_name": "Sediment Deposition Rate",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.1",
+                "0.1 to 0.5",
+                "0.5 to 1",
+                "1 to 2",
+                "2 to 5",
+                "5 to 10",
+                "More than 10"
+            ],
+            "role": "endogenous",
+            "category": "intermediate_calculation",
+            "short_description": "Annual sediment deposition rate in mm/yr.",
+            "extended_description": "The annual rate of sediment deposition within the estuary, in millimetres per year. Calculated from the sediment load and sediment trapping efficiency. Natural rates are generally considerably less than 1 mm/yr. A default guideline value of 2 mm/yr above natural rate is considered to cause detrimental effects. Deposition rate drives sediment muddiness and seagrass decline through physical smothering.",
+            "sensitivity_hints": "Intermediate calculation. Driven by sediment load and trapping efficiency. Determines muddiness and seagrass decline.",
+            "related_domain_knowledge": [
+                "Natural sedimentation rates are generally less than 1 mm/yr.",
+                "Deposition rates above 2 mm/yr above natural cause detrimental ecological effects.",
+                "High deposition increases mud content, degrading habitat quality.",
+                "Deposition drives seagrass decline through smothering and light attenuation."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Townsend2015"
+            ],
+            "llm_name": "sediment_deposition_rate"
+        },
+        {
+            "name": "SedMud",
+            "display_name": "Sediment Percent Mud",
+            "type": "ordinal",
+            "states": [
+                "0 to 12",
+                "12 to 25",
+                "25 to 34",
+                "34 to 100"
+            ],
+            "role": "endogenous",
+            "category": "intermediate_calculation",
+            "short_description": "Estuary-averaged sediment mud content as a percentage.",
+            "extended_description": "The estuary-averaged percentage of mud (particles <63 microns) in the sediment. Predicted from sediment deposition rates. Muddiness does not directly contribute to the ETI score, but interacts with other indicators: muddy sediments favour nutrient retention, macroalgal outgrowth, and affect macrobenthic health. Thresholds of 12%, 25% and 34% were identified as important for macrobenthic community health in NZ estuaries.",
+            "sensitivity_hints": "Intermediate node. Driven by sediment deposition. Influences sediment carbon, macrobenthos. Does not directly contribute to ETI score.",
+            "related_domain_knowledge": [
+                "Mud content thresholds of 12%, 25% and 34% are ecologically significant for macrobenthos.",
+                "Muddy sediments favour nutrient retention and macroalgal growth.",
+                "Macroalgae trap additional mud, creating positive feedback loops.",
+                "Mud content is not directly scored in the ETI but influences secondary indicators."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Robertson2016c"
+            ],
+            "llm_name": "sediment_mud_percent"
+        },
+        {
+            "name": "SedToc",
+            "display_name": "Sediment Total Organic Carbon",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.5",
+                "0.5 to 1.2",
+                "1.2 to 2",
+                "2 to 10"
+            ],
+            "role": "endogenous",
+            "category": "secondary_indicator",
+            "short_description": "Sediment total organic carbon content as a percentage.",
+            "extended_description": "The estuary-averaged percentage of total organic carbon (TOC) in the sediment. Driven by an interaction of macroalgal biomass and sediment muddiness. Macroalgal decomposition is a primary source of organic carbon, while muddy sediments retain organic matter more effectively. High sediment TOC (>2%) indicates enrichment and can lead to sediment deoxygenation and ecological impairment. Sediment TOC is a secondary indicator in the ETI scoring.",
+            "sensitivity_hints": "Secondary indicator. Driven by macroalgae and sediment mud. Influences sediment redox and macrobenthos.",
+            "related_domain_knowledge": [
+                "Sediment TOC above 2% indicates enrichment in global studies.",
+                "Macroalgal decomposition is a major source of sediment organic carbon in eutrophic estuaries.",
+                "Muddy sediments retain organic matter more effectively than sandy sediments.",
+                "High TOC drives sediment deoxygenation and redox potential decline."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Hyland2005"
+            ],
+            "llm_name": "sediment_toc"
+        },
+        {
+            "name": "SedTocStandardised",
+            "display_name": "Sediment TOC Standardised Score",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.25",
+                "0.25 to 0.50",
+                "0.50 to 0.75",
+                "0.75 to 1"
+            ],
+            "role": "endogenous",
+            "category": "standardised_indicator",
+            "short_description": "Normalised sediment TOC score from 0 (healthy) to 1 (degraded).",
+            "extended_description": "Standardised (normalised) sediment total organic carbon indicator score, converting sediment TOC percentage to a 0-1 scale with four equal bands prior to input to the ETI secondary score node.",
+            "sensitivity_hints": "Deterministic mapping from sediment TOC. Feeds into ETI secondary score.",
+            "related_domain_knowledge": [
+                "Standardisation converts TOC percentage to a uniform 0-1 scale.",
+                "One of the secondary indicators averaged in the ETI secondary score."
+            ],
+            "references": [
+                "Zeldis2022"
+            ],
+            "llm_name": "sediment_toc_standardised"
+        },
+        {
+            "name": "SedARPD",
+            "display_name": "Sediment Apparent Redox Potential Discontinuity Depth",
+            "type": "ordinal",
+            "states": [
+                ">4",
+                "2.5 to 4",
+                "1 to 2.5",
+                "<1"
+            ],
+            "role": "endogenous",
+            "category": "secondary_indicator",
+            "short_description": "Depth of the apparent redox potential discontinuity in sediment (cm).",
+            "extended_description": "The depth of the apparent redox potential discontinuity (aRPD) in the sediment, measured in centimetres. The aRPD marks the transition from oxygenated to anoxic sediment. Deep aRPD (>4 cm) indicates healthy, well-oxygenated sediment. Shallow aRPD (<1 cm) indicates severely impaired sediment with anoxic conditions near the surface. Driven by macroalgal biomass (decomposition consuming oxygen) and sediment organic carbon content.",
+            "sensitivity_hints": "Secondary indicator. Driven by macroalgae and sediment TOC. Low aRPD indicates poor sediment oxygenation.",
+            "related_domain_knowledge": [
+                "aRPD depth reflects the balance between oxygen supply and organic matter decomposition.",
+                "Shallow aRPD indicates anoxic conditions near the sediment surface.",
+                "Macroalgal decomposition is a primary driver of sediment deoxygenation.",
+                "aRPD is closely related to sediment redox potential (SRP) measurements."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Gerwing2018"
+            ],
+            "llm_name": "sediment_arpd"
+        },
+        {
+            "name": "SedARPDStandardised",
+            "display_name": "Sediment aRPD Standardised Score",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.25",
+                "0.25 to 0.50",
+                "0.50 to 0.75",
+                "0.75 to 1"
+            ],
+            "role": "endogenous",
+            "category": "standardised_indicator",
+            "short_description": "Normalised sediment aRPD score from 0 (healthy) to 1 (degraded).",
+            "extended_description": "Standardised (normalised) sediment aRPD indicator score, converting aRPD depth to a 0-1 scale with four equal bands prior to input to the ETI secondary score node.",
+            "sensitivity_hints": "Deterministic mapping from sediment aRPD. Feeds into ETI secondary score.",
+            "related_domain_knowledge": [
+                "Standardisation inverts the aRPD scale so higher scores indicate worse conditions.",
+                "One of the secondary indicators averaged in the ETI secondary score."
+            ],
+            "references": [
+                "Zeldis2022"
+            ],
+            "llm_name": "sediment_arpd_standardised"
+        },
+        {
+            "name": "Macrobenthos",
+            "display_name": "Macrobenthic Health Index",
+            "type": "ordinal",
+            "states": [
+                "0 to 1.2",
+                "1.2 to 3.3",
+                "3.3 to 4.3",
+                "4.3 to 7"
+            ],
+            "role": "endogenous",
+            "category": "secondary_indicator",
+            "short_description": "New Zealand AMBI macrobenthic health index score.",
+            "extended_description": "The New Zealand Estuary AMBI (NZ AMBI) macrobenthic health index, ranging from 0 (healthy, dominated by sensitive species) to 7 (azoic, no macrofauna). Driven by macroalgal biomass, sediment muddiness and sediment organic carbon content. Muddy, organically enriched sediments with macroalgal mats shift benthic communities from sensitive species towards opportunistic, enrichment-tolerant species. Thresholds are based on empirical NZ estuary data.",
+            "sensitivity_hints": "Secondary indicator. Driven by macroalgae, sediment mud and sediment TOC.",
+            "related_domain_knowledge": [
+                "NZ AMBI is adapted from the European AMBI index for NZ benthic communities.",
+                "Scores below 1.2 indicate undisturbed benthic communities.",
+                "Scores above 4.3 indicate heavily disturbed or azoic conditions.",
+                "Sediment muddiness and organic enrichment are key drivers of benthic degradation.",
+                "Macroalgal mats cause hypoxia in underlying sediment, displacing sensitive fauna."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Robertson2015",
+                "Robertson2016c",
+                "Borja2000"
+            ],
+            "llm_name": "macrobenthos_nzambi"
+        },
+        {
+            "name": "MacrobenthosStandardised",
+            "display_name": "Macrobenthos Standardised Score",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.25",
+                "0.25 to 0.50",
+                "0.50 to 0.75",
+                "0.75 to 1"
+            ],
+            "role": "endogenous",
+            "category": "standardised_indicator",
+            "short_description": "Normalised macrobenthos score from 0 (healthy) to 1 (degraded).",
+            "extended_description": "Standardised (normalised) macrobenthos indicator score, converting NZ AMBI to a 0-1 scale with four equal bands prior to input to the ETI secondary score node.",
+            "sensitivity_hints": "Deterministic mapping from macrobenthos NZ AMBI. Feeds into ETI secondary score.",
+            "related_domain_knowledge": [
+                "Standardisation converts NZ AMBI to a uniform 0-1 scale.",
+                "One of the secondary indicators averaged in the ETI secondary score."
+            ],
+            "references": [
+                "Zeldis2022"
+            ],
+            "llm_name": "macrobenthos_standardised"
+        },
+        {
+            "name": "Oxygen",
+            "display_name": "Dissolved Oxygen",
+            "type": "ordinal",
+            "states": [
+                "7 to 8",
+                "6 to 7",
+                "5 to 6",
+                "4 to 5"
+            ],
+            "role": "endogenous",
+            "category": "secondary_indicator",
+            "short_description": "Bottom water dissolved oxygen concentration in mg/L.",
+            "extended_description": "Bottom water dissolved oxygen concentration in milligrams per litre. Driven by flushing time, phytoplankton biomass and water column stratification. Oxygen depletion occurs when phytoplankton blooms decay in stratified waters with long flushing times. Oxygen concentrations below 5-6 mg/L cause stress in marine organisms, with hypoxia (below 2 mg/L) causing widespread mortality. For shallow, well-mixed tidal lagoons, oxygen depletion is typically absent and may be excluded from the secondary score.",
+            "sensitivity_hints": "Secondary indicator. Driven by flushing, phytoplankton and stratification. Excluded from secondary score for well-mixed tidal lagoons.",
+            "related_domain_knowledge": [
+                "Phytoplankton bloom decay consumes dissolved oxygen.",
+                "Stratification prevents reoxygenation of bottom waters.",
+                "Shallow, well-mixed estuaries rarely experience significant oxygen depletion.",
+                "Oxygen depletion affects fish, shellfish and benthic organisms."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Vaquer-Sunyer2008",
+                "Conley2009"
+            ],
+            "llm_name": "dissolved_oxygen"
+        },
+        {
+            "name": "OxygenStandardised",
+            "display_name": "Oxygen Standardised Score",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.25",
+                "0.25 to 0.50",
+                "0.50 to 0.75",
+                "0.75 to 1"
+            ],
+            "role": "endogenous",
+            "category": "standardised_indicator",
+            "short_description": "Normalised oxygen score from 0 (healthy) to 1 (degraded).",
+            "extended_description": "Standardised (normalised) dissolved oxygen indicator score, converting oxygen concentration to a 0-1 scale with four equal bands prior to input to the ETI secondary score node.",
+            "sensitivity_hints": "Deterministic mapping from dissolved oxygen. Feeds into ETI secondary score.",
+            "related_domain_knowledge": [
+                "Standardisation inverts the oxygen scale so higher scores indicate worse (lower oxygen) conditions.",
+                "May be excluded from secondary score for well-mixed tidal lagoons."
+            ],
+            "references": [
+                "Zeldis2022"
+            ],
+            "llm_name": "oxygen_standardised"
+        },
+        {
+            "name": "SeagrassDecline",
+            "display_name": "Seagrass Decline Severity",
+            "type": "ordinal",
+            "states": [
+                "Extreme",
+                "Severe",
+                "Moderate",
+                "Minor"
+            ],
+            "role": "endogenous",
+            "category": "secondary_indicator",
+            "short_description": "Degree of seagrass (Zostera) decline from healthy baseline.",
+            "extended_description": "The degree of seagrass (Zostera muelleri) decline from a healthy baseline condition, driven by macroalgal biomass and sediment deposition. Macroalgal mats smother seagrass and outcompete for light; high sediment deposition physically buries seagrass and increases turbidity. Seagrass beds provide critical ecosystem services including sediment stabilisation, carbon sequestration and habitat for fisheries. Extreme decline indicates near-complete loss of seagrass cover.",
+            "sensitivity_hints": "Secondary indicator. Driven by macroalgae and sediment deposition. Sensitive to both nutrient and sediment pressures.",
+            "related_domain_knowledge": [
+                "Seagrass decline is driven by macroalgal smothering and sediment burial.",
+                "Potential TN above 150-200 mg/m3 begins to elicit macroalgal effects on seagrass.",
+                "Seagrass provides critical habitat and ecosystem services.",
+                "Seagrass recovery is slow, making it a lagging indicator of improvement."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Burkholder2007"
+            ],
+            "llm_name": "seagrass_decline"
+        },
+        {
+            "name": "SeagrassStandardised",
+            "display_name": "Seagrass Standardised Score",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.25",
+                "0.25 to 0.50",
+                "0.50 to 0.75",
+                "0.75 to 1"
+            ],
+            "role": "endogenous",
+            "category": "standardised_indicator",
+            "short_description": "Normalised seagrass score from 0 (healthy) to 1 (degraded).",
+            "extended_description": "Standardised (normalised) seagrass indicator score, converting seagrass decline severity to a 0-1 scale with four equal bands prior to input to the ETI secondary score node.",
+            "sensitivity_hints": "Deterministic mapping from seagrass decline. Feeds into ETI secondary score.",
+            "related_domain_knowledge": [
+                "Standardisation converts seagrass decline severity to a uniform 0-1 scale.",
+                "One of the secondary indicators averaged in the ETI secondary score."
+            ],
+            "references": [
+                "Zeldis2022"
+            ],
+            "llm_name": "seagrass_standardised"
+        },
+        {
+            "name": "ETIPrimaryScore",
+            "display_name": "ETI Primary Indicator Score",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.1",
+                "0.1 to 0.2",
+                "0.2 to 0.3",
+                "0.3 to 0.4",
+                "0.4 to 0.5",
+                "0.5 to 0.6",
+                "0.6 to 0.7",
+                "0.7 to 0.8",
+                "0.8 to 0.9",
+                "0.9 to 1.0"
+            ],
+            "role": "endogenous",
+            "category": "performance_score",
+            "short_description": "Combined primary indicator score using the worst of macroalgae or phytoplankton.",
+            "extended_description": "The ETI primary indicator score, combining standardised macroalgae and phytoplankton scores using a rule conditioned on intertidal area. If intertidal area is less than 5%, phytoplankton is selected as the primary indicator. If greater than 40%, macroalgae is selected. Between 5% and 40%, the larger (worse) of the two standardised scores is used. Discretised into 10 bands (0-1) for improved precision when combining with the secondary score.",
+            "sensitivity_hints": "Performance node. Driven by intertidal percent, macroalgae standardised, and phytoplankton standardised. High-cardinality (10 states).",
+            "related_domain_knowledge": [
+                "Primary score uses the worst-of rule for selecting between primary indicators.",
+                "10-band discretisation improves precision over the 4-band indicator nodes.",
+                "Intertidal area determines which primary indicator dominates the score.",
+                "Primary score reflects the direct eutrophication response (nuisance primary producers)."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Robertson2016b"
+            ],
+            "llm_name": "eti_primary_score"
+        },
+        {
+            "name": "ETISecondaryScore",
+            "display_name": "ETI Secondary Indicator Score",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.1",
+                "0.1 to 0.2",
+                "0.2 to 0.3",
+                "0.3 to 0.4",
+                "0.4 to 0.5",
+                "0.5 to 0.6",
+                "0.6 to 0.7",
+                "0.7 to 0.8",
+                "0.8 to 0.9",
+                "0.9 to 1.0"
+            ],
+            "role": "endogenous",
+            "category": "performance_score",
+            "short_description": "Average of standardised secondary indicator scores.",
+            "extended_description": "The ETI secondary indicator score, calculated as the average of standardised scores for secondary indicators: sediment aRPD, macrobenthos, sediment TOC, seagrass and oxygen. The calculation is conditioned by estuary type (oxygen is excluded for well-mixed tidal lagoons) and salinity. Seven parent nodes reflect the complex integration of all secondary ecological symptoms.",
+            "sensitivity_hints": "Performance node with 7 parents. Driven by estuary type, salinity, and five standardised secondary indicators. High-cardinality (10 states).",
+            "related_domain_knowledge": [
+                "Secondary score averages ecological symptom indicators.",
+                "Oxygen excluded for shallow, well-mixed tidal lagoons.",
+                "Estuary type and salinity condition the averaging formula.",
+                "Seven parents make this the most complex CPT in the network."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Robertson2016b"
+            ],
+            "llm_name": "eti_secondary_score"
+        },
+        {
+            "name": "ETIScore",
+            "display_name": "ETI Overall Score",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.1",
+                "0.1 to 0.2",
+                "0.2 to 0.3",
+                "0.3 to 0.4",
+                "0.4 to 0.5",
+                "0.5 to 0.6",
+                "0.6 to 0.7",
+                "0.7 to 0.8",
+                "0.8 to 0.9",
+                "0.9 to 1.0"
+            ],
+            "role": "endogenous",
+            "category": "performance_score",
+            "short_description": "Overall ETI health score from 0 (healthy) to 1 (grossly eutrophic).",
+            "extended_description": "The overall Estuary Trophic Index (ETI) score, calculated as the average of the primary and secondary indicator scores: ETI = (ETI_primary + ETI_secondary) / 2. Discretised into 10 bands. Values near 0 indicate a healthy estuary with minimal eutrophication symptoms, while values near 1 indicate gross eutrophication. This is the main performance node of the BBN, used for comparing estuary health across systems and assessing management scenarios.",
+            "sensitivity_hints": "Terminal performance node. Simple average of primary and secondary scores. High-cardinality (10 states).",
+            "related_domain_knowledge": [
+                "ETI score is the primary output for estuary health assessment.",
+                "Equal weighting of primary and secondary scores.",
+                "Predicted scores for 291 NZ estuaries showed good agreement with observations.",
+                "Score can be used for nutrient load scenario testing."
+            ],
+            "references": [
+                "Zeldis2022"
+            ],
+            "llm_name": "eti_score"
+        },
+        {
+            "name": "ETIBand",
+            "display_name": "ETI Health Band",
+            "type": "categorical",
+            "states": [
+                "A",
+                "B",
+                "C",
+                "D"
+            ],
+            "role": "endogenous",
+            "category": "performance_score",
+            "short_description": "Four-level health band (A-D) derived from ETI score.",
+            "extended_description": "The ETI health band, mapping the 10-level ETI score to four health bands following New Zealand freshwater policy (NPSFM). Band A indicates ecological communities are healthy and resilient with minimal eutrophication symptoms. Band B indicates slightly impacted communities with increasing macroalgae. Band C indicates highly impacted communities with elevated macroalgal or phytoplankton biomass and degraded sediment. Band D indicates severely degraded conditions with gross eutrophication. This is the terminal node of the network.",
+            "sensitivity_hints": "Terminal node. Deterministic mapping from ETI score to four bands.",
+            "related_domain_knowledge": [
+                "Four-band system matches the NZ National Policy Statement for Freshwater Management.",
+                "Band A: ETI score approximately 0-0.25 (healthy and resilient).",
+                "Band B: ETI score approximately 0.25-0.5 (slightly impacted).",
+                "Band C: ETI score approximately 0.5-0.75 (highly impacted).",
+                "Band D: ETI score approximately 0.75-1.0 (severely degraded)."
+            ],
+            "references": [
+                "Zeldis2022",
+                "Robertson2016b"
+            ],
+            "llm_name": "eti_band"
+        }
+    ]
+}

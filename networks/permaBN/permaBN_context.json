@@ -1,0 +1,427 @@
+{
+    "schema_version": "2.0",
+    "network": "permaBN",
+    "domain": "arctic_permafrost_thaw_prediction",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for an Arctic permafrost thaw depth prediction model, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "permaBN",
+        "source_reference": "Beall, K., Loisel, J., & Medina-Cetina, Z. (2022). PermaBN: A Bayesian Network framework to help predict permafrost thaw in the Arctic. Ecological Informatics, 69, 101601.",
+        "source_url": "https://doi.org/10.1016/j.ecoinf.2022.101601",
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "PermaBN is a Bayesian Network framework for predicting permafrost thaw depth in the continuous permafrost region of the Arctic, developed by Beall, Loisel, and Medina-Cetina (2022) at Texas A&M University. It integrates expert-assessed conditional probability tables informed by extensive literature review and validated through prognostic and diagnostic experiments against observations from the Siksik Creek Basin in Trail Valley Creek, Northwest Territories, Canada. Contains 14 nodes and 27 edges. Aspect and Season are treated as decision nodes (non-random) in the original model but are represented as chance nodes here. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This model predicts permafrost thaw depth in the continuous permafrost region of the Arctic as a function of geological, atmospheric, surface insulation, and soil variables.",
+            "The causal chain follows: geological setting + atmospheric conditions → surface processes → soil properties → thaw depth.",
+            "Four primary parent nodes drive the system: topographic aspect (a fixed landscape feature), soil density (geological composition), air temperature (atmospheric regime), and season (snow-free or snow-covered period).",
+            "Air temperature directly influences rainfall, snowfall, soil water input, vegetation height, and soil temperature.",
+            "Rainfall and snowfall are both driven by air temperature; warmer conditions increase the rain-to-snow ratio.",
+            "Soil water input represents the ratio of precipitation to evaporation, determined jointly by air temperature, rain, and snow.",
+            "Vegetation height is controlled by air temperature and topographic aspect; in Arctic tundra, northerly and westerly aspects support only low vegetation, while southerly aspects permit taller shrubs.",
+            "Snow depth is a complex node with five parents: topographic aspect, rain, season, snow, and vegetation height. During the snow-free season, snow depth is always zero regardless of other conditions.",
+            "Surface insulation integrates the thermal buffering effects of snow depth, soil density (organic content), and vegetation height. High vegetation and deep snow provide greater insulation.",
+            "Soil moisture depends on topographic aspect, soil density, and soil water input. Low-density organic soils retain more moisture than high-density mineral soils.",
+            "Soil temperature is a central mediating node influenced by air temperature, insulation, season, and soil moisture. The relationship between soil moisture and soil temperature differs by season: positive in winter (higher moisture → warmer) and negative in summer (higher moisture → cooler via evaporation).",
+            "Active layer ice content depends on soil moisture and soil temperature. Low temperatures promote high ice content, while high temperatures reduce it.",
+            "Thaw depth is the terminal outcome, determined by active layer ice content, soil moisture, and soil temperature. High ice content delays thaw through latent heat absorption; high soil temperatures promote deeper thaw.",
+            "All CPTs were developed through expert assessment informed by extensive literature review, with subsequent refinement based on validation experiments and a case study from Trail Valley Creek, NWT, Canada.",
+            "The model was designed for the continuous permafrost region and should not be applied to discontinuous or transitional permafrost zones."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "Aspect",
+            "display_name": "Topographic Slope Orientation",
+            "type": "categorical",
+            "states": [
+                "north",
+                "east",
+                "south",
+                "west"
+            ],
+            "role": "exogenous",
+            "category": "geological_setting",
+            "short_description": "Cardinal direction the terrain slope faces.",
+            "extended_description": "The compass direction that a terrain slope faces, classified into the four cardinal directions. A fixed landscape-scale feature that influences snow distribution, incident solar radiation, wind exposure, and consequently vegetation communities, soil moisture, and soil temperature. In the northern hemisphere, northerly aspects receive less intense incoming radiation and tend to be snowier and cooler than southerly aspects.",
+            "sensitivity_hints": "Fixed geological feature. Influences snow accumulation patterns, vegetation height, and soil moisture. Effects on radiation are lessened at higher latitudes for east and west aspects, but differences between north and south remain significant.",
+            "related_domain_knowledge": [
+                "Northerly aspects receive less solar radiation and are typically cooler and snowier.",
+                "Southerly aspects are warmer and drier, potentially supporting taller vegetation.",
+                "East and west aspects have intermediate radiation regimes at high latitudes.",
+                "Aspect controls microclimate through its effect on insolation and wind exposure."
+            ],
+            "references": [
+                "Beall2022_PermaBN"
+            ],
+            "llm_name": "SlopeOrientation"
+        },
+        {
+            "name": "SoilDensity",
+            "display_name": "Soil Bulk Density",
+            "type": "ordinal",
+            "states": [
+                "low",
+                "medium",
+                "high"
+            ],
+            "role": "exogenous",
+            "category": "geological_setting",
+            "short_description": "Bulk density of the soil reflecting organic versus mineral composition.",
+            "extended_description": "A measure of soil bulk density that captures the organic versus mineral composition of the ground. Low density corresponds to organic-rich peat soils with high moisture retention and low thermal conductivity. High density corresponds to mineral soils (sand-dominated) with lower moisture retention but higher thermal conductivity. This variable accounts for the combined effects of soil particle size and organic content on moisture retention and thermal properties.",
+            "sensitivity_hints": "Exogenous geological property. Influences soil moisture retention, thermal conductivity, and surface insulation. Low-density organic soils retain more moisture and have lower thermal conductivity than high-density mineral soils.",
+            "related_domain_knowledge": [
+                "Sandy soils have higher dry bulk density than silty, clayey, or organic soils.",
+                "Dry bulk density influences soil thermal conductivity: higher density increases thermal conductivity at a given moisture content.",
+                "Organic soils generally have very low dry densities and high moisture retention.",
+                "Thermal conductivity tends to be highest in sandy (high density) soils and lowest in organic (low density) soils."
+            ],
+            "references": [
+                "Beall2022_PermaBN"
+            ],
+            "llm_name": "GroundComposition"
+        },
+        {
+            "name": "AirTemperature",
+            "display_name": "Surface Air Temperature Regime",
+            "type": "ordinal",
+            "states": [
+                "low",
+                "medium",
+                "high"
+            ],
+            "role": "exogenous",
+            "category": "atmospheric_condition",
+            "short_description": "Temperature of the air near the earth's surface.",
+            "extended_description": "The temperature of the air near the earth's surface, classified into low, medium, or high bands. A primary atmospheric driver that directly influences precipitation type (rain versus snow), soil water input, vegetation growth, and soil temperature. Warmer air temperatures increase the proportion of precipitation falling as rain, extend the growing season for vegetation, and promote higher soil temperatures and deeper thaw.",
+            "sensitivity_hints": "Primary atmospheric driver. Directly influences rainfall, snowfall, soil water input, vegetation height, and soil temperature. Warmer temperatures promote deeper permafrost thaw through multiple pathways.",
+            "related_domain_knowledge": [
+                "Arctic air temperatures have increased by approximately 0.6°C per decade in recent decades.",
+                "Warmer temperatures shift the rain-to-snow precipitation ratio toward more rain.",
+                "Air-to-soil temperature coupling is modulated by surface insulation from snow and vegetation.",
+                "Medium air temperature is most probable under current Arctic climate projections."
+            ],
+            "references": [
+                "Beall2022_PermaBN"
+            ],
+            "llm_name": "SurfaceAirTemperature"
+        },
+        {
+            "name": "Season",
+            "display_name": "Seasonal Period",
+            "type": "binary",
+            "states": [
+                "snow_free",
+                "snow_covered"
+            ],
+            "role": "exogenous",
+            "category": "atmospheric_condition",
+            "short_description": "Division of the year by presence or absence of snow cover.",
+            "extended_description": "A binary division of the year into snow-free (summer) and snow-covered (winter) periods. A decision variable that controls whether snow accumulates on the ground and modulates the relationship between soil moisture and soil temperature. During the snow-covered season, snow provides insulation that keeps soils warmer; during the snow-free season, direct solar radiation drives soil warming. The Arctic typically experiences an 8-month snow-covered period.",
+            "sensitivity_hints": "Exogenous temporal control variable. Determines whether snow can accumulate and modulates the soil moisture–soil temperature relationship. During snow-free season, snow depth is always zero.",
+            "related_domain_knowledge": [
+                "The Arctic typically has an 8-month snow-covered period.",
+                "Snow cover insulates the ground, leading to warmer winter soil temperatures.",
+                "During snow-free months, direct radiation and air temperature drive soil thermal regime.",
+                "The relationship between soil moisture and soil temperature reverses between seasons."
+            ],
+            "references": [
+                "Beall2022_PermaBN"
+            ],
+            "llm_name": "TimePeriod"
+        },
+        {
+            "name": "Rain",
+            "display_name": "Rainfall Amount",
+            "type": "ordinal",
+            "states": [
+                "low",
+                "medium",
+                "high"
+            ],
+            "role": "endogenous",
+            "category": "atmospheric_condition",
+            "short_description": "Amount of liquid precipitation.",
+            "extended_description": "The amount of moisture falling as liquid rain, classified into low, medium, or high. Driven by air temperature: warmer conditions produce a higher ratio of precipitation as rain rather than snow. Rainfall contributes to soil water input and can melt existing snow cover, reducing snow depth and its insulating effect.",
+            "sensitivity_hints": "Driven by air temperature. Higher temperatures increase rainfall. Contributes to soil water input and can reduce snow depth through melting.",
+            "related_domain_knowledge": [
+                "Warmer Arctic temperatures shift precipitation from snow toward rain.",
+                "Rain on snow events can rapidly reduce snow depth.",
+                "Increased rainfall stimulates permafrost thaw through enhanced soil moisture.",
+                "The Arctic is expected to experience increased total precipitation with a higher rain fraction."
+            ],
+            "references": [
+                "Beall2022_PermaBN"
+            ],
+            "llm_name": "RainfallIntensity"
+        },
+        {
+            "name": "Snow",
+            "display_name": "Snowfall Amount",
+            "type": "ordinal",
+            "states": [
+                "low",
+                "medium",
+                "high"
+            ],
+            "role": "endogenous",
+            "category": "atmospheric_condition",
+            "short_description": "Amount of solid precipitation as snow.",
+            "extended_description": "The amount of atmospheric water vapour frozen into ice crystals and falling as snow, classified into low, medium, or high. Inversely related to air temperature: colder conditions favour more snowfall. Snowfall is a precursor to snow depth accumulation, which provides ground insulation during winter.",
+            "sensitivity_hints": "Driven by air temperature. Lower temperatures favour more snowfall. Contributes to snow depth accumulation and subsequent ground insulation.",
+            "related_domain_knowledge": [
+                "Colder air temperatures produce a higher fraction of precipitation as snow.",
+                "Snowfall amounts are expected to decrease as the Arctic warms.",
+                "Snow is a critical precursor inputs for ground insulation via snow depth.",
+                "Mean annual precipitation in the study region is approximately 266 mm, of which about 66% falls as snow."
+            ],
+            "references": [
+                "Beall2022_PermaBN"
+            ],
+            "llm_name": "SnowfallAmount"
+        },
+        {
+            "name": "SoilWaterInput",
+            "display_name": "Soil Water Input",
+            "type": "ordinal",
+            "states": [
+                "low",
+                "medium",
+                "high"
+            ],
+            "role": "endogenous",
+            "category": "soil_property",
+            "short_description": "Ratio of precipitation to evaporation entering the soil.",
+            "extended_description": "The net water input to the soil system, representing the ratio of precipitation to evaporation. Determined jointly by air temperature, rainfall, and snowfall. High rainfall and snowmelt contribute to high soil water input, while high air temperatures increase evaporation. This variable mediates between atmospheric precipitation and soil moisture.",
+            "sensitivity_hints": "Determined by air temperature, rainfall, and snowfall. Mediates the pathway from atmospheric precipitation to soil moisture conditions.",
+            "related_domain_knowledge": [
+                "Snowmelt is a major contributor to soil water input in spring.",
+                "Evaporation increases with air temperature, reducing net water input.",
+                "Permafrost acts as an impermeable layer, limiting deep drainage.",
+                "Rainfall on frozen ground can lead to rapid surface runoff rather than infiltration."
+            ],
+            "references": [
+                "Beall2022_PermaBN"
+            ],
+            "llm_name": "WaterInput"
+        },
+        {
+            "name": "VegetationHeight",
+            "display_name": "Vegetation Height",
+            "type": "ordinal",
+            "states": [
+                "low",
+                "medium",
+                "high"
+            ],
+            "role": "endogenous",
+            "category": "surface_insulation",
+            "short_description": "Height of the dominant vegetation classes.",
+            "extended_description": "The height of the dominant vegetation community, ranging from low tundra (mosses and lichens, 5–25 cm) through medium shrubs (alder, 80–150 cm) to tall channel vegetation (willows, 150–200 cm). Controlled by air temperature and topographic aspect. Taller vegetation traps more snow in winter (increasing insulation) but shades the ground in summer (reducing soil warming). Arctic shrub expansion driven by climate warming is a major feedback mechanism in the permafrost system.",
+            "sensitivity_hints": "Controlled by air temperature and slope orientation. Northerly and westerly aspects support only low vegetation. Taller vegetation increases winter insulation via snow trapping but provides summer shading.",
+            "related_domain_knowledge": [
+                "Shrub expansion is a documented response to Arctic warming.",
+                "Taller vegetation traps snow in branches, increasing local snow depth.",
+                "Summer vegetation shading reduces the thermal gradient into the soil.",
+                "The net effect of vegetation on permafrost (warming via snow trapping vs. cooling via shading) remains debated."
+            ],
+            "references": [
+                "Beall2022_PermaBN"
+            ],
+            "llm_name": "CanopyHeight"
+        },
+        {
+            "name": "SnowDepth",
+            "display_name": "Snow Depth",
+            "type": "ordinal",
+            "states": [
+                "none",
+                "low",
+                "medium",
+                "high"
+            ],
+            "role": "endogenous",
+            "category": "surface_insulation",
+            "short_description": "Depth of accumulated snow on the ground.",
+            "extended_description": "The depth of snow that has accumulated on the ground from previous weather events, classified into none, low, medium, or high. A complex node influenced by five factors: topographic aspect, rainfall, season, snowfall, and vegetation height. During the snow-free season, snow depth is always zero regardless of other conditions. During the snow-covered season, higher snowfall and taller vegetation (which traps snow) promote deeper snow, while rainfall can reduce snow depth through melting. Southern aspects tend to have less snow due to more intense insolation.",
+            "sensitivity_hints": "Complex node with five parents. Always zero during the snow-free season. Deeper snow provides greater insulation, warming winter soils but potentially slowing active layer refreezing.",
+            "related_domain_knowledge": [
+                "Snow is a highly effective thermal insulator due to its low thermal conductivity.",
+                "Deep snow prevents the active layer from fully refreezing during winter.",
+                "Rain-on-snow events can rapidly reduce snow depth.",
+                "Vegetation traps snow, creating local snow depth variations of ecological significance."
+            ],
+            "references": [
+                "Beall2022_PermaBN"
+            ],
+            "llm_name": "SnowAccumulation"
+        },
+        {
+            "name": "Insulation",
+            "display_name": "Ground Insulation",
+            "type": "ordinal",
+            "states": [
+                "low",
+                "medium",
+                "high"
+            ],
+            "role": "endogenous",
+            "category": "surface_insulation",
+            "short_description": "Degree of thermal insulation protecting the ground from heat transfer.",
+            "extended_description": "The overall state of thermal insulation at the ground surface, integrating the buffering effects of snow depth, soil density (organic content), and vegetation height. High insulation occurs when deep snow, organic-rich soils, and tall vegetation combine to reduce heat exchange between the atmosphere and the ground. This variable mediates between surface conditions and soil temperature. During winter, insulation warms soils by trapping geothermal heat; during summer, it can cool soils by reducing the penetration of warm air temperatures.",
+            "sensitivity_hints": "Integrates snow depth, soil composition, and vegetation height into a single insulation measure. High insulation strongly modulates the air temperature to soil temperature pathway.",
+            "related_domain_knowledge": [
+                "Snow is the most effective surface insulator in Arctic environments.",
+                "Organic soil layers provide significant insulation due to low thermal conductivity.",
+                "The combined insulation effect is non-linear — strong insulation can dramatically alter soil thermal regime.",
+                "Insulation implicitly represents soil thermal conductivity effects."
+            ],
+            "references": [
+                "Beall2022_PermaBN"
+            ],
+            "llm_name": "ThermalBuffering"
+        },
+        {
+            "name": "SoilMoisture",
+            "display_name": "Soil Moisture Content",
+            "type": "ordinal",
+            "states": [
+                "low",
+                "medium",
+                "high"
+            ],
+            "role": "endogenous",
+            "category": "soil_property",
+            "short_description": "Water held in pore spaces between soil particles.",
+            "extended_description": "The amount of water held in the pore spaces between soil particles, classified into low, medium, or high. Determined by topographic aspect, soil density, and soil water input. Low-density organic soils retain more moisture than high-density mineral soils. Northerly aspects tend to be wetter. Soil moisture has a complex relationship with soil temperature that reverses between seasons, and also directly influences active layer ice content and thaw depth.",
+            "sensitivity_hints": "Determined by slope orientation, ground composition, and water input. Has a season-dependent relationship with soil temperature (positive in winter, negative in summer). Directly influences ground ice content and thaw depth.",
+            "related_domain_knowledge": [
+                "Permafrost acts as an impermeable barrier, keeping moisture in the active layer.",
+                "Organic soils retain significantly more moisture than mineral soils.",
+                "Higher soil moisture increases heat capacity but also thermal conductivity.",
+                "Soil moisture is a critical variable in ground ice formation and thaw dynamics."
+            ],
+            "references": [
+                "Beall2022_PermaBN"
+            ],
+            "llm_name": "SubsurfaceMoisture"
+        },
+        {
+            "name": "SoilTemperature",
+            "display_name": "Soil Temperature",
+            "type": "ordinal",
+            "states": [
+                "low",
+                "medium",
+                "high"
+            ],
+            "role": "endogenous",
+            "category": "soil_property",
+            "short_description": "Temperature of the soil in the active layer.",
+            "extended_description": "The temperature of the soil in the active layer, classified into low, medium, or high. A central mediating variable influenced by four parents: air temperature, insulation, season, and soil moisture. The relationship between soil moisture and soil temperature is season-dependent: in winter, higher moisture leads to warmer temperatures (moisture retains heat), while in summer, higher moisture leads to cooler temperatures (evaporative cooling). Soil temperature is the primary direct driver of permafrost thaw.",
+            "sensitivity_hints": "Central mediating node with four parents. The soil moisture–soil temperature relationship reverses between seasons. Primary thermodynamic driver of the active layer and thaw depth.",
+            "related_domain_knowledge": [
+                "Soil temperatures in the Arctic have been increasing in response to air temperature warming.",
+                "Snow insulation keeps winter soil temperatures significantly warmer than air temperatures.",
+                "The zero-degree isotherm in the soil defines the base of the active layer.",
+                "Soil thermal regime is the single most important determinant of permafrost stability."
+            ],
+            "references": [
+                "Beall2022_PermaBN"
+            ],
+            "llm_name": "SubsurfaceTemperature"
+        },
+        {
+            "name": "ActiveLayerIceContent",
+            "display_name": "Active Layer Ice Content",
+            "type": "ordinal",
+            "states": [
+                "low",
+                "medium",
+                "high"
+            ],
+            "role": "endogenous",
+            "category": "soil_property",
+            "short_description": "Volume of ice in the upper soil layer subject to annual thaw–freeze cycles.",
+            "extended_description": "The volume of all types of ice contained in the upper portion of the soil column that is subject to annual thawing and freezing, classified into low, medium, or high. Determined by soil moisture (water availability for freezing) and soil temperature (thermal conditions for ice formation). High moisture and low temperatures promote high ice content. Ground ice delays active layer thickening through the large latent heat required to melt it, but when it does melt, it can cause ground subsidence and further promote thaw.",
+            "sensitivity_hints": "Determined by soil moisture and soil temperature. High ice content delays thaw through latent heat absorption. Conversely, high ice content can lead to pronounced ground subsidence when it melts.",
+            "related_domain_knowledge": [
+                "Ground ice is vulnerable to degradation as soil temperatures rise.",
+                "Wet sites are more likely to have high ice concentrations than dry sites.",
+                "Latent heat from ice melt can delay active layer thickening significantly.",
+                "Ice-rich permafrost in the study region is between 350 and 500 m thick."
+            ],
+            "references": [
+                "Beall2022_PermaBN"
+            ],
+            "llm_name": "GroundIceContent"
+        },
+        {
+            "name": "ThawDepth",
+            "display_name": "Permafrost Thaw Depth",
+            "type": "ordinal",
+            "states": [
+                "low",
+                "medium",
+                "high"
+            ],
+            "role": "endogenous",
+            "category": "endpoint",
+            "short_description": "Depth of the ground layer subject to annual thawing.",
+            "extended_description": "The depth of the ground layer subject to annual thawing and freezing, i.e. the active layer thickness, classified into low, medium, or high. This is the terminal endpoint of the model, determined by active layer ice content, soil moisture, and soil temperature. High soil temperatures and low ice content promote deeper thaw; high ice content delays thaw through latent heat absorption. In the study region (Trail Valley Creek, NWT, Canada), active layer thickness typically varies between 50 and 80 cm, with low thaw depth being less than 50 cm and high thaw depth greater than 80 cm.",
+            "sensitivity_hints": "Terminal endpoint of the model. Determined by ground ice content, soil moisture, and soil temperature. Thaw depth increases during the snow-free season under warming temperatures, lowered soil moisture, and low ice content.",
+            "related_domain_knowledge": [
+                "Active layer thickness in the continuous permafrost zone typically ranges from 0.5 to 0.8 m.",
+                "Deeper thaw releases previously frozen soil carbon, creating a positive climate feedback.",
+                "Thaw depth is influenced by multiple cascading pathways through the model.",
+                "Permafrost thaw threatens Arctic infrastructure and alters ecosystem dynamics."
+            ],
+            "references": [
+                "Beall2022_PermaBN"
+            ],
+            "llm_name": "FrostTableDepth"
+        }
+    ]
+}

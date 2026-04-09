@@ -1,0 +1,617 @@
+{
+    "schema_version": "2.0",
+    "network": "corrosion",
+    "domain": "pipeline_under_deposit_corrosion",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for an under-deposit corrosion model in oil and gas pipelines, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "corrosion",
+        "source_reference": "Dao, U., Sajid, Z., Khan, F., & Zhang, Y. (2023). Dynamic Bayesian network model to study under-deposit corrosion. Reliability Engineering & System Safety, 237, 109370.",
+        "source_url": "https://doi.org/10.1016/j.ress.2023.109370",
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "The corrosion network models under-deposit corrosion (UDC) in oil and gas pipelines, originally developed by Dao, Sajid, Khan, and Zhang (2023) using a dynamic Bayesian network elicited from expert judgement and engineering models. It captures relationships between operating conditions, deposit formation, electrochemical corrosion, wall degradation, and pipe failure. Contains 22 nodes and 24 edges. Variables are a mixture of binary, ternary, and quaternary discrete states. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a model of under-deposit corrosion (UDC) in oil and gas pipeline systems.",
+            "The causal chain follows: operating conditions + deposit sources → deposit accumulation → electrochemical corrosion cell → corrosion rate → wall degradation → defect geometry → burst pressure → pipe failure.",
+            "Three types of deposit sources (inorganic, organic, mixed) combine to determine the overall level of suspended deposits in the pipeline fluid.",
+            "Flow velocity and operating pressure jointly determine shearing force, which influences whether deposits settle or remain suspended.",
+            "Solid deposits accumulate from suspended deposits modulated by flow velocity — low flow promotes settlement, high flow promotes re-suspension.",
+            "Operating temperature and partial pressure of CO2 jointly determine pH of the pipeline fluid, which is a key driver of corrosion electrochemistry.",
+            "Chloride concentration, monoethylene glycol (MEG) presence, and pH together determine the quality of the under-deposit galvanic cell, from poor (low corrosion) to excellent (high corrosion).",
+            "Under-deposit corrosion rate is a central node driven by shearing force, solid deposits, and galvanic cell quality.",
+            "Wall thickness loss is a direct consequence of corrosion rate, and leads to defect depth and defect length.",
+            "Burst pressure is determined by defect geometry (depth and length), outer diameter, and steel grade.",
+            "Pipe failure is the terminal outcome, determined by burst pressure relative to operating pressure.",
+            "MEG is a corrosion inhibitor commonly used in oil and gas pipelines; its presence modifies galvanic cell behaviour.",
+            "The model represents a single time-slice of a dynamic Bayesian network amenable to temporal unrolling.",
+            "All CPTs were elicited from domain experts in pipeline integrity engineering."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "OperatingTemperature",
+            "display_name": "Pipeline Operating Temperature",
+            "type": "ordinal",
+            "states": [
+                "high",
+                "moderate",
+                "low"
+            ],
+            "role": "exogenous",
+            "category": "operating_condition",
+            "short_description": "Operating temperature of the pipeline fluid.",
+            "extended_description": "The temperature of the fluid flowing through the pipeline, classified into high, moderate, or low bands. An exogenous operating condition that directly influences the pH of the pipeline fluid through its effect on CO2 solubility and carbonate equilibrium chemistry. Higher temperatures generally reduce CO2 solubility and shift pH upward.",
+            "sensitivity_hints": "Exogenous operating condition. Together with partial pressure of CO2, determines fluid pH. Does not directly affect corrosion rate — its effect is fully mediated through pH.",
+            "related_domain_knowledge": [
+                "Temperature affects CO2 solubility in aqueous solutions according to Henry’s law.",
+                "Higher temperatures accelerate electrochemical reaction kinetics but reduce dissolved CO2.",
+                "Typical oil and gas pipeline operating temperatures range from 20°C to 120°C.",
+                "Temperature gradients along the pipeline can create localised corrosion hot spots."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "pipeline_temperature"
+        },
+        {
+            "name": "PartialPressureCO2",
+            "display_name": "Partial Pressure of CO2",
+            "type": "ordinal",
+            "states": [
+                "high",
+                "moderate",
+                "low"
+            ],
+            "role": "exogenous",
+            "category": "operating_condition",
+            "short_description": "Partial pressure of dissolved carbon dioxide in the pipeline fluid.",
+            "extended_description": "The partial pressure of CO2 in the pipeline environment, classified as high, moderate, or low. CO2 is the primary driver of sweet corrosion in oil and gas pipelines. Together with operating temperature, it determines the pH of the fluid, which governs carbonate scale formation and the severity of the electrochemical corrosion cell.",
+            "sensitivity_hints": "Exogenous operating condition. Together with temperature, determines fluid pH. Higher CO2 partial pressure drives pH toward acidic conditions, intensifying corrosion.",
+            "related_domain_knowledge": [
+                "CO2 corrosion (sweet corrosion) is the most common form of internal corrosion in oil and gas pipelines.",
+                "CO2 dissolves in water to form carbonic acid (H2CO3), lowering pH.",
+                "CO2 partial pressure above ~2 bar is generally considered high risk for corrosion.",
+                "CO2 corrosion rate depends on the interplay of temperature, pressure, pH, and flow regime."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "co2_partial_pressure"
+        },
+        {
+            "name": "pH",
+            "display_name": "Pipeline Fluid pH",
+            "type": "ordinal",
+            "states": [
+                "acidic",
+                "neutral",
+                "basic"
+            ],
+            "role": "endogenous",
+            "category": "chemical_condition",
+            "short_description": "Acidity level of the pipeline fluid.",
+            "extended_description": "The pH of the pipeline fluid, determined by operating temperature and CO2 partial pressure through carbonate equilibrium chemistry. Acidic pH promotes formation of a strong galvanic cell under deposits by enhancing anodic dissolution. Neutral or basic pH tends to promote protective scale formation that slows corrosion.",
+            "sensitivity_hints": "Driven by operating temperature and CO2 partial pressure. Directly affects the under-deposit galvanic cell quality. Key chemical mediator in the corrosion pathway.",
+            "related_domain_knowledge": [
+                "pH below 4.0 typically indicates severe CO2 corrosion risk.",
+                "At neutral to basic pH, iron carbonate (FeCO3) scales can form a protective layer.",
+                "The relationship between CO2, temperature, and pH follows carbonate equilibrium models.",
+                "pH measurement in high-pressure pipeline environments requires specialised probes."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "fluid_acidity"
+        },
+        {
+            "name": "Chloride",
+            "display_name": "Chloride Ion Concentration",
+            "type": "ordinal",
+            "states": [
+                "high",
+                "moderate",
+                "low"
+            ],
+            "role": "exogenous",
+            "category": "chemical_condition",
+            "short_description": "Concentration of chloride ions in the pipeline fluid.",
+            "extended_description": "The concentration of chloride ions (Cl⁻) in the pipeline fluid, classified as high, moderate, or low. Chloride is an aggressive anion that destabilises protective oxide films, promotes pitting corrosion, and enhances the under-deposit galvanic cell by increasing local ionic conductivity beneath deposits.",
+            "sensitivity_hints": "Exogenous chemical parameter. Directly affects the galvanic cell quality under deposits. High chloride is particularly damaging in combination with acidic pH.",
+            "related_domain_knowledge": [
+                "Chloride ions penetrate and destabilise passive oxide films on carbon steel.",
+                "Produced water in oil and gas pipelines often contains significant chloride levels.",
+                "Chloride-induced pitting is a localised corrosion mechanism distinct from general CO2 corrosion.",
+                "Chloride concentration above ~10,000 ppm is considered high in pipeline integrity assessments."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "chloride_concentration"
+        },
+        {
+            "name": "MEG",
+            "display_name": "Monoethylene Glycol Presence",
+            "type": "binary",
+            "states": [
+                "absent",
+                "present"
+            ],
+            "role": "exogenous",
+            "category": "chemical_treatment",
+            "short_description": "Whether monoethylene glycol (MEG) is injected as hydrate and corrosion inhibitor.",
+            "extended_description": "Whether monoethylene glycol (MEG) is being injected into the pipeline. MEG is a dual-purpose chemical used as both a hydrate inhibitor and corrosion inhibitor in subsea and wet-gas pipelines. Its presence modifies the electrochemical environment under deposits, potentially reducing the severity of the galvanic cell.",
+            "sensitivity_hints": "Exogenous chemical treatment. Directly affects galvanic cell quality. Present in approximately 70% of operating conditions in this model.",
+            "related_domain_knowledge": [
+                "MEG is the most common hydrate inhibitor in offshore oil and gas production.",
+                "MEG reduces water activity and can lower corrosion rates by 50–80% at typical injection rates.",
+                "MEG regeneration and reclamation systems are standard in subsea pipeline infrastructure.",
+                "MEG effectiveness as a corrosion inhibitor depends on concentration and contamination levels."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "glycol_inhibitor"
+        },
+        {
+            "name": "UnderDepositGalvanicCell",
+            "display_name": "Under-Deposit Galvanic Cell Quality",
+            "type": "ordinal",
+            "states": [
+                "poor",
+                "fair",
+                "good",
+                "excellent"
+            ],
+            "role": "endogenous",
+            "category": "electrochemical_process",
+            "short_description": "Quality of the electrochemical galvanic cell formed beneath deposits.",
+            "extended_description": "The quality (severity) of the electrochemical galvanic cell that forms beneath deposits on the pipe wall, ranging from poor (minimal corrosion potential) to excellent (maximum corrosion potential). Determined by chloride concentration, MEG presence, and pH. A strong galvanic cell creates a large potential difference between the area under the deposit (anode) and the surrounding exposed metal (cathode), accelerating localised corrosion.",
+            "sensitivity_hints": "Central electrochemical node. Driven by chloride, MEG, and pH. Directly affects corrosion rate. ‘Excellent’ from an electrochemistry perspective means the worst-case for pipeline integrity.",
+            "related_domain_knowledge": [
+                "Under-deposit corrosion creates an occluded cell where aggressive species (Cl⁻, H⁺) concentrate.",
+                "The galvanic couple between covered and bare metal drives anodic dissolution under the deposit.",
+                "In acidic, high-chloride environments without inhibitors, galvanic cells are most severe.",
+                "The crevice-like environment under deposits restricts mass transport, concentrating corrodents."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "galvanic_cell_severity"
+        },
+        {
+            "name": "FlowVelocity",
+            "display_name": "Pipeline Flow Velocity",
+            "type": "ordinal",
+            "states": [
+                "high",
+                "moderate",
+                "low"
+            ],
+            "role": "exogenous",
+            "category": "operating_condition",
+            "short_description": "Velocity of fluid flow inside the pipeline.",
+            "extended_description": "The velocity of the multiphase fluid flowing through the pipeline, classified as high, moderate, or low. Flow velocity has a dual role: it determines the shearing force acting on deposits (jointly with operating pressure) and influences whether suspended deposits settle or remain entrained in the flow. High flow velocity generally inhibits deposit formation but increases erosion risk.",
+            "sensitivity_hints": "Exogenous operating condition. Directly affects both shearing force and solid deposit accumulation. A key controllable parameter in pipeline operations.",
+            "related_domain_knowledge": [
+                "Minimum flow velocity to prevent deposit settling is typically 1–3 m/s depending on particle size.",
+                "Low-flow or stagnant regions (bends, dead legs) are most susceptible to deposit accumulation.",
+                "Excessively high flow can cause erosion-corrosion, removing protective scales.",
+                "Flow regime (stratified, slug, annular) affects deposit distribution along the pipe circumference."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "flow_velocity"
+        },
+        {
+            "name": "OperatingPressure",
+            "display_name": "Pipeline Operating Pressure",
+            "type": "ordinal",
+            "states": [
+                "high",
+                "moderate",
+                "low"
+            ],
+            "role": "exogenous",
+            "category": "operating_condition",
+            "short_description": "Internal operating pressure of the pipeline.",
+            "extended_description": "The internal operating pressure of the pipeline, classified as high, moderate, or low. Operating pressure contributes to shearing force on the pipe wall (jointly with flow velocity) and is a critical factor in determining whether a corroded pipe will fail — higher operating pressure relative to burst pressure increases failure probability.",
+            "sensitivity_hints": "Exogenous operating condition. Affects both shearing force (upstream) and pipe failure (downstream). Connects the deposit formation pathway to the structural failure pathway.",
+            "related_domain_knowledge": [
+                "Typical oil and gas pipeline operating pressures range from 20 to 200 bar.",
+                "Operating pressure is the primary load that a corroded pipe wall must resist.",
+                "Pressure cycling (fluctuations) can accelerate fatigue-corrosion interactions.",
+                "Maximum allowable operating pressure (MAOP) is determined by pipe specifications and safety factors."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "operating_pressure"
+        },
+        {
+            "name": "ShearingForce",
+            "display_name": "Wall Shearing Force",
+            "type": "ordinal",
+            "states": [
+                "high",
+                "moderate",
+                "low"
+            ],
+            "role": "endogenous",
+            "category": "physical_process",
+            "short_description": "Shearing force exerted by the flowing fluid on the pipe wall and deposits.",
+            "extended_description": "The shearing force exerted by the flowing fluid on the pipe wall surface and any accumulated deposits. Determined jointly by flow velocity and operating pressure. High shearing force can remove deposits and protective corrosion scales, exposing fresh metal to the corrosive environment and affecting the corrosion rate.",
+            "sensitivity_hints": "Driven by flow velocity and operating pressure. Directly affects corrosion rate. Represents the mechanical interaction between fluid dynamics and deposit stability.",
+            "related_domain_knowledge": [
+                "Wall shear stress in turbulent pipe flow scales with velocity squared.",
+                "Shearing force determines whether deposits are mechanically stable or continuously eroded.",
+                "At pipe bends and restrictions, local shearing forces can be significantly higher than average.",
+                "High shearing removes both harmful deposits and protective corrosion product films."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "wall_shear_force"
+        },
+        {
+            "name": "InorganicDeposits",
+            "display_name": "Inorganic Deposit Source",
+            "type": "binary",
+            "states": [
+                "absent",
+                "present"
+            ],
+            "role": "exogenous",
+            "category": "deposit_source",
+            "short_description": "Presence of inorganic deposit sources such as sand, scale, or mineral precipitates.",
+            "extended_description": "Whether inorganic deposit sources are present in the pipeline fluid, including sand particles, mineral scale (calcium carbonate, barium sulphate), and corrosion products (iron carbonate, iron sulphide). One of three deposit source types that combine to determine the overall suspended deposit load.",
+            "sensitivity_hints": "Exogenous deposit source. Contributes to suspended deposit level. Its effect on corrosion is mediated through the suspended → solid deposits → corrosion rate pathway.",
+            "related_domain_knowledge": [
+                "Sand production from reservoir formations is a major source of inorganic deposits.",
+                "Scale deposition (CaCO3, BaSO4) is common when produced water chemistry changes.",
+                "Corrosion product deposits (FeCO3, FeS) can be both protective and harmful depending on morphology.",
+                "Inorganic deposits are typically denser and more abrasive than organic deposits."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "inorganic_deposits"
+        },
+        {
+            "name": "OrganicDeposits",
+            "display_name": "Organic Deposit Source",
+            "type": "binary",
+            "states": [
+                "absent",
+                "present"
+            ],
+            "role": "exogenous",
+            "category": "deposit_source",
+            "short_description": "Presence of organic deposit sources such as wax, asphaltenes, or biofilms.",
+            "extended_description": "Whether organic deposit sources are present in the pipeline fluid, including paraffin wax, asphaltenes, and microbiologically induced biofilms. One of three deposit source types that combine to determine the overall suspended deposit load.",
+            "sensitivity_hints": "Exogenous deposit source. Contributes to suspended deposit level. Organic deposits are particularly associated with microbiologically influenced corrosion (MIC).",
+            "related_domain_knowledge": [
+                "Wax deposition occurs when pipeline temperature drops below the wax appearance temperature.",
+                "Asphaltene deposits are triggered by pressure and composition changes.",
+                "Biofilms harbour sulphate-reducing bacteria (SRB) that cause microbiologically influenced corrosion.",
+                "Organic deposits create ideal environments for anaerobic corrosion beneath the deposit layer."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "organic_deposits"
+        },
+        {
+            "name": "MixedDeposits",
+            "display_name": "Mixed Deposit Source",
+            "type": "binary",
+            "states": [
+                "absent",
+                "present"
+            ],
+            "role": "exogenous",
+            "category": "deposit_source",
+            "short_description": "Presence of mixed organic-inorganic deposit sources.",
+            "extended_description": "Whether mixed deposit sources are present in the pipeline, representing combinations of organic and inorganic materials such as wax-sand mixtures, scale-biofilm composites, or corrosion product-organic matrices. These mixed deposits are often more tenacious and harder to remove than pure deposits.",
+            "sensitivity_hints": "Exogenous deposit source. Contributes to suspended deposit level. Mixed deposits often create the most severe under-deposit corrosion environments.",
+            "related_domain_knowledge": [
+                "Mixed deposits are common in real pipeline environments where multiple sources co-exist.",
+                "The interaction between organic and inorganic components can create synergistic deposition.",
+                "Mixed deposits are particularly difficult to remove by pigging or chemical treatment.",
+                "Co-deposition of scale and biofilm creates highly localised aggressive environments."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "mixed_deposits"
+        },
+        {
+            "name": "SuspendedDeposits",
+            "display_name": "Suspended Deposit Load",
+            "type": "ordinal",
+            "states": [
+                "high",
+                "moderate",
+                "low"
+            ],
+            "role": "endogenous",
+            "category": "deposit_process",
+            "short_description": "Overall level of suspended deposits in the pipeline fluid.",
+            "extended_description": "The overall concentration of suspended particulate matter in the pipeline fluid, aggregated from the three deposit source types (inorganic, organic, mixed). High suspended deposit loads increase the likelihood of solid deposit accumulation on the pipe wall, particularly in low-flow regions.",
+            "sensitivity_hints": "Driven by the three deposit source types. Directly affects solid deposit accumulation (jointly with flow velocity). Central node in the deposit formation pathway.",
+            "related_domain_knowledge": [
+                "Suspended solids concentration is routinely monitored in pipeline operations.",
+                "Particle settling velocity depends on size, density, and fluid viscosity.",
+                "High suspended loads can also contribute to erosion of pipe walls and components.",
+                "Filtration and separation equipment can reduce suspended deposit loads upstream."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "suspended_deposit_load"
+        },
+        {
+            "name": "SolidDeposits",
+            "display_name": "Solid Deposit Accumulation",
+            "type": "ordinal",
+            "states": [
+                "high",
+                "moderate",
+                "low"
+            ],
+            "role": "endogenous",
+            "category": "deposit_process",
+            "short_description": "Level of solid deposit accumulation on the pipe wall.",
+            "extended_description": "The level of solid deposits that have accumulated on the internal pipe wall surface. Determined by flow velocity and suspended deposit load. Solid deposits create the occluded environment necessary for under-deposit corrosion by trapping aggressive species against the metal surface and creating differential aeration cells.",
+            "sensitivity_hints": "Driven by flow velocity and suspended deposit load. Directly affects corrosion rate. Represents the transition from suspended particles to wall-adherent deposits.",
+            "related_domain_knowledge": [
+                "Deposits preferentially accumulate at the 6 o’clock position (pipe bottom) in horizontal pipelines.",
+                "Pipeline pigging is the primary mechanical method for removing solid deposits.",
+                "Deposit thickness above 1–2 mm is generally considered sufficient to initiate under-deposit corrosion.",
+                "The porosity and permeability of the deposit layer affect the severity of the occluded cell."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "solid_deposit_level"
+        },
+        {
+            "name": "UDCCorrRate",
+            "display_name": "Under-Deposit Corrosion Rate",
+            "type": "ordinal",
+            "states": [
+                "high",
+                "moderate",
+                "low"
+            ],
+            "role": "endogenous",
+            "category": "corrosion_process",
+            "short_description": "Rate of under-deposit corrosion on the pipe wall.",
+            "extended_description": "The rate of corrosion occurring beneath deposits on the pipe wall, classified as high, moderate, or low. This is the central corrosion node in the model, determined by three factors: shearing force (which can remove protective scales), solid deposit level (which creates the occluded environment), and galvanic cell quality (which drives electrochemical dissolution). High corrosion rate leads to rapid wall thinning.",
+            "sensitivity_hints": "Central corrosion node. Driven by shearing force, solid deposits, and galvanic cell quality. Directly affects wall thickness loss. The primary target variable for corrosion risk mitigation.",
+            "related_domain_knowledge": [
+                "Under-deposit corrosion rates can exceed 10 mm/year in severe cases, far above general corrosion rates.",
+                "UDC is a localised corrosion mechanism that creates pits and grooves rather than uniform wall loss.",
+                "The three-factor interaction (hydrodynamic + deposit + electrochemical) makes UDC difficult to predict.",
+                "Corrosion rate monitoring tools (coupons, ER probes, ultrasonic thickness gauges) are used in-line."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "corrosion_rate"
+        },
+        {
+            "name": "WallThicknessLoss",
+            "display_name": "Pipeline Wall Thickness Loss",
+            "type": "binary",
+            "states": [
+                "yes",
+                "no"
+            ],
+            "role": "endogenous",
+            "category": "structural_degradation",
+            "short_description": "Whether significant wall thickness loss has occurred due to corrosion.",
+            "extended_description": "Whether the pipeline has experienced significant wall thickness loss as a direct result of under-deposit corrosion. Wall thickness loss is the primary structural consequence of corrosion and leads to reduced burst pressure capacity. It is the precursor to both defect depth and defect length.",
+            "sensitivity_hints": "Driven by corrosion rate. Leads to defect depth. Direct link between corrosion process and structural integrity degradation.",
+            "related_domain_knowledge": [
+                "Wall thickness is typically monitored using in-line inspection (ILI) tools (smart pigs).",
+                "Minimum allowable wall thickness is determined by pipe specifications and design codes (e.g., ASME B31G).",
+                "Corrosion allowance in pipeline design typically ranges from 1.5 to 6 mm.",
+                "Wall thickness loss data is used for remaining life assessment and fitness-for-service evaluations."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "wall_thickness_loss"
+        },
+        {
+            "name": "DefectDepth",
+            "display_name": "Corrosion Defect Depth",
+            "type": "binary",
+            "states": [
+                "yes",
+                "no"
+            ],
+            "role": "endogenous",
+            "category": "structural_degradation",
+            "short_description": "Whether a significant-depth corrosion defect is present.",
+            "extended_description": "Whether a corrosion defect of significant depth (relative to wall thickness) has developed. Defect depth is a direct consequence of wall thickness loss and is a critical input to burst pressure calculations. Deep defects dramatically reduce the pressure-carrying capacity of the pipe.",
+            "sensitivity_hints": "Driven by wall thickness loss. Directly affects burst pressure. In this model, defect depth is deterministically linked to wall thickness loss.",
+            "related_domain_knowledge": [
+                "Defect depth is typically expressed as a fraction of nominal wall thickness (d/t ratio).",
+                "Defects deeper than 80% of wall thickness are generally considered critical.",
+                "In-line inspection tools can measure defect depth to within ±10% of wall thickness.",
+                "Defect depth is the primary parameter in most burst pressure prediction models."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "defect_depth"
+        },
+        {
+            "name": "DefectLength",
+            "display_name": "Corrosion Defect Length",
+            "type": "binary",
+            "states": [
+                "yes",
+                "no"
+            ],
+            "role": "endogenous",
+            "category": "structural_degradation",
+            "short_description": "Whether a significant-length corrosion defect is present.",
+            "extended_description": "Whether a corrosion defect of significant axial length has developed. Defect length is directly related to the corrosion rate — higher rates produce longer defects over time. Together with defect depth, defect length determines the geometry of the corrosion anomaly and its effect on burst pressure.",
+            "sensitivity_hints": "Driven by corrosion rate. Directly affects burst pressure. Longer defects reduce burst pressure more than shorter defects of the same depth.",
+            "related_domain_knowledge": [
+                "Defect length is measured in the axial (longitudinal) direction of the pipe.",
+                "Long, shallow defects may be less critical than short, deep defects.",
+                "The ASME B31G and DNV-RP-F101 codes use defect length in burst pressure assessment.",
+                "Corrosion colonies (multiple interacting defects) can have an effective length greater than individual defects."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "defect_length"
+        },
+        {
+            "name": "OD",
+            "display_name": "Pipeline Outer Diameter",
+            "type": "binary",
+            "states": [
+                "high",
+                "low"
+            ],
+            "role": "exogenous",
+            "category": "pipe_specification",
+            "short_description": "Outer diameter class of the pipeline.",
+            "extended_description": "The outer diameter (OD) of the pipeline, classified as high (large diameter) or low (small diameter). Outer diameter is a fixed pipe specification that influences burst pressure — larger diameter pipes have different hoop stress distributions than smaller ones. In this model, 92% of pipes are in the high OD category.",
+            "sensitivity_hints": "Exogenous pipe specification. Directly affects burst pressure calculation. Fixed design parameter not controllable during operations.",
+            "related_domain_knowledge": [
+                "Common oil and gas pipeline diameters range from 4 inches (100 mm) to 48 inches (1200 mm).",
+                "Hoop stress in a pressurised pipe is proportional to diameter (Barlow’s formula: σ = PD/2t).",
+                "Larger diameter pipes require proportionally thicker walls for the same operating pressure.",
+                "Pipeline diameter affects flow regime, deposit distribution, and inspection tool selection."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "pipe_diameter"
+        },
+        {
+            "name": "SteelGrade",
+            "display_name": "Pipeline Steel Grade",
+            "type": "binary",
+            "states": [
+                "high",
+                "low"
+            ],
+            "role": "exogenous",
+            "category": "pipe_specification",
+            "short_description": "Grade (strength) classification of the pipeline steel.",
+            "extended_description": "The grade of the pipeline steel, classified as high-strength or low-strength. Steel grade determines the yield and tensile strength of the pipe material, directly affecting the burst pressure capacity. Higher grade steels can withstand greater pressures before failure but may have different corrosion resistance properties.",
+            "sensitivity_hints": "Exogenous pipe specification. Directly affects burst pressure. In this model, 78% of pipes are high-grade steel.",
+            "related_domain_knowledge": [
+                "Common pipeline steel grades include API 5L X42 through X80.",
+                "Higher grade steels have higher yield strength but may be more susceptible to hydrogen embrittlement.",
+                "Steel grade selection is a design-stage decision based on operating pressure and environment.",
+                "The relationship between steel grade and corrosion resistance is complex and environment-dependent."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "steel_grade"
+        },
+        {
+            "name": "BurstPressure",
+            "display_name": "Estimated Burst Pressure",
+            "type": "binary",
+            "states": [
+                "high",
+                "low"
+            ],
+            "role": "endogenous",
+            "category": "structural_integrity",
+            "short_description": "Estimated burst pressure capacity of the corroded pipeline section.",
+            "extended_description": "The estimated burst pressure of the pipeline section, accounting for the corrosion defect geometry (depth and length), pipe outer diameter, and steel grade. Burst pressure represents the maximum internal pressure the corroded pipe can withstand before rupture. It is calculated using assessment models such as ASME B31G or DNV-RP-F101.",
+            "sensitivity_hints": "Driven by defect depth, defect length, outer diameter, and steel grade. Directly determines pipe failure risk (jointly with operating pressure). The key structural integrity metric.",
+            "related_domain_knowledge": [
+                "Burst pressure is the primary output of pipeline fitness-for-service assessments.",
+                "ASME B31G and DNV-RP-F101 are the most widely used burst pressure prediction methods.",
+                "Burst pressure decreases with increasing defect depth and length.",
+                "Higher steel grades increase burst pressure capacity for the same defect geometry.",
+                "A safety factor of 1.25–1.72 is typically applied between operating pressure and predicted burst pressure."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "burst_pressure"
+        },
+        {
+            "name": "PipeFailure",
+            "display_name": "Pipeline Failure",
+            "type": "binary",
+            "states": [
+                "yes",
+                "no"
+            ],
+            "role": "endogenous",
+            "category": "failure_outcome",
+            "short_description": "Whether the pipeline section has failed (rupture or leak).",
+            "extended_description": "The terminal outcome variable representing whether the corroded pipeline section has failed, either through rupture (burst) or leak. Failure occurs when the operating pressure exceeds the burst pressure capacity of the corroded section. This is the ultimate consequence node in the model, integrating the corrosion degradation pathway with the structural loading pathway.",
+            "sensitivity_hints": "Terminal output node. Driven by burst pressure and operating pressure. All upstream variables affect this through their respective causal chains. The primary risk metric for pipeline integrity management.",
+            "related_domain_knowledge": [
+                "Pipeline failures can result in rupture (sudden, catastrophic) or leak (gradual, detectable).",
+                "Failure consequences include environmental contamination, fire/explosion, production loss, and fatalities.",
+                "Pipeline integrity management programmes aim to keep failure probability below 10⁻⁴ to 10⁻⁵ per km-year.",
+                "Failure prediction is used to schedule inspection, repair, and replacement activities.",
+                "Operating pressure and burst pressure are the two competing forces in the failure equation."
+            ],
+            "references": [
+                "Dao2023_UDC"
+            ],
+            "llm_name": "pipe_failure"
+        }
+    ]
+}

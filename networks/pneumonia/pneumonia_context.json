@@ -1,0 +1,2788 @@
+{
+    "schema_version": "2.0",
+    "network": "pneumonia",
+    "domain": "paediatric_respiratory_infection",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a paediatric pneumonia causative pathogen prediction model, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "pneumonia",
+        "source_reference": "Wu, Y., Mascaro, S., Bhuiyan, M., Fathima, P., Mace, A. O., Nicol, M. P., ... & Blyth, C. C. (2023). Predicting the causative pathogen among children with pneumonia using a causal Bayesian network. PLoS Computational Biology, 19(3), e1010967.",
+        "source_url": "https://www.bnlearn.com/bnrepository/",
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "The pneumonia network models causal relationships among host susceptibility factors, pathogen exposure, nasopharyngeal colonisation, upper/lower airway infection, clinical signs and symptoms, and diagnostic test results in hospitalised children with suspected pneumonia. It supports differential diagnosis of bacterial versus viral causative pathogens."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a clinical diagnostic model for determining the causative pathogen (bacterial, viral-like, or none) in children hospitalised with suspected pneumonia.",
+            "The model has a layered causal structure: demographic/host factors drive susceptibility, which drives pathogen exposure and colonisation, which drives infection and clinical presentation.",
+            "Five respiratory viruses and typical bacteria can colonise the nasopharynx; their combined effect determines whether upper airway infection, lower airway pneumonia, or both occur.",
+            "The causative pathogen node is a deterministic function of bacterial and viral pneumonia presence—exactly one pathogen type is assigned.",
+            "Clinical presentation (phenotype) determines the pattern of signs and symptoms observed, including fever, respiratory distress, laboratory values, and chest imaging findings.",
+            "Demographic factors (age, ethnicity) influence vaccination status, childcare exposure, smoking exposure, and hospital transfer patterns.",
+            "Diagnostic test results (blood culture, pleural fluid) are influenced by antibiotic exposure, specimen collection decisions, and the underlying pathogen.",
+            "The model distinguishes between nasopharyngeal colonisation (carriage) and actual causative lower respiratory infection.",
+            "Some variables are deterministic: the causative pathogen is determined entirely by bacterial and viral pneumonia status; the subject group (case/control) is determined by causative pathogen."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a specific benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge & naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, conditional rates, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "base_rate",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "ImpairedImmunity",
+            "display_name": "Immune Compromise Status",
+            "aliases": [
+                "ImpairedImmunity",
+                "immunodeficiency",
+                "immune_compromise"
+            ],
+            "type": "binary",
+            "states": [
+                "Reported",
+                "Unknown"
+            ],
+            "role": "exogenous",
+            "category": "host_factor",
+            "short_description": "Whether the child has a reported immune deficiency.",
+            "extended_description": "Binary variable indicating whether the child has a clinically reported immune compromise (e.g. primary immunodeficiency, immunosuppressive therapy, HIV). Immune compromise increases susceptibility to both colonisation and disease progression, and affects antibiotic prescribing patterns.",
+            "base_rate": {
+                "Reported": 0.05,
+                "Unknown": 0.95
+            },
+            "sensitivity_hints": "Immune compromise affects three downstream pathways: colonisation susceptibility, disease progression susceptibility, and antibiotic exposure patterns.",
+            "related_domain_knowledge": [
+                "Immunocompromised children are at higher risk for opportunistic and atypical pathogens.",
+                "Immune deficiency may alter the typical clinical presentation of pneumonia.",
+                "Approximately 5% of hospitalised pneumonia cases have reported immune compromise."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "immune_compromise"
+        },
+        {
+            "name": "Ethnicity",
+            "display_name": "Ethnic Background",
+            "aliases": [
+                "Ethnicity",
+                "ethnic_group",
+                "indigenous_status"
+            ],
+            "type": "binary",
+            "states": [
+                "Indigenous",
+                "NonIndigenous"
+            ],
+            "role": "exogenous",
+            "category": "demographic",
+            "short_description": "Whether the child is of Indigenous or non-Indigenous background.",
+            "extended_description": "Binary demographic variable distinguishing Indigenous from non-Indigenous children. Ethnicity influences multiple social determinants of health including vaccination uptake, household smoking exposure, childcare attendance patterns, prematurity risk, hospital transfer likelihood, and overall pathogen exposure levels.",
+            "base_rate": {
+                "Indigenous": 0.097,
+                "NonIndigenous": 0.903
+            },
+            "sensitivity_hints": "Ethnicity is the most connected demographic variable, influencing six downstream factors through social determinant pathways.",
+            "related_domain_knowledge": [
+                "Indigenous Australian children have higher rates of pneumonia hospitalisation.",
+                "Social determinants including remote community living affect healthcare access and vaccination uptake.",
+                "Household crowding and smoking rates differ by ethnic background.",
+                "Hospital transfer rates are higher for Indigenous children due to remote location of communities."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "ethnic_background"
+        },
+        {
+            "name": "InfluenzaSeason",
+            "display_name": "Influenza Season Period",
+            "aliases": [
+                "InfluenzaSeason",
+                "flu_season",
+                "seasonal_period"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "exogenous",
+            "category": "environmental",
+            "short_description": "Whether the presentation occurs during the influenza season.",
+            "extended_description": "Binary temporal variable indicating whether the child's presentation falls within the influenza season. Influenza seasonality affects the circulation rates of multiple respiratory viruses (influenza, HMPV, RSV), altering the prior probability of nasopharyngeal colonisation by these pathogens.",
+            "base_rate": {
+                "No": 0.465,
+                "Yes": 0.535
+            },
+            "sensitivity_hints": "Influenza season modulates the prevalence of three viral pathogens in the nasopharynx: influenza, HMPV, and RSV.",
+            "related_domain_knowledge": [
+                "Influenza season in the Southern Hemisphere typically runs May to October.",
+                "RSV and HMPV have overlapping but distinct seasonal patterns.",
+                "Seasonal variation in pathogen prevalence affects the pre-test probability of viral aetiology.",
+                "Approximately 53% of admissions occur during the influenza season."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "respiratory_virus_season"
+        },
+        {
+            "name": "AgeGroup",
+            "display_name": "Child Age Category",
+            "aliases": [
+                "AgeGroup",
+                "age_category",
+                "developmental_stage"
+            ],
+            "type": "categorical",
+            "states": [
+                "Infant",
+                "PreSchool",
+                "School"
+            ],
+            "role": "exogenous",
+            "category": "demographic",
+            "short_description": "Age category of the child (infant, pre-school, or school-age).",
+            "extended_description": "Categorical demographic variable classifying children into three age groups: infant (under 1 year), pre-school (1-4 years), and school-age (5+ years). Age profoundly influences susceptibility to colonisation and disease progression, vaccination status, exposure levels, clinical presentation patterns, and the diagnostic workup approach.",
+            "base_rate": {
+                "Infant": 0.317,
+                "PreSchool": 0.322,
+                "School": 0.361
+            },
+            "sensitivity_hints": "Age is the most highly connected exogenous variable in the model, affecting 29 downstream variables either directly or through mediating pathways. It modulates nearly every aspect of pathogen acquisition, disease presentation, and clinical investigation.",
+            "related_domain_knowledge": [
+                "Infants have immature immune systems and are most vulnerable to severe respiratory infections.",
+                "Pre-school children have high daycare exposure but developing immunity.",
+                "School-age children are more likely to present with Mycoplasma pneumonia.",
+                "Age affects the ability to report symptoms (e.g. headache, sore throat) and the clinical examination findings."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "child_age_group"
+        },
+        {
+            "name": "ChronicRespiratoryDisease",
+            "display_name": "Chronic Respiratory Condition",
+            "aliases": [
+                "ChronicRespiratoryDisease",
+                "chronic_lung_disease",
+                "respiratory_comorbidity"
+            ],
+            "type": "binary",
+            "states": [
+                "Reported",
+                "Unknown"
+            ],
+            "role": "exogenous",
+            "category": "host_factor",
+            "short_description": "Whether the child has a chronic respiratory disease.",
+            "extended_description": "Binary variable indicating whether the child has a pre-existing chronic respiratory condition (e.g. asthma, bronchopulmonary dysplasia, cystic fibrosis). Chronic respiratory disease increases susceptibility to disease progression and modifies the clinical presentation, particularly the likelihood of wheezing.",
+            "base_rate": {
+                "Reported": 0.041,
+                "Unknown": 0.959
+            },
+            "sensitivity_hints": "Chronic respiratory disease affects two pathways: disease progression susceptibility and wheezing presentation.",
+            "related_domain_knowledge": [
+                "Children with chronic lung disease have altered baseline respiratory function.",
+                "Pre-existing respiratory conditions increase the risk of severe pneumonia outcomes.",
+                "Approximately 4% of hospitalised pneumonia cases have a reported chronic respiratory condition.",
+                "Wheezing is more common in children with pre-existing airway disease regardless of the infecting pathogen."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "chronic_respiratory_condition"
+        },
+        {
+            "name": "PneumococcalVaccine",
+            "display_name": "Pneumococcal Vaccination Status",
+            "aliases": [
+                "PneumococcalVaccine",
+                "pcv_status",
+                "pneumococcal_immunisation"
+            ],
+            "type": "binary",
+            "states": [
+                "FullyVax",
+                "UnderVax"
+            ],
+            "role": "endogenous",
+            "category": "immunisation",
+            "short_description": "Whether the child is fully vaccinated against pneumococcus.",
+            "extended_description": "Binary variable indicating whether the child has received the full course of pneumococcal conjugate vaccine. Determined by age group and ethnicity. Full vaccination reduces nasopharyngeal colonisation by typical bacteria and modifies the probability of typical bacterial pneumonia.",
+            "sensitivity_hints": "Pneumococcal vaccination status mediates the effect of age and ethnicity on bacterial colonisation and bacterial pneumonia risk.",
+            "related_domain_knowledge": [
+                "Pneumococcal conjugate vaccines (PCV) reduce nasopharyngeal carriage of vaccine serotypes.",
+                "Under-vaccination is more common in younger age groups and Indigenous populations.",
+                "Vaccine effectiveness against invasive pneumococcal disease exceeds 90% for vaccine serotypes.",
+                "Non-vaccine serotype replacement can occur after widespread PCV use."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "pneumococcal_vaccine_status"
+        },
+        {
+            "name": "SusceptibilityToProgression",
+            "display_name": "Disease Progression Susceptibility",
+            "aliases": [
+                "SusceptibilityToProgression",
+                "progression_risk",
+                "severity_susceptibility"
+            ],
+            "type": "binary",
+            "states": [
+                "High",
+                "Low"
+            ],
+            "role": "endogenous",
+            "category": "host_susceptibility",
+            "short_description": "Latent susceptibility to disease progression from colonisation to pneumonia.",
+            "extended_description": "Latent binary variable representing the child's overall susceptibility to progression from nasopharyngeal colonisation to lower respiratory tract infection. Determined by age, chronic respiratory disease, and immune compromise. High susceptibility increases the probability of developing clinical pneumonia and of a more severe clinical phenotype.",
+            "sensitivity_hints": "Disease progression susceptibility is a key mediating variable that integrates three host factors and drives both previous infection history and the clinical phenotype observed at presentation.",
+            "related_domain_knowledge": [
+                "Susceptibility to disease progression reflects the host's ability to contain upper airway pathogens.",
+                "Infants and immunocompromised children have the highest progression susceptibility.",
+                "Chronic respiratory disease impairs local airway defence mechanisms.",
+                "High susceptibility is associated with more severe clinical presentations."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "disease_progression_risk"
+        },
+        {
+            "name": "SmokerInHousehold",
+            "display_name": "Household Smoke Exposure",
+            "aliases": [
+                "SmokerInHousehold",
+                "passive_smoking",
+                "environmental_tobacco"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "environmental",
+            "short_description": "Whether there is a smoker in the child's household.",
+            "extended_description": "Binary variable indicating household tobacco smoke exposure. Determined by ethnicity—Indigenous households have higher smoking prevalence. Passive smoking increases susceptibility to nasopharyngeal colonisation and is a risk factor for prematurity.",
+            "sensitivity_hints": "Household smoking mediates the effect of ethnicity on both colonisation susceptibility and prematurity risk.",
+            "related_domain_knowledge": [
+                "Environmental tobacco smoke impairs mucociliary clearance in the airways.",
+                "Passive smoking increases the risk of respiratory infections in children.",
+                "Indigenous Australian households have approximately three times higher smoking prevalence.",
+                "Smoking exposure is a modifiable risk factor for paediatric pneumonia."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "household_smoking"
+        },
+        {
+            "name": "HospitalTransfer",
+            "display_name": "Hospital Transfer Status",
+            "aliases": [
+                "HospitalTransfer",
+                "inter_hospital_transfer",
+                "referral_status"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "clinical_pathway",
+            "short_description": "Whether the child was transferred from another hospital.",
+            "extended_description": "Binary variable indicating whether the child was transferred from a peripheral or regional hospital to the tertiary centre. Determined by age and ethnicity. Hospital transfer reflects disease severity, geographic remoteness, and affects antibiotic exposure, symptom duration reporting, blood culture collection, and clinical phenotype at presentation.",
+            "sensitivity_hints": "Hospital transfer is a marker of both geographic remoteness and initial disease severity. It modifies four downstream clinical variables: antibiotic exposure, symptom duration, blood culture collection, and clinical phenotype.",
+            "related_domain_knowledge": [
+                "Transferred children are more likely to have received prior antibiotics at the referring hospital.",
+                "Remote Indigenous communities often require inter-hospital transfer for paediatric pneumonia care.",
+                "Transfer introduces selection bias: transferred children tend to be sicker or have failed initial treatment.",
+                "Duration of symptoms may be longer in transferred children due to travel time."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "hospital_transfer"
+        },
+        {
+            "name": "SusceptibilityToColonisation",
+            "display_name": "Colonisation Susceptibility",
+            "aliases": [
+                "SusceptibilityToColonisation",
+                "colonisation_risk",
+                "carriage_susceptibility"
+            ],
+            "type": "binary",
+            "states": [
+                "High",
+                "Low"
+            ],
+            "role": "endogenous",
+            "category": "host_susceptibility",
+            "short_description": "Latent susceptibility to nasopharyngeal pathogen colonisation.",
+            "extended_description": "Latent binary variable representing the child's overall susceptibility to nasopharyngeal colonisation by respiratory pathogens. Determined by age, immune compromise, and household smoking exposure. High colonisation susceptibility increases the likelihood of carrying typical bacteria in the nasopharynx and of previous significant infections.",
+            "sensitivity_hints": "Colonisation susceptibility integrates three host factors and drives both bacterial nasopharyngeal carriage and infection history.",
+            "related_domain_knowledge": [
+                "Nasopharyngeal colonisation is a prerequisite for mucosal respiratory infection.",
+                "Younger children have higher colonisation rates due to immature mucosal immunity.",
+                "Passive smoking impairs nasopharyngeal mucosal defences.",
+                "Immunocompromise reduces pathogen clearance from the nasopharynx."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "colonisation_susceptibility"
+        },
+        {
+            "name": "BloodCulturePerformed",
+            "display_name": "Blood Culture Collection",
+            "aliases": [
+                "BloodCulturePerformed",
+                "blood_culture_taken",
+                "bacteraemia_test"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "diagnostic_investigation",
+            "short_description": "Whether a blood culture was collected.",
+            "extended_description": "Binary variable indicating whether a blood culture specimen was obtained. Determined by age and hospital transfer status. Blood cultures are more likely in younger children and in those not transferred (collected at the admitting hospital). The result of the blood culture, if performed, contributes to the diagnosis of bacterial pneumonia.",
+            "sensitivity_hints": "Blood culture collection is a decision node that determines whether blood culture results are available for diagnosis. It does not directly affect the disease process.",
+            "related_domain_knowledge": [
+                "Blood cultures are recommended for all children hospitalised with pneumonia.",
+                "Collection rates vary by age and clinical presentation severity.",
+                "Transferred children may have had blood cultures collected at the referring hospital.",
+                "Blood culture yield in paediatric pneumonia is typically low (5-10%)."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "blood_culture_collected"
+        },
+        {
+            "name": "Prematurity",
+            "display_name": "Premature Birth History",
+            "aliases": [
+                "Prematurity",
+                "preterm_birth",
+                "born_premature"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "host_factor",
+            "short_description": "Whether the child was born prematurely.",
+            "extended_description": "Binary variable indicating premature birth. Determined by ethnicity and household smoking exposure. Prematurity affects childcare attendance patterns and influenza vaccination uptake, both of which influence pathogen exposure levels.",
+            "sensitivity_hints": "Prematurity mediates the effects of ethnicity and smoking on childcare days and influenza vaccination, which in turn affect pathogen exposure.",
+            "related_domain_knowledge": [
+                "Premature infants have immature immune systems and smaller airways.",
+                "Indigenous children and those with smoking-exposed mothers have higher prematurity rates.",
+                "Premature children may have different childcare attendance patterns.",
+                "Prematurity is a known risk factor for severe respiratory infections in early childhood."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "premature_birth"
+        },
+        {
+            "name": "AntibioticExposure",
+            "display_name": "Prior Antibiotic Exposure",
+            "aliases": [
+                "AntibioticExposure",
+                "prior_antibiotics",
+                "antibiotic_use"
+            ],
+            "type": "categorical",
+            "states": [
+                "Last_day",
+                "Last_week",
+                "No"
+            ],
+            "role": "endogenous",
+            "category": "clinical_pathway",
+            "short_description": "Timing of prior antibiotic exposure before specimen collection.",
+            "extended_description": "Categorical variable indicating when the child last received antibiotics: within the last day, within the last week, or no recent exposure. Determined by age, hospital transfer, and immune compromise. Recent antibiotic exposure reduces the sensitivity of blood cultures and pleural fluid cultures, and affects nasopharyngeal bacterial carriage.",
+            "sensitivity_hints": "Antibiotic exposure is a critical confounder for diagnostic test interpretation. It reduces culture sensitivity and alters nasopharyngeal flora.",
+            "related_domain_knowledge": [
+                "Prior antibiotics significantly reduce blood culture yield.",
+                "Transferred children are more likely to have received antibiotics at the referring facility.",
+                "Immunocompromised children often receive empirical antibiotics earlier.",
+                "Recent antibiotic exposure can cause false-negative cultures even when bacterial infection is present."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "prior_antibiotic_exposure"
+        },
+        {
+            "name": "DurationOfSymptomsOnset",
+            "display_name": "Symptom Duration at Presentation",
+            "aliases": [
+                "DurationOfSymptomsOnset",
+                "symptom_duration",
+                "illness_duration"
+            ],
+            "type": "categorical",
+            "states": [
+                "More_than_one_week",
+                "One_or_two_days",
+                "Three_to_seven_days"
+            ],
+            "role": "endogenous",
+            "category": "clinical_history",
+            "short_description": "Duration of symptoms before hospital presentation.",
+            "extended_description": "Categorical variable indicating how long symptoms have been present before the child is seen at the tertiary hospital. Determined by age and hospital transfer status. Symptom duration influences the clinical phenotype observed at presentation, as disease manifestations evolve over time.",
+            "sensitivity_hints": "Symptom duration modifies the clinical phenotype, which in turn affects all downstream symptom and sign observations.",
+            "related_domain_knowledge": [
+                "Bacterial pneumonia may present acutely (1-2 days) or after failed outpatient treatment (>7 days).",
+                "Viral pneumonia typically has a prodromal phase of 3-7 days before lower respiratory involvement.",
+                "Transferred children generally have longer symptom duration due to the referral process.",
+                "Symptom duration is an important clinical feature for differential diagnosis."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "symptom_duration"
+        },
+        {
+            "name": "InfluenzaVaccine",
+            "display_name": "Influenza Vaccination Status",
+            "aliases": [
+                "InfluenzaVaccine",
+                "flu_vaccine",
+                "influenza_immunisation"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "immunisation",
+            "short_description": "Whether the child received the influenza vaccine.",
+            "extended_description": "Binary variable indicating influenza vaccination status. Determined by age, ethnicity, and prematurity. Influenza vaccination reduces the probability of influenza nasopharyngeal colonisation, thereby reducing influenza as a potential causative pathogen.",
+            "sensitivity_hints": "Influenza vaccination specifically reduces influenza nasopharyngeal colonisation. It does not affect other respiratory viruses.",
+            "related_domain_knowledge": [
+                "Annual influenza vaccination is recommended for children aged 6 months and older.",
+                "Vaccination uptake varies by age, ethnicity, and access to healthcare.",
+                "Premature children may have different vaccination schedules.",
+                "Influenza vaccine effectiveness varies by season and strain match."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "influenza_vaccine_status"
+        },
+        {
+            "name": "PreviousSignificantInfection",
+            "display_name": "Prior Significant Infection History",
+            "aliases": [
+                "PreviousSignificantInfection",
+                "prior_infection",
+                "infection_history"
+            ],
+            "type": "binary",
+            "states": [
+                "Reported",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "clinical_history",
+            "short_description": "Whether the child has a history of previous significant infections.",
+            "extended_description": "Binary variable indicating whether the child has had prior significant respiratory or other infections. Determined by age, colonisation susceptibility, and disease progression susceptibility. Previous infections reflect the child's cumulative infection burden and underlying host vulnerability.",
+            "sensitivity_hints": "Previous infection history is an observable marker of the two latent susceptibility variables (colonisation and progression).",
+            "related_domain_knowledge": [
+                "Recurrent infections may indicate underlying immune deficiency.",
+                "Previous lower respiratory tract infections increase risk of subsequent pneumonia.",
+                "Infection history is routinely assessed during clinical evaluation.",
+                "High colonisation susceptibility and high progression susceptibility together increase prior infection likelihood."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "prior_infection_history"
+        },
+        {
+            "name": "ChildcareDays",
+            "display_name": "Weekly Childcare Attendance",
+            "aliases": [
+                "ChildcareDays",
+                "daycare_days",
+                "childcare_exposure"
+            ],
+            "type": "categorical",
+            "states": [
+                "Five_or_more",
+                "One_or_less",
+                "Two_to_four"
+            ],
+            "role": "endogenous",
+            "category": "environmental",
+            "short_description": "Number of days per week the child attends childcare.",
+            "extended_description": "Categorical variable indicating the child's weekly childcare attendance: five or more days, two to four days, or one day or less. Determined by age, ethnicity, and prematurity. Childcare attendance is a major determinant of pathogen exposure level, as group settings facilitate respiratory pathogen transmission.",
+            "sensitivity_hints": "Childcare days is the primary mediator between demographic factors and pathogen exposure level.",
+            "related_domain_knowledge": [
+                "Childcare attendance is the strongest modifiable risk factor for respiratory infections in young children.",
+                "Group childcare settings facilitate transmission of respiratory viruses and bacteria.",
+                "Attendance patterns vary by age (school-age children attend school rather than childcare), ethnicity, and prematurity status.",
+                "Reducing childcare exposure has been shown to lower respiratory infection rates."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "childcare_attendance"
+        },
+        {
+            "name": "LevelOfExposure",
+            "display_name": "Pathogen Exposure Level",
+            "aliases": [
+                "LevelOfExposure",
+                "exposure_level",
+                "transmission_risk"
+            ],
+            "type": "binary",
+            "states": [
+                "High",
+                "Low"
+            ],
+            "role": "endogenous",
+            "category": "exposure",
+            "short_description": "Overall level of respiratory pathogen exposure.",
+            "extended_description": "Latent binary variable representing the child's overall exposure to respiratory pathogens. Determined by age, childcare attendance, and ethnicity. High exposure level increases the probability of nasopharyngeal colonisation by all respiratory pathogens (viruses and bacteria).",
+            "sensitivity_hints": "Pathogen exposure level is the critical mediating variable between social/environmental factors and nasopharyngeal colonisation by all six pathogen types.",
+            "related_domain_knowledge": [
+                "Pathogen exposure integrates multiple social determinants into a single transmission risk factor.",
+                "High exposure environments include childcare centres, overcrowded housing, and large sibling groups.",
+                "Exposure level affects all pathogen types simultaneously, not just specific organisms.",
+                "The concept represents aggregate respiratory pathogen transmission pressure."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "pathogen_exposure_level"
+        },
+        {
+            "name": "TypicalBacteriaInNasopharynx",
+            "display_name": "Bacterial Nasopharyngeal Carriage",
+            "aliases": [
+                "TypicalBacteriaInNasopharynx",
+                "bacterial_carriage",
+                "np_bacteria"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "colonisation",
+            "short_description": "Whether typical bacteria are detected in the nasopharynx.",
+            "extended_description": "Binary variable indicating nasopharyngeal carriage of typical pneumonia-causing bacteria (primarily Streptococcus pneumoniae, Haemophilus influenzae). Determined by age, antibiotic exposure, pathogen exposure level, pneumococcal vaccination, and colonisation susceptibility. Bacterial carriage is necessary but not sufficient for bacterial pneumonia—it represents colonisation rather than infection.",
+            "sensitivity_hints": "Bacterial nasopharyngeal carriage has five parents, making it one of the most densely connected nodes. It is a prerequisite for bacterial pneumonia but colonisation alone does not indicate disease.",
+            "related_domain_knowledge": [
+                "Nasopharyngeal carriage rates of S. pneumoniae are 20-60% in healthy children.",
+                "Carriage does not equal disease—most colonised children do not develop pneumonia.",
+                "Antibiotic exposure reduces detectable carriage (culture sensitivity effect).",
+                "Pneumococcal vaccination reduces vaccine-serotype carriage.",
+                "Colonisation susceptibility and exposure level together determine carriage probability."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "bacterial_np_carriage"
+        },
+        {
+            "name": "HMPVInNasopharynx",
+            "display_name": "HMPV Nasopharyngeal Detection",
+            "aliases": [
+                "HMPVInNasopharynx",
+                "hmpv_positive",
+                "metapneumovirus"
+            ],
+            "type": "binary",
+            "states": [
+                "Negative",
+                "Positive"
+            ],
+            "role": "endogenous",
+            "category": "colonisation",
+            "short_description": "Whether human metapneumovirus is detected in the nasopharynx.",
+            "extended_description": "Binary variable indicating nasopharyngeal detection of human metapneumovirus (HMPV). Determined by age, influenza season, and pathogen exposure level. HMPV detection contributes to viral nasopharyngeal infection status, throat infection, and viral-like pneumonia.",
+            "sensitivity_hints": "HMPV is one of five respiratory viruses whose nasopharyngeal presence drives viral infection pathways. It contributes to three downstream infection nodes.",
+            "related_domain_knowledge": [
+                "HMPV causes respiratory illness similar to RSV, particularly in young children.",
+                "HMPV has seasonal peaks, often in late winter and spring.",
+                "HMPV can cause both upper and lower respiratory tract infections.",
+                "Co-detection with other viruses is common in young children."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "hmpv_detected"
+        },
+        {
+            "name": "InfluenzaInNasopharynx",
+            "display_name": "Influenza Nasopharyngeal Detection",
+            "aliases": [
+                "InfluenzaInNasopharynx",
+                "influenza_positive",
+                "flu_detected"
+            ],
+            "type": "binary",
+            "states": [
+                "Negative",
+                "Positive"
+            ],
+            "role": "endogenous",
+            "category": "colonisation",
+            "short_description": "Whether influenza virus is detected in the nasopharynx.",
+            "extended_description": "Binary variable indicating nasopharyngeal detection of influenza virus. Determined by age, influenza season, influenza vaccination, and pathogen exposure level. Influenza detection contributes to viral infection status, throat infection, and viral-like pneumonia. It is uniquely modifiable through vaccination.",
+            "sensitivity_hints": "Influenza nasopharyngeal detection is the only viral colonisation variable affected by vaccination. It has four parents including the influenza vaccine.",
+            "related_domain_knowledge": [
+                "Influenza can cause primary viral pneumonia or predispose to secondary bacterial infection.",
+                "Influenza vaccination reduces but does not eliminate nasopharyngeal influenza detection.",
+                "Influenza has strong seasonal patterns with annual epidemics.",
+                "Rapid influenza testing from nasopharyngeal specimens is widely available."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "influenza_detected"
+        },
+        {
+            "name": "MycoplasmaInNasopharynx",
+            "display_name": "Mycoplasma Nasopharyngeal Detection",
+            "aliases": [
+                "MycoplasmaInNasopharynx",
+                "mycoplasma_positive",
+                "atypical_bacteria"
+            ],
+            "type": "binary",
+            "states": [
+                "Negative",
+                "Positive"
+            ],
+            "role": "endogenous",
+            "category": "colonisation",
+            "short_description": "Whether Mycoplasma pneumoniae is detected in the nasopharynx.",
+            "extended_description": "Binary variable indicating nasopharyngeal detection of Mycoplasma pneumoniae. Determined by age and pathogen exposure level. Despite being a bacterium, Mycoplasma is grouped with viral-like pathogens in this model because it causes atypical pneumonia with a viral-like clinical presentation and does not respond to beta-lactam antibiotics.",
+            "sensitivity_hints": "Mycoplasma is classified as viral-like in this model due to its atypical clinical presentation. It is most common in school-age children.",
+            "related_domain_knowledge": [
+                "Mycoplasma pneumoniae is the most common cause of atypical pneumonia in school-age children.",
+                "It does not respond to standard beta-lactam antibiotics (penicillins, cephalosporins).",
+                "Walking pneumonia caused by Mycoplasma typically has a subacute course.",
+                "Nasopharyngeal carriage can persist for weeks after acute infection."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "mycoplasma_detected"
+        },
+        {
+            "name": "ParainfluenzaInNasopharynx",
+            "display_name": "Parainfluenza Nasopharyngeal Detection",
+            "aliases": [
+                "ParainfluenzaInNasopharynx",
+                "parainfluenza_positive",
+                "piv_detected"
+            ],
+            "type": "binary",
+            "states": [
+                "Negative",
+                "Positive"
+            ],
+            "role": "endogenous",
+            "category": "colonisation",
+            "short_description": "Whether parainfluenza virus is detected in the nasopharynx.",
+            "extended_description": "Binary variable indicating nasopharyngeal detection of parainfluenza virus. Determined by age and pathogen exposure level. Parainfluenza detection contributes to viral nasopharyngeal infection, throat infection, and viral-like pneumonia.",
+            "sensitivity_hints": "Parainfluenza has the simplest parent structure among viral colonisation variables: only age and exposure level.",
+            "related_domain_knowledge": [
+                "Parainfluenza viruses are a common cause of croup and lower respiratory infections in young children.",
+                "Four serotypes exist with different seasonal patterns.",
+                "Parainfluenza is not strongly seasonal unlike influenza and RSV.",
+                "It can cause pneumonia particularly in immunocompromised hosts."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "parainfluenza_detected"
+        },
+        {
+            "name": "RSVInNasopharynx",
+            "display_name": "RSV Nasopharyngeal Detection",
+            "aliases": [
+                "RSVInNasopharynx",
+                "rsv_positive",
+                "rsv_detected"
+            ],
+            "type": "binary",
+            "states": [
+                "Negative",
+                "Positive"
+            ],
+            "role": "endogenous",
+            "category": "colonisation",
+            "short_description": "Whether respiratory syncytial virus (RSV) is detected in the nasopharynx.",
+            "extended_description": "Binary variable indicating nasopharyngeal detection of RSV. Determined by age, influenza season, and pathogen exposure level. RSV is the most common viral cause of severe lower respiratory infection in infants, with strong seasonal variation.",
+            "sensitivity_hints": "RSV detection is particularly important in infants where it dominates as the causative pathogen. It has the highest base detection rate among the five viral pathogens for the infant age group.",
+            "related_domain_knowledge": [
+                "RSV is the leading cause of bronchiolitis and pneumonia hospitalisation in infants.",
+                "RSV has a clear winter seasonal pattern in temperate climates.",
+                "Nearly all children are infected with RSV by age 2.",
+                "RSV bronchiolitis and pneumonia can be clinically indistinguishable."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "rsv_detected"
+        },
+        {
+            "name": "ViralNasopharyngealInfection",
+            "display_name": "Viral Upper Airway Presence",
+            "aliases": [
+                "ViralNasopharyngealInfection",
+                "viral_np_infection",
+                "viral_detection"
+            ],
+            "type": "binary",
+            "states": [
+                "Absent",
+                "Present"
+            ],
+            "role": "endogenous",
+            "category": "infection_pathway",
+            "short_description": "Whether any respiratory virus infection is present in the nasopharynx.",
+            "extended_description": "Binary variable indicating the presence of any viral respiratory infection in the nasopharynx, synthesised from the detection results of all five respiratory viruses (HMPV, influenza, Mycoplasma, parainfluenza, RSV). This node aggregates individual pathogen detections into a single viral infection indicator that drives downstream infection pathways.",
+            "sensitivity_hints": "Viral nasopharyngeal infection is a five-parent aggregation node. It feeds into throat infection, upper airway involvement, viral-like pneumonia, and typical bacterial pneumonia pathways.",
+            "related_domain_knowledge": [
+                "Multiple viral pathogens can be detected simultaneously in young children.",
+                "Viral upper airway infection is extremely common in hospitalised children even without pneumonia.",
+                "The distinction between viral carriage and causative viral infection is clinically challenging.",
+                "Viral nasopharyngeal infection can predispose to secondary bacterial pneumonia."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "viral_np_infection"
+        },
+        {
+            "name": "ThroatInfection",
+            "display_name": "Pharyngeal Infection",
+            "aliases": [
+                "ThroatInfection",
+                "pharyngitis",
+                "throat_involvement"
+            ],
+            "type": "binary",
+            "states": [
+                "Absent",
+                "Present"
+            ],
+            "role": "endogenous",
+            "category": "infection_pathway",
+            "short_description": "Whether there is active infection/inflammation of the throat.",
+            "extended_description": "Binary variable indicating pharyngeal infection/inflammation. Determined by the presence of five nasopharyngeal pathogens plus viral nasopharyngeal infection status. Throat infection affects upper airway involvement classification, viral-like pneumonia development, and bacterial pneumonia development through altered local immune defences.",
+            "sensitivity_hints": "Throat infection is a six-parent node integrating all five pathogen detections plus overall viral status. It feeds into three downstream pathways: upper airway involvement, viral-like pneumonia, and bacterial pneumonia.",
+            "related_domain_knowledge": [
+                "Pharyngeal inflammation can facilitate pathogen descent to the lower respiratory tract.",
+                "Viral pharyngitis often precedes lower respiratory infection.",
+                "The presence of throat infection modifies bacterial pneumonia risk through impaired local immunity.",
+                "Throat infection is assessed clinically by examination of the oropharynx."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "throat_infection"
+        },
+        {
+            "name": "ViralLikePneumonia",
+            "display_name": "Viral-Type Lower Respiratory Infection",
+            "aliases": [
+                "ViralLikePneumonia",
+                "viral_pneumonia",
+                "atypical_pneumonia"
+            ],
+            "type": "binary",
+            "states": [
+                "Absent",
+                "Present"
+            ],
+            "role": "endogenous",
+            "category": "infection_pathway",
+            "short_description": "Whether a viral-like or atypical pneumonia is present.",
+            "extended_description": "Binary variable indicating the presence of viral-like or atypical pneumonia (including Mycoplasma). Determined by all five nasopharyngeal pathogens, throat infection, and viral nasopharyngeal infection status. This is one of the two pneumonia-type nodes that together determine the causative pathogen classification.",
+            "sensitivity_hints": "Viral-like pneumonia has seven parents—the most of any node in the model. It feeds into the deterministic causative pathogen node and also affects bacterial pneumonia probability.",
+            "related_domain_knowledge": [
+                "Viral-like pneumonia includes RSV pneumonia, influenza pneumonia, HMPV pneumonia, parainfluenza pneumonia, and Mycoplasma pneumonia.",
+                "Viral-like pneumonia typically presents with diffuse bilateral infiltrates rather than lobar consolidation.",
+                "The presence of viral-like pneumonia modifies the probability of concurrent bacterial pneumonia.",
+                "Clinical distinction between viral and bacterial pneumonia is challenging without microbiological confirmation."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "viral_type_pneumonia"
+        },
+        {
+            "name": "UpperAirwayInvolvment",
+            "display_name": "Upper Airway Involvement Pattern",
+            "aliases": [
+                "UpperAirwayInvolvment",
+                "upper_airway_pattern",
+                "airway_involvement"
+            ],
+            "type": "categorical",
+            "states": [
+                "NP",
+                "NPAndThroat",
+                "No",
+                "Throat"
+            ],
+            "role": "endogenous",
+            "category": "clinical_finding",
+            "short_description": "Pattern of upper airway involvement (nasopharynx, throat, both, or none).",
+            "extended_description": "Categorical variable classifying the pattern of upper airway infection: nasopharyngeal only, throat only, both, or none. Determined by throat infection status, bacterial nasopharyngeal carriage, and viral nasopharyngeal infection. The upper airway pattern modifies the expected presentation of multiple clinical signs and symptoms.",
+            "sensitivity_hints": "Upper airway involvement is a key clinical phenotype modifier that affects seven downstream symptom variables: sore throat, earache, rhinorrhoea, cough, headache, wheezing, and breathing difficulty.",
+            "related_domain_knowledge": [
+                "Upper airway involvement pattern helps distinguish viral from bacterial aetiology.",
+                "Combined nasopharyngeal and throat infection suggests more extensive viral involvement.",
+                "Isolated throat infection without nasopharyngeal viral detection may suggest bacterial pharyngitis.",
+                "The absence of upper airway involvement in a child with pneumonia favours a primary lower respiratory pathogen."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "upper_airway_pattern"
+        },
+        {
+            "name": "SoreThroat",
+            "display_name": "Sore Throat Symptom",
+            "aliases": [
+                "SoreThroat",
+                "pharyngeal_pain",
+                "throat_pain"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether sore throat is reported or recorded.",
+            "extended_description": "Binary symptom variable indicating sore throat. Determined by age and upper airway involvement pattern. Reporting depends on the child's age (younger children cannot verbalise) and the degree of pharyngeal involvement.",
+            "sensitivity_hints": "Sore throat reporting is strongly age-dependent. It is most informative in school-age children with throat involvement.",
+            "related_domain_knowledge": [
+                "Infants and young pre-verbal children cannot report sore throat.",
+                "Sore throat suggests pharyngeal involvement, favouring viral or Mycoplasma aetiology.",
+                "School-age children can reliably report throat pain.",
+                "Absence of sore throat does not exclude pharyngitis in young children."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "sore_throat"
+        },
+        {
+            "name": "TypicalBacterialPneumonia",
+            "display_name": "Typical Bacterial Pneumonia",
+            "aliases": [
+                "TypicalBacterialPneumonia",
+                "bacterial_pneumonia",
+                "pyogenic_pneumonia"
+            ],
+            "type": "binary",
+            "states": [
+                "Absent",
+                "Present"
+            ],
+            "role": "endogenous",
+            "category": "infection_pathway",
+            "short_description": "Whether typical bacterial pneumonia is present.",
+            "extended_description": "Binary variable indicating the presence of typical bacterial pneumonia (primarily pneumococcal or Haemophilus). Determined by age, pneumococcal vaccination, throat infection, bacterial nasopharyngeal carriage, viral-like pneumonia, and viral nasopharyngeal infection. This is one of the two pneumonia-type nodes that determine the causative pathogen. Notably, viral co-infection can either promote or inhibit bacterial pneumonia development.",
+            "sensitivity_hints": "Bacterial pneumonia has six parents. The interaction between viral infection and bacterial pneumonia is complex: viral infection can predispose to secondary bacterial infection but also competes for the same ecological niche.",
+            "related_domain_knowledge": [
+                "Typical bacterial pneumonia is most commonly caused by Streptococcus pneumoniae.",
+                "Lobar consolidation on chest X-ray is the hallmark presentation.",
+                "Vaccination reduces but does not eliminate bacterial pneumonia risk.",
+                "Children with nasopharyngeal bacterial carriage are at higher risk if they also have a viral upper respiratory infection."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "bacterial_pneumonia"
+        },
+        {
+            "name": "Earache",
+            "display_name": "Earache Symptom",
+            "aliases": [
+                "Earache",
+                "ear_pain",
+                "otalgia"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether earache is reported or recorded.",
+            "extended_description": "Binary symptom variable indicating ear pain. Determined by age and upper airway involvement pattern. Earache reflects otitis media, which frequently accompanies upper respiratory infections in children.",
+            "sensitivity_hints": "Earache is associated with upper airway involvement and may indicate viral upper respiratory infection preceding pneumonia.",
+            "related_domain_knowledge": [
+                "Acute otitis media frequently accompanies viral upper respiratory infections in children.",
+                "Earache reporting varies by age and ability to verbalise.",
+                "Concurrent otitis media may indicate a viral trigger for the respiratory illness.",
+                "Ear examination is a routine part of paediatric pneumonia assessment."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "ear_pain"
+        },
+        {
+            "name": "Rhinorrhoea",
+            "display_name": "Nasal Discharge",
+            "aliases": [
+                "Rhinorrhoea",
+                "runny_nose",
+                "nasal_discharge"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether nasal discharge (rhinorrhoea) is recorded.",
+            "extended_description": "Binary symptom variable indicating the presence of nasal discharge. Determined solely by upper airway involvement pattern. Rhinorrhoea is a marker of nasopharyngeal inflammation and is highly suggestive of viral upper airway involvement.",
+            "sensitivity_hints": "Rhinorrhoea has only one parent (upper airway pattern) and is the most specific clinical marker for nasopharyngeal involvement.",
+            "related_domain_knowledge": [
+                "Rhinorrhoea is nearly universal with nasopharyngeal viral infections.",
+                "Its absence suggests the respiratory illness may not involve the upper airway.",
+                "Purulent rhinorrhoea does not reliably distinguish bacterial from viral infection.",
+                "Recording of rhinorrhoea is straightforward and age-independent."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "nasal_discharge"
+        },
+        {
+            "name": "CausativePathogenForPneumonia",
+            "display_name": "Pneumonia Causative Pathogen",
+            "aliases": [
+                "CausativePathogenForPneumonia",
+                "pathogen_type",
+                "pneumonia_aetiology"
+            ],
+            "type": "categorical",
+            "states": [
+                "NoPneumonia",
+                "TypicalBac",
+                "ViralLike"
+            ],
+            "role": "endogenous",
+            "category": "diagnosis",
+            "short_description": "The causative pathogen category (bacterial, viral-like, or no pneumonia).",
+            "extended_description": "Deterministic categorical variable classifying the pneumonia aetiology into three categories: typical bacterial, viral-like, or no pneumonia. Determined entirely by the presence/absence of typical bacterial pneumonia and viral-like pneumonia. This is the primary diagnostic target of the model and the parent of most clinical presentation variables.",
+            "sensitivity_hints": "The causative pathogen is deterministic: bacterial present → TypicalBac, viral-like present (no bacterial) → ViralLike, neither present → NoPneumonia. It is the most connected parent node, driving 22 downstream clinical presentation variables.",
+            "related_domain_knowledge": [
+                "Accurate pathogen identification guides appropriate antibiotic therapy.",
+                "Viral-like pneumonia generally does not require antibiotics (except Mycoplasma).",
+                "No pneumonia classification applies to control subjects with other diagnoses.",
+                "Mixed bacterial-viral infections are resolved in favour of bacterial classification in this model."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "pneumonia_pathogen_type"
+        },
+        {
+            "name": "CurrentPhenotype",
+            "display_name": "Clinical Presentation Phenotype",
+            "aliases": [
+                "CurrentPhenotype",
+                "clinical_phenotype",
+                "presentation_type"
+            ],
+            "type": "binary",
+            "states": [
+                "Type_1",
+                "Type_2"
+            ],
+            "role": "endogenous",
+            "category": "clinical_pathway",
+            "short_description": "The clinical presentation phenotype of the child.",
+            "extended_description": "Latent binary variable representing two distinct clinical presentation phenotypes. Determined by the causative pathogen, symptom duration, hospital transfer, and disease progression susceptibility. The phenotype modifies the probability of nearly all observable clinical signs, symptoms, and laboratory values, making it the main pathway through which pathogen type manifests clinically.",
+            "sensitivity_hints": "Clinical phenotype is the primary mediating variable between pathogen type and clinical observations. It has four parents and drives 22 downstream symptom/sign variables.",
+            "related_domain_knowledge": [
+                "Two distinct clinical phenotypes may represent acute-severe versus subacute-moderate presentations.",
+                "Phenotype integrates disease severity, duration, and host factors into a single latent variable.",
+                "The phenotype concept captures the clinical gestalt that experienced clinicians use for diagnosis.",
+                "Phenotype modifies the expression of every clinical feature in the model."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "clinical_phenotype"
+        },
+        {
+            "name": "SubjectGroup",
+            "display_name": "Study Subject Classification",
+            "aliases": [
+                "SubjectGroup",
+                "case_control",
+                "study_group"
+            ],
+            "type": "binary",
+            "states": [
+                "Case",
+                "Control"
+            ],
+            "role": "endogenous",
+            "category": "study_design",
+            "short_description": "Whether the subject is a pneumonia case or a control.",
+            "extended_description": "Deterministic binary variable classifying subjects as pneumonia cases (bacterial or viral-like) or controls (no pneumonia). Determined entirely by the causative pathogen. This variable reflects the case-control study design and has no downstream effects in the causal model.",
+            "sensitivity_hints": "Subject group is a terminal node with no children. It is deterministic: any pneumonia → Case, no pneumonia → Control.",
+            "related_domain_knowledge": [
+                "The case-control design compares children with confirmed pneumonia to hospitalised controls.",
+                "Controls are hospitalised children without evidence of lower respiratory infection.",
+                "This variable is relevant for study design understanding, not clinical prediction."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "study_group"
+        },
+        {
+            "name": "Fever",
+            "display_name": "Fever Symptom",
+            "aliases": [
+                "Fever",
+                "febrile",
+                "pyrexia"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether fever is recorded.",
+            "extended_description": "Binary symptom variable indicating the presence of fever. Determined by age, causative pathogen, and clinical phenotype. Fever is a cardinal feature of pneumonia but is not universally present, particularly in young infants.",
+            "sensitivity_hints": "Fever is one of the most discriminating clinical features for pneumonia versus no pneumonia. Its absence in infants is less informative due to immature thermoregulation.",
+            "related_domain_knowledge": [
+                "Fever is present in 80-95% of children with bacterial pneumonia.",
+                "Afebrile pneumonia is more common in neonates and young infants.",
+                "Fever alone does not distinguish bacterial from viral pneumonia.",
+                "Temperature measurement method affects fever detection sensitivity."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "fever_present"
+        },
+        {
+            "name": "Irritable",
+            "display_name": "Irritability Symptom",
+            "aliases": [
+                "Irritable",
+                "irritability",
+                "fussiness"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether irritability is recorded.",
+            "extended_description": "Binary symptom variable indicating irritability or unusual fussiness. Determined by age, causative pathogen, and clinical phenotype. Irritability is an important non-specific indicator of illness severity in infants and pre-verbal children who cannot report symptoms like pain or discomfort.",
+            "sensitivity_hints": "Irritability is most clinically relevant in infants as a non-specific marker of illness. Age modulates its diagnostic value.",
+            "related_domain_knowledge": [
+                "Irritability in infants is a concerning sign that may indicate serious infection.",
+                "It serves as a proxy for pain, dyspnoea, and general malaise in pre-verbal children.",
+                "School-age children can verbalise specific symptoms rather than presenting with irritability.",
+                "Irritability alone is non-specific and requires contextual clinical interpretation."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "irritability"
+        },
+        {
+            "name": "NeutrophilProportion",
+            "display_name": "Neutrophil Percentage",
+            "aliases": [
+                "NeutrophilProportion",
+                "neutrophil_ratio",
+                "differential_count"
+            ],
+            "type": "categorical",
+            "states": [
+                "Above_80",
+                "Below_50",
+                "Between_50_and_80"
+            ],
+            "role": "endogenous",
+            "category": "laboratory",
+            "short_description": "Proportion of neutrophils in the white cell differential.",
+            "extended_description": "Categorical laboratory variable representing the neutrophil proportion of the white blood cell differential count. Determined by causative pathogen and clinical phenotype. Elevated neutrophils (above 80%) suggest bacterial infection, while low neutrophils (below 50%) suggest viral aetiology.",
+            "sensitivity_hints": "Neutrophil proportion is a key laboratory discriminator between bacterial and viral pneumonia. High neutrophils strongly favour bacterial aetiology.",
+            "related_domain_knowledge": [
+                "Neutrophilia is the hallmark haematological response to bacterial infection.",
+                "Viral infections typically cause lymphocyte-predominant responses.",
+                "Neutrophil proportion above 80% has moderate specificity for bacterial pneumonia.",
+                "The neutrophil proportion should be interpreted alongside the total white cell count."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "neutrophil_percentage"
+        },
+        {
+            "name": "OtherPain",
+            "display_name": "Other Pain Symptom",
+            "aliases": [
+                "OtherPain",
+                "non_specific_pain",
+                "myalgia"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether other pain symptoms are recorded.",
+            "extended_description": "Binary symptom variable indicating non-specific pain such as myalgia, arthralgia, or general body aches. Determined by age, causative pathogen, and clinical phenotype. Non-specific pain is more commonly reported by older children with systemic viral illness.",
+            "sensitivity_hints": "Other pain is most informative in school-age children who can articulate pain symptoms. Its absence in younger children is not diagnostically meaningful.",
+            "related_domain_knowledge": [
+                "Myalgia and body aches are common with influenza and other systemic viral infections.",
+                "Younger children may express pain as irritability rather than localised complaint.",
+                "Non-specific pain can indicate the systemic inflammatory response to infection.",
+                "Age significantly affects the reliability of pain reporting."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "other_pain"
+        },
+        {
+            "name": "Diarrhoea",
+            "display_name": "Diarrhoea Symptom",
+            "aliases": [
+                "Diarrhoea",
+                "loose_stools",
+                "gastrointestinal_symptom"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether diarrhoea is recorded.",
+            "extended_description": "Binary symptom variable indicating the presence of diarrhoea. Determined by causative pathogen and clinical phenotype. Diarrhoea can accompany respiratory infections, particularly viral, and affects oral intake capacity and abdominal pain presentation.",
+            "sensitivity_hints": "Diarrhoea is both a symptom and a parent of two other variables (abdominal pain and reduced oral intake), creating downstream clinical cascades.",
+            "related_domain_knowledge": [
+                "Gastrointestinal symptoms can accompany respiratory viral infections in children.",
+                "Diarrhoea contributes to dehydration risk and reduced oral intake.",
+                "Diarrhoea is more common with some viral pathogens than with bacterial pneumonia.",
+                "The presence of diarrhoea may redirect clinical attention from respiratory to gastrointestinal symptoms."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "diarrhoea"
+        },
+        {
+            "name": "Rash",
+            "display_name": "Skin Rash",
+            "aliases": [
+                "Rash",
+                "exanthem",
+                "skin_eruption"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether a rash is recorded.",
+            "extended_description": "Binary symptom variable indicating the presence of a skin rash. Determined by causative pathogen and clinical phenotype. Rash may indicate a viral exanthem or drug reaction and is a non-specific finding in the context of respiratory infection.",
+            "sensitivity_hints": "Rash is a relatively uncommon finding that may provide supplementary diagnostic information, particularly for viral aetiology.",
+            "related_domain_knowledge": [
+                "Viral exanthems can accompany respiratory viral infections.",
+                "Drug eruptions from antibiotics may mimic viral rash.",
+                "Rash is a non-specific finding with limited discriminatory power for pneumonia aetiology.",
+                "Certain viruses (measles, adenovirus) have characteristic rash patterns."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "skin_rash"
+        },
+        {
+            "name": "Cough",
+            "display_name": "Cough Symptom",
+            "aliases": [
+                "Cough",
+                "coughing",
+                "tussis"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether cough is recorded.",
+            "extended_description": "Binary symptom variable indicating the presence of cough. Determined by causative pathogen, clinical phenotype, and upper airway involvement. Cough is the most common presenting symptom of pneumonia and is modulated by both the extent of airway involvement and the type of infecting pathogen.",
+            "sensitivity_hints": "Cough is nearly universal in pneumonia but its character and association with upper airway involvement helps distinguish pathogen types.",
+            "related_domain_knowledge": [
+                "Cough is the cardinal symptom of lower respiratory tract infection.",
+                "Productive (wet) cough suggests bacterial infection while dry cough suggests viral or atypical aetiology.",
+                "Upper airway involvement produces cough through post-nasal drip even without lower airway disease.",
+                "The absence of cough in a child with pneumonia is unusual and may indicate early or atypical presentation."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "cough"
+        },
+        {
+            "name": "CReactiveProteins",
+            "display_name": "C-Reactive Protein Level",
+            "aliases": [
+                "CReactiveProteins",
+                "crp_level",
+                "inflammatory_marker"
+            ],
+            "type": "categorical",
+            "states": [
+                "Above_70",
+                "Below_30",
+                "Between_30_and_70"
+            ],
+            "role": "endogenous",
+            "category": "laboratory",
+            "short_description": "C-reactive protein level category.",
+            "extended_description": "Categorical laboratory variable representing the CRP level: above 70 mg/L, between 30 and 70 mg/L, or below 30 mg/L. Determined by causative pathogen and clinical phenotype. CRP is an acute-phase reactant that is typically higher in bacterial than viral infections.",
+            "sensitivity_hints": "CRP above 70 mg/L is a strong indicator of bacterial aetiology. CRP below 30 mg/L favours viral infection or no pneumonia.",
+            "related_domain_knowledge": [
+                "CRP is an acute-phase protein produced by the liver in response to inflammation.",
+                "Bacterial infections typically produce higher CRP levels than viral infections.",
+                "CRP above 70 mg/L has moderate sensitivity and specificity for bacterial pneumonia.",
+                "CRP can be elevated by any inflammatory process, not just infection."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "crp_level"
+        },
+        {
+            "name": "Headache",
+            "display_name": "Headache Symptom",
+            "aliases": [
+                "Headache",
+                "cephalgia",
+                "head_pain"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether headache is reported or recorded.",
+            "extended_description": "Binary symptom variable indicating headache. Determined by age, causative pathogen, clinical phenotype, and upper airway involvement. Headache is more commonly reported by school-age children and is associated with systemic illness (fever, viral infection) and sinus/upper airway congestion.",
+            "sensitivity_hints": "Headache has four parents, reflecting its complex dependence on age, pathogen, phenotype, and airway involvement. It is most diagnostically relevant in school-age children.",
+            "related_domain_knowledge": [
+                "Headache cannot be reliably assessed in infants and young pre-verbal children.",
+                "Sinus congestion from upper airway involvement causes referred headache.",
+                "Systemic viral infections commonly cause headache through fever and inflammation.",
+                "Headache may be the dominant symptom in Mycoplasma pneumonia in older children."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "headache"
+        },
+        {
+            "name": "HighestTemperature",
+            "display_name": "Peak Temperature",
+            "aliases": [
+                "HighestTemperature",
+                "peak_temp",
+                "maximum_fever"
+            ],
+            "type": "categorical",
+            "states": [
+                "Above_39",
+                "Below_38",
+                "Between_38_and_39"
+            ],
+            "role": "endogenous",
+            "category": "vital_sign",
+            "short_description": "Highest recorded temperature during the illness.",
+            "extended_description": "Categorical vital sign variable representing the peak temperature: above 39°C, between 38-39°C, or below 38°C. Determined by age, causative pathogen, and clinical phenotype. High fever (above 39°C) is more indicative of bacterial pneumonia, while temperatures below 38°C suggest viral aetiology or no pneumonia.",
+            "sensitivity_hints": "Peak temperature above 39°C is one of the strongest clinical discriminators for bacterial pneumonia. It also drives the downstream chills/sweats symptom.",
+            "related_domain_knowledge": [
+                "Temperatures above 39°C are considered high fever in children.",
+                "Bacterial pneumonia typically produces higher fevers than viral pneumonia.",
+                "Young infants may have blunted fever responses even with serious bacterial infection.",
+                "The pattern of fever (continuous vs intermittent) is not captured in this variable."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "peak_temperature"
+        },
+        {
+            "name": "PleuralEffusion",
+            "display_name": "Pleural Fluid Collection",
+            "aliases": [
+                "PleuralEffusion",
+                "pleural_fluid",
+                "empyema"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "clinical_finding",
+            "short_description": "Whether a pleural effusion is present on imaging.",
+            "extended_description": "Binary variable indicating the presence of pleural effusion on chest imaging. Determined by causative pathogen and clinical phenotype. Pleural effusion is a complication of pneumonia, strongly associated with bacterial aetiology, and drives multiple downstream variables including pleural fluid testing, chest pain, abdominal pain, blood culture results, and the bacterial pneumonia diagnosis.",
+            "sensitivity_hints": "Pleural effusion is a critical finding that strongly favours bacterial pneumonia. It is the parent of five downstream variables and is a key component of the diagnostic pathway.",
+            "related_domain_knowledge": [
+                "Parapneumonic effusion complicates 20-40% of bacterial pneumonia hospitalisation in children.",
+                "Empyema (infected pleural fluid) is almost exclusively a complication of bacterial pneumonia.",
+                "Pleural effusion on chest imaging prompts pleural fluid sampling for diagnosis.",
+                "Small effusions may also occur with viral pneumonia but are usually simple and self-resolving."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "pleural_effusion"
+        },
+        {
+            "name": "Wheezing",
+            "display_name": "Wheezing on Examination",
+            "aliases": [
+                "Wheezing",
+                "wheeze",
+                "expiratory_wheeze"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "clinical_finding",
+            "short_description": "Whether wheezing is detected on chest auscultation.",
+            "extended_description": "Binary examination finding indicating audible wheezing. Determined by age, causative pathogen, chronic respiratory disease, clinical phenotype, and upper airway involvement. Wheezing is a key clinical sign that favours viral over bacterial aetiology, particularly in the context of pre-existing airway disease.",
+            "sensitivity_hints": "Wheezing has five parents, making it one of the most complexly determined signs. It is a strong indicator of viral aetiology, especially RSV in infants.",
+            "related_domain_knowledge": [
+                "Wheezing indicates lower airway obstruction from bronchospasm or mucosal oedema.",
+                "RSV and parainfluenza viruses are the most common causes of wheezing in young children.",
+                "Pre-existing chronic respiratory disease increases baseline wheezing likelihood.",
+                "Wheezing is uncommon in typical bacterial pneumonia unless there is concurrent viral infection."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "wheezing"
+        },
+        {
+            "name": "WhiteCellCount",
+            "display_name": "Total White Cell Count",
+            "aliases": [
+                "WhiteCellCount",
+                "wcc",
+                "leukocyte_count"
+            ],
+            "type": "categorical",
+            "states": [
+                "Above18",
+                "Below10",
+                "Between_10_and_18"
+            ],
+            "role": "endogenous",
+            "category": "laboratory",
+            "short_description": "Total white blood cell count category (×10⁹/L).",
+            "extended_description": "Categorical laboratory variable representing the total white cell count: above 18, between 10 and 18, or below 10 (×10⁹/L). Determined by causative pathogen and clinical phenotype. Leukocytosis (above 18) is more indicative of bacterial infection, while leukopenia or normal counts suggest viral aetiology.",
+            "sensitivity_hints": "White cell count above 18 ×10⁹/L is suggestive of bacterial infection but has limited discriminatory power when used alone.",
+            "related_domain_knowledge": [
+                "Leukocytosis is a non-specific marker of infection and inflammation.",
+                "Bacterial infections typically cause higher white cell counts than viral infections.",
+                "Severe viral infections can paradoxically cause leukopenia.",
+                "White cell count should be interpreted with the neutrophil differential for better discrimination."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "white_cell_count"
+        },
+        {
+            "name": "O2Type",
+            "display_name": "Oxygen Delivery Method",
+            "aliases": [
+                "O2Type",
+                "oxygen_therapy",
+                "supplemental_oxygen"
+            ],
+            "type": "binary",
+            "states": [
+                "RoomAir",
+                "Supp02"
+            ],
+            "role": "endogenous",
+            "category": "treatment",
+            "short_description": "Whether the child is on room air or supplemental oxygen.",
+            "extended_description": "Binary variable indicating whether the child requires supplemental oxygen or is breathing room air. Determined by causative pathogen and clinical phenotype. Supplemental oxygen requirement reflects the severity of the respiratory compromise and affects the interpretation of oxygen saturation measurements.",
+            "sensitivity_hints": "Oxygen delivery method is a treatment and a confounder for oxygen saturation readings. It reflects clinical severity and affects downstream saturation interpretation.",
+            "related_domain_knowledge": [
+                "Supplemental oxygen improves oxygen saturation measurements, masking the true severity of gas exchange impairment.",
+                "Oxygen requirement is one criterion for hospitalisation in paediatric pneumonia.",
+                "Oxygen saturation on supplemental oxygen cannot be directly compared to room air readings.",
+                "The type and flow rate of supplemental oxygen reflects the clinical team's severity assessment."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "oxygen_delivery"
+        },
+        {
+            "name": "Vomiting",
+            "display_name": "Vomiting Symptom",
+            "aliases": [
+                "Vomiting",
+                "emesis",
+                "nausea_vomiting"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether vomiting is recorded.",
+            "extended_description": "Binary symptom variable indicating the presence of vomiting. Determined by causative pathogen and clinical phenotype. Vomiting can accompany respiratory infections due to cough-induced emesis, post-nasal drip, or systemic illness effects, and it contributes to reduced oral intake.",
+            "sensitivity_hints": "Vomiting is both a symptom of infection and a driver of reduced oral intake. It has differential prevalence across pathogen types.",
+            "related_domain_knowledge": [
+                "Cough-induced vomiting is common in young children with pneumonia.",
+                "Post-nasal drip from viral upper respiratory infections triggers vomiting reflexes.",
+                "Vomiting contributes to dehydration risk and reduced oral intake.",
+                "Its presence does not reliably distinguish between pathogen types."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "vomiting"
+        },
+        {
+            "name": "Crackles",
+            "display_name": "Lung Crackles on Auscultation",
+            "aliases": [
+                "Crackles",
+                "crepitations",
+                "rales"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "clinical_finding",
+            "short_description": "Whether crackles are detected on chest auscultation.",
+            "extended_description": "Binary examination finding indicating pulmonary crackles (crepitations) on auscultation. Determined by causative pathogen and clinical phenotype. Crackles are a sign of alveolar or interstitial lung disease and are a hallmark finding in pneumonia.",
+            "sensitivity_hints": "Crackles are one of the most discriminating auscultatory findings for pneumonia. Their presence strongly favouring parenchymal lung disease.",
+            "related_domain_knowledge": [
+                "Fine crackles suggest interstitial or alveolar fluid/inflammation.",
+                "Crackles are a cardinal sign of pneumonia on physical examination.",
+                "Localised crackles favour lobar (bacterial) pneumonia; diffuse crackles favour viral.",
+                "Auscultation reliability varies with the examiner's experience and the child's cooperation."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "lung_crackles"
+        },
+        {
+            "name": "OxygenSaturation",
+            "display_name": "Oxygen Saturation Level",
+            "aliases": [
+                "OxygenSaturation",
+                "spo2",
+                "pulse_oximetry"
+            ],
+            "type": "categorical",
+            "states": [
+                "Above_95",
+                "Below_92",
+                "Betwenn_92_and_95"
+            ],
+            "role": "endogenous",
+            "category": "vital_sign",
+            "short_description": "Oxygen saturation level category.",
+            "extended_description": "Categorical vital sign variable representing oxygen saturation: above 95%, between 92-95%, or below 92%. Determined by causative pathogen, clinical phenotype, and oxygen delivery method. Low saturation indicates impaired gas exchange and affects downstream variables including breathing difficulty and respiratory rate.",
+            "sensitivity_hints": "Oxygen saturation is confounded by supplemental oxygen delivery. Low saturation on room air is more diagnostically meaningful than low saturation on supplemental oxygen.",
+            "related_domain_knowledge": [
+                "Oxygen saturation below 92% is a criterion for severe pneumonia in children.",
+                "Saturation readings on supplemental oxygen mask the true severity of gas exchange impairment.",
+                "Low saturation drives compensatory increases in respiratory rate.",
+                "Pulse oximetry is a standard monitoring tool in all hospitalised pneumonia patients."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "oxygen_saturation"
+        },
+        {
+            "name": "PleuralFluidResult",
+            "display_name": "Pleural Fluid Culture Result",
+            "aliases": [
+                "PleuralFluidResult",
+                "pleural_culture",
+                "empyema_test"
+            ],
+            "type": "categorical",
+            "states": [
+                "Negative",
+                "NotDone",
+                "Positive"
+            ],
+            "role": "endogenous",
+            "category": "diagnostic_result",
+            "short_description": "Result of pleural fluid culture (positive, negative, or not done).",
+            "extended_description": "Categorical diagnostic result variable for pleural fluid culture. Determined by antibiotic exposure, causative pathogen, and pleural effusion presence. If no effusion is present, the test is not done. If performed, the result is affected by prior antibiotic exposure (which reduces culture sensitivity) and the underlying pathogen.",
+            "sensitivity_hints": "Pleural fluid result is conditioned on effusion presence. A positive result is strong evidence for bacterial pneumonia, but prior antibiotics frequently cause false-negative results.",
+            "related_domain_knowledge": [
+                "Pleural fluid culture is the gold standard for diagnosing empyema.",
+                "Prior antibiotic exposure significantly reduces pleural fluid culture yield.",
+                "Molecular methods (PCR) can improve pathogen detection in culture-negative specimens.",
+                "Not done is the most common result as most children do not have pleural effusions."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "pleural_fluid_culture"
+        },
+        {
+            "name": "ChillSweat",
+            "display_name": "Chills and Sweating",
+            "aliases": [
+                "ChillSweat",
+                "rigors",
+                "chills_sweats"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether chills or sweating episodes are recorded.",
+            "extended_description": "Binary symptom variable indicating chills, rigors, or sweating episodes. Determined by causative pathogen, clinical phenotype, and peak temperature. Chills and sweats are associated with high fevers and are more common in bacterial infections with bacteraemia.",
+            "sensitivity_hints": "Chills and sweating depend on peak temperature as well as pathogen type. They are most informative when present with high fever, suggesting bacterial aetiology.",
+            "related_domain_knowledge": [
+                "Rigors (shaking chills) are associated with bacteraemia and high fevers.",
+                "Chills occur during the rising phase of fever due to thermoregulatory adjustments.",
+                "Sweating episodes occur during fever defervescence.",
+                "Rigors in a child with pneumonia should prompt urgent blood culture collection."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "chills_sweats"
+        },
+        {
+            "name": "ReducedOralIntake",
+            "display_name": "Reduced Oral Intake",
+            "aliases": [
+                "ReducedOralIntake",
+                "poor_feeding",
+                "decreased_intake"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether reduced oral intake or poor feeding is recorded.",
+            "extended_description": "Binary symptom variable indicating reduced fluid or food intake. Determined by age, causative pathogen, clinical phenotype, diarrhoea, and vomiting. Reduced oral intake is a marker of illness severity and has five parents including both gastrointestinal symptoms (diarrhoea, vomiting) and systemic illness factors.",
+            "sensitivity_hints": "Reduced oral intake is an important severity marker, especially in young children. It has five parents reflecting the multiple contributors to feeding difficulty in sick children.",
+            "related_domain_knowledge": [
+                "Poor feeding in infants is a red flag for serious illness.",
+                "Reduced intake leads to dehydration risk, requiring intravenous fluid therapy.",
+                "Vomiting and diarrhoea both contribute to reduced effective oral intake.",
+                "Respiratory distress (tachypnoea) also impairs feeding by competing with breathing."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "reduced_oral_intake"
+        },
+        {
+            "name": "AbdominalPain",
+            "display_name": "Abdominal Pain Symptom",
+            "aliases": [
+                "AbdominalPain",
+                "stomach_pain",
+                "belly_pain"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether abdominal pain is recorded.",
+            "extended_description": "Binary symptom variable indicating abdominal pain. Determined by causative pathogen, clinical phenotype, diarrhoea, and pleural effusion. Abdominal pain in pneumonia can result from lower lobe pneumonia irritating the diaphragm, pleural effusion, or concurrent gastrointestinal symptoms.",
+            "sensitivity_hints": "Abdominal pain has four parents reflecting its complex aetiology: it can arise from referred diaphragmatic pain (pleural effusion), gastrointestinal illness (diarrhoea), or systemic effects of infection.",
+            "related_domain_knowledge": [
+                "Lower lobe pneumonia frequently presents with abdominal pain due to diaphragmatic irritation.",
+                "Pleural effusion-associated pain may be referred to the abdomen.",
+                "Abdominal pain can lead to misdiagnosis as a surgical abdomen in children with unrecognised pneumonia.",
+                "Diarrhoea causes direct gastrointestinal-related abdominal pain."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "abdominal_pain"
+        },
+        {
+            "name": "ChestPain",
+            "display_name": "Chest Pain Symptom",
+            "aliases": [
+                "ChestPain",
+                "pleuritic_pain",
+                "thoracic_pain"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether chest pain is reported or recorded.",
+            "extended_description": "Binary symptom variable indicating chest or pleuritic pain. Determined by age, causative pathogen, clinical phenotype, and pleural effusion. Chest pain is associated with pleural inflammation and is more common in bacterial pneumonia with parapneumonic effusion.",
+            "sensitivity_hints": "Chest pain is strongly associated with pleural effusion and bacterial aetiology. It is most reliably reported by school-age children.",
+            "related_domain_knowledge": [
+                "Pleuritic chest pain is sharp, worsened by deep breathing, and indicates pleural inflammation.",
+                "Young children may not localise or report chest pain.",
+                "Chest pain with pleural effusion strongly suggests bacterial pneumonia, often pneumococcal.",
+                "Chest pain can also occur with viral pneumonia but is less common."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "chest_pain"
+        },
+        {
+            "name": "BloodCultureResult",
+            "display_name": "Blood Culture Result",
+            "aliases": [
+                "BloodCultureResult",
+                "bacteraemia_result",
+                "blood_culture_outcome"
+            ],
+            "type": "categorical",
+            "states": [
+                "Negative",
+                "NotDone",
+                "Positive"
+            ],
+            "role": "endogenous",
+            "category": "diagnostic_result",
+            "short_description": "Result of blood culture (positive, negative, or not done).",
+            "extended_description": "Categorical diagnostic result variable for blood culture. Determined by antibiotic exposure, blood culture collection, causative pathogen, and pleural effusion. If blood culture was not collected, the result is NotDone. When collected, the result depends on whether the child has bacteraemia (linked to bacterial pneumonia and pleural effusion) and whether prior antibiotics have sterilised the blood.",
+            "sensitivity_hints": "Blood culture result has four parents and feeds directly into bacterial pneumonia diagnosis. A positive result is highly specific for bacterial aetiology, but sensitivity is low due to antibiotic pre-treatment.",
+            "related_domain_knowledge": [
+                "Blood culture positivity in paediatric pneumonia is typically only 5-10%.",
+                "Prior antibiotic exposure is the main reason for false-negative blood cultures.",
+                "Bacteraemia is more common with complicated pneumonia (e.g. with pleural effusion).",
+                "Blood culture is the gold standard for confirming bacteraemic pneumonia."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "blood_culture_result"
+        },
+        {
+            "name": "BreathingDifficulty",
+            "display_name": "Breathing Difficulty",
+            "aliases": [
+                "BreathingDifficulty",
+                "dyspnoea",
+                "respiratory_distress"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether breathing difficulty or respiratory distress is recorded.",
+            "extended_description": "Binary symptom variable indicating breathing difficulty. Determined by causative pathogen, clinical phenotype, oxygen saturation, and upper airway involvement. Breathing difficulty integrates the effect of impaired gas exchange (low saturation), upper airway obstruction, and the specific pathogen-driven inflammatory pattern.",
+            "sensitivity_hints": "Breathing difficulty has four parents reflecting the multiple contributors to respiratory distress: both upper and lower airway processes contribute, and oxygen saturation provides an objective severity measure.",
+            "related_domain_knowledge": [
+                "Signs of breathing difficulty in children include nasal flaring, intercostal retractions, and grunting.",
+                "Upper airway obstruction and lower airway disease both cause breathing difficulty but with different mechanisms.",
+                "Low oxygen saturation is an objective correlate of subjective breathing difficulty.",
+                "Breathing difficulty assessment is a key component of severity scoring in paediatric pneumonia."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "breathing_difficulty"
+        },
+        {
+            "name": "DiagnosisBacterialPneumonia",
+            "display_name": "Confirmed Bacterial Pneumonia Diagnosis",
+            "aliases": [
+                "DiagnosisBacterialPneumonia",
+                "bacterial_diagnosis",
+                "confirmed_bacterial"
+            ],
+            "type": "binary",
+            "states": [
+                "No",
+                "Yes"
+            ],
+            "role": "endogenous",
+            "category": "diagnosis",
+            "short_description": "Whether bacterial pneumonia is confirmed by diagnostic testing.",
+            "extended_description": "Deterministic binary variable indicating confirmed bacterial pneumonia diagnosis. Determined by blood culture result and pleural effusion. A positive blood culture or the presence of pleural effusion confirms bacterial pneumonia. This is a diagnostic endpoint that combines microbiological and imaging evidence.",
+            "sensitivity_hints": "Bacterial pneumonia diagnosis is deterministic: positive blood culture OR pleural effusion → confirmed bacterial pneumonia.",
+            "related_domain_knowledge": [
+                "This composite endpoint uses the most specific diagnostic criteria available.",
+                "Positive blood culture alone confirms bacteraemic pneumonia.",
+                "Pleural effusion is a strong marker of bacterial aetiology even without positive cultures.",
+                "Most bacterial pneumonia cases lack positive cultures due to prior antibiotic exposure."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "confirmed_bacterial_diagnosis"
+        },
+        {
+            "name": "RespiratoryRate",
+            "display_name": "Respiratory Rate Category",
+            "aliases": [
+                "RespiratoryRate",
+                "breathing_rate",
+                "tachypnoea"
+            ],
+            "type": "categorical",
+            "states": [
+                "Above_50",
+                "Below_30",
+                "Between_30_and_50"
+            ],
+            "role": "endogenous",
+            "category": "vital_sign",
+            "short_description": "Respiratory rate category (breaths per minute).",
+            "extended_description": "Categorical vital sign variable representing the respiratory rate: above 50, between 30 and 50, or below 30 breaths per minute. Determined by age, causative pathogen, clinical phenotype, and oxygen saturation. Tachypnoea (elevated respiratory rate) is the most sensitive clinical sign for pneumonia in children and is driven by hypoxia and parenchymal lung disease.",
+            "sensitivity_hints": "Respiratory rate is the WHO-recommended screening criterion for pneumonia. Age affects normal ranges: higher rates are normal in infants.",
+            "related_domain_knowledge": [
+                "Tachypnoea is the most sensitive sign of pneumonia in children according to WHO criteria.",
+                "Age-specific normal ranges must be used: higher rates are normal in infants.",
+                "Respiratory rate above 50 is concerning in any age group.",
+                "Low oxygen saturation drives compensatory tachypnoea through chemoreceptor stimulation."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "respiratory_rate"
+        },
+        {
+            "name": "EnergyLoss",
+            "display_name": "Lethargy/Energy Loss",
+            "aliases": [
+                "EnergyLoss",
+                "lethargy",
+                "fatigue"
+            ],
+            "type": "binary",
+            "states": [
+                "Recorded",
+                "Unknown"
+            ],
+            "role": "endogenous",
+            "category": "symptom",
+            "short_description": "Whether lethargy or energy loss is recorded.",
+            "extended_description": "Binary symptom variable indicating lethargy, tiredness, or decreased activity. Determined by causative pathogen, clinical phenotype, and reduced oral intake. Energy loss reflects both the systemic inflammatory response to infection and the consequences of poor nutrition/hydration from reduced oral intake.",
+            "sensitivity_hints": "Energy loss is a downstream marker of both pathogen severity and nutritional depletion from reduced oral intake. It is a non-specific but important severity indicator.",
+            "related_domain_knowledge": [
+                "Lethargy in a sick child is a concerning sign requiring careful assessment.",
+                "Dehydration from poor oral intake contributes to reduced energy levels.",
+                "Systemic infection causes fatigue through inflammatory cytokine effects.",
+                "Severe lethargy may indicate respiratory failure or sepsis in pneumonia patients."
+            ],
+            "references": [
+                "Wu2023_Pneumonia"
+            ],
+            "llm_name": "energy_loss"
+        }
+    ],
+    "constraints": {
+        "v_structures": [
+            {
+                "parent1": "bacterial_pneumonia",
+                "parent2": "viral_type_pneumonia",
+                "child": "pneumonia_pathogen_type",
+                "explanation": "Bacterial and viral-like pneumonia independently determine the causative pathogen classification."
+            },
+            {
+                "parent1": "immune_compromise",
+                "parent2": "chronic_respiratory_condition",
+                "child": "disease_progression_risk",
+                "explanation": "Immune compromise and chronic respiratory disease are independent host factors that jointly determine disease progression susceptibility."
+            },
+            {
+                "parent1": "immune_compromise",
+                "parent2": "household_smoking",
+                "child": "colonisation_susceptibility",
+                "explanation": "Immune compromise and smoking exposure independently contribute to colonisation susceptibility."
+            },
+            {
+                "parent1": "blood_culture_result",
+                "parent2": "pleural_effusion",
+                "child": "confirmed_bacterial_diagnosis",
+                "explanation": "Positive blood culture and pleural effusion are independent diagnostic criteria that each confirm bacterial pneumonia."
+            },
+            {
+                "parent1": "prior_antibiotic_exposure",
+                "parent2": "pneumonia_pathogen_type",
+                "child": "blood_culture_result",
+                "explanation": "Antibiotic exposure and the pathogen type independently affect blood culture result: antibiotics reduce sensitivity while pathogen type determines presence."
+            },
+            {
+                "parent1": "diarrhoea",
+                "parent2": "pleural_effusion",
+                "child": "abdominal_pain",
+                "explanation": "Diarrhoea and pleural effusion independently contribute to abdominal pain through different mechanisms."
+            },
+            {
+                "parent1": "diarrhoea",
+                "parent2": "vomiting",
+                "child": "reduced_oral_intake",
+                "explanation": "Diarrhoea and vomiting independently contribute to reduced oral intake."
+            },
+            {
+                "parent1": "colonisation_susceptibility",
+                "parent2": "disease_progression_risk",
+                "child": "prior_infection_history",
+                "explanation": "Colonisation and progression susceptibility independently contribute to prior infection history."
+            },
+            {
+                "parent1": "pneumococcal_vaccine_status",
+                "parent2": "pathogen_exposure_level",
+                "child": "bacterial_np_carriage",
+                "explanation": "Vaccination status and exposure level independently affect bacterial nasopharyngeal carriage."
+            },
+            {
+                "parent1": "throat_infection",
+                "parent2": "viral_np_infection",
+                "child": "upper_airway_pattern",
+                "explanation": "Throat infection and viral nasopharyngeal infection independently determine the pattern of upper airway involvement."
+            }
+        ],
+        "conditional_independencies": [
+            {
+                "statement": "immune_compromise ⊥ ethnic_background",
+                "explanation": "Immune compromise and ethnicity are independent exogenous host factors."
+            },
+            {
+                "statement": "respiratory_virus_season ⊥ child_age_group",
+                "explanation": "Influenza season and age are independent exogenous variables."
+            },
+            {
+                "statement": "chronic_respiratory_condition ⊥ ethnic_background",
+                "explanation": "Chronic respiratory disease and ethnicity are independent exogenous variables."
+            },
+            {
+                "statement": "rsv_detected ⊥ influenza_detected | pathogen_exposure_level, respiratory_virus_season, child_age_group",
+                "explanation": "Given exposure level, season, and age, RSV and influenza colonisation are conditionally independent."
+            },
+            {
+                "statement": "bacterial_np_carriage ⊥ rsv_detected | pathogen_exposure_level, child_age_group",
+                "explanation": "Given exposure and age, bacterial and RSV carriage are conditionally independent at the colonisation level."
+            },
+            {
+                "statement": "fever_present ⊥ lung_crackles | pneumonia_pathogen_type, clinical_phenotype",
+                "explanation": "Given the pathogen and phenotype, fever and crackles are conditionally independent manifestations."
+            },
+            {
+                "statement": "neutrophil_percentage ⊥ crp_level | pneumonia_pathogen_type, clinical_phenotype",
+                "explanation": "Given pathogen and phenotype, neutrophil proportion and CRP are conditionally independent inflammatory markers."
+            }
+        ],
+        "forbidden_edges": [
+            [
+                "confirmed_bacterial_diagnosis",
+                "pneumonia_pathogen_type"
+            ],
+            [
+                "fever_present",
+                "bacterial_np_carriage"
+            ],
+            [
+                "lung_crackles",
+                "viral_np_infection"
+            ],
+            [
+                "respiratory_rate",
+                "pathogen_exposure_level"
+            ],
+            [
+                "study_group",
+                "clinical_phenotype"
+            ]
+        ],
+        "required_edges": [
+            {
+                "from": "bacterial_pneumonia",
+                "to": "pneumonia_pathogen_type",
+                "reason": "Bacterial pneumonia is a direct deterministic parent of the causative pathogen classification."
+            },
+            {
+                "from": "viral_type_pneumonia",
+                "to": "pneumonia_pathogen_type",
+                "reason": "Viral-like pneumonia is a direct deterministic parent of the causative pathogen classification."
+            },
+            {
+                "from": "pneumonia_pathogen_type",
+                "to": "clinical_phenotype",
+                "reason": "The causative pathogen directly determines the clinical presentation phenotype."
+            },
+            {
+                "from": "pathogen_exposure_level",
+                "to": "bacterial_np_carriage",
+                "reason": "Pathogen exposure level directly drives bacterial nasopharyngeal colonisation."
+            },
+            {
+                "from": "blood_culture_result",
+                "to": "confirmed_bacterial_diagnosis",
+                "reason": "Positive blood culture directly confirms bacterial pneumonia diagnosis."
+            }
+        ]
+    },
+    "causal_principles": [
+        {
+            "id": "host_susceptibility_layering",
+            "statement": "Host susceptibility is determined by demographic and medical factors (age, immune status, chronic disease, smoking exposure) and manifests as two latent traits: susceptibility to nasopharyngeal colonisation and susceptibility to disease progression from colonisation to lower respiratory infection.",
+            "references": [
+                "Wu2023_Pneumonia"
+            ]
+        },
+        {
+            "id": "exposure_colonisation_infection_cascade",
+            "statement": "Pathogen acquisition follows a causal cascade: social/environmental determinants drive exposure level, exposure level drives nasopharyngeal colonisation, colonisation enables upper then lower airway infection, and lower airway infection determines the causative pathogen.",
+            "references": [
+                "Wu2023_Pneumonia"
+            ]
+        },
+        {
+            "id": "colonisation_not_causation",
+            "statement": "Nasopharyngeal pathogen detection indicates colonisation (carriage) which is necessary but not sufficient for causative lower respiratory infection. The model distinguishes carriage from disease through separate colonisation and pneumonia nodes.",
+            "references": [
+                "Wu2023_Pneumonia"
+            ]
+        },
+        {
+            "id": "deterministic_pathogen_classification",
+            "statement": "The causative pathogen is deterministically classified: if typical bacterial pneumonia is present it is classified as bacterial, otherwise if viral-like pneumonia is present it is classified as viral-like, otherwise no pneumonia. Mixed infections resolve to bacterial.",
+            "references": [
+                "Wu2023_Pneumonia"
+            ]
+        },
+        {
+            "id": "phenotype_mediated_presentation",
+            "statement": "Clinical signs, symptoms, and laboratory values are not observed directly from the pathogen but mediated through a latent clinical phenotype that integrates pathogen type, disease duration, severity, and host factors.",
+            "references": [
+                "Wu2023_Pneumonia"
+            ]
+        },
+        {
+            "id": "diagnostic_test_sensitivity",
+            "statement": "Diagnostic test results (blood culture, pleural fluid culture) are affected by prior antibiotic exposure which reduces sensitivity, creating false negatives. Test availability depends on clinical decisions (specimen collection) and clinical findings (pleural effusion presence).",
+            "references": [
+                "Wu2023_Pneumonia"
+            ]
+        },
+        {
+            "id": "vaccination_colonisation_pathway",
+            "statement": "Vaccination acts specifically on its target pathogen's colonisation: pneumococcal vaccine reduces bacterial nasopharyngeal carriage and bacterial pneumonia risk; influenza vaccine reduces influenza nasopharyngeal detection. Neither vaccine has cross-pathogen effects.",
+            "references": [
+                "Wu2023_Pneumonia"
+            ]
+        }
+    ],
+    "ground_truth": {
+        "num_nodes": 62,
+        "num_edges": 171,
+        "edges": [
+            [
+                "AgeGroup",
+                "AntibioticExposure"
+            ],
+            [
+                "AgeGroup",
+                "BloodCulturePerformed"
+            ],
+            [
+                "AgeGroup",
+                "ChestPain"
+            ],
+            [
+                "AgeGroup",
+                "ChildcareDays"
+            ],
+            [
+                "AgeGroup",
+                "DurationOfSymptomsOnset"
+            ],
+            [
+                "AgeGroup",
+                "Earache"
+            ],
+            [
+                "AgeGroup",
+                "Fever"
+            ],
+            [
+                "AgeGroup",
+                "HMPVInNasopharynx"
+            ],
+            [
+                "AgeGroup",
+                "Headache"
+            ],
+            [
+                "AgeGroup",
+                "HighestTemperature"
+            ],
+            [
+                "AgeGroup",
+                "HospitalTransfer"
+            ],
+            [
+                "AgeGroup",
+                "InfluenzaInNasopharynx"
+            ],
+            [
+                "AgeGroup",
+                "InfluenzaVaccine"
+            ],
+            [
+                "AgeGroup",
+                "Irritable"
+            ],
+            [
+                "AgeGroup",
+                "LevelOfExposure"
+            ],
+            [
+                "AgeGroup",
+                "MycoplasmaInNasopharynx"
+            ],
+            [
+                "AgeGroup",
+                "OtherPain"
+            ],
+            [
+                "AgeGroup",
+                "ParainfluenzaInNasopharynx"
+            ],
+            [
+                "AgeGroup",
+                "PneumococcalVaccine"
+            ],
+            [
+                "AgeGroup",
+                "PreviousSignificantInfection"
+            ],
+            [
+                "AgeGroup",
+                "RSVInNasopharynx"
+            ],
+            [
+                "AgeGroup",
+                "ReducedOralIntake"
+            ],
+            [
+                "AgeGroup",
+                "RespiratoryRate"
+            ],
+            [
+                "AgeGroup",
+                "SoreThroat"
+            ],
+            [
+                "AgeGroup",
+                "SusceptibilityToColonisation"
+            ],
+            [
+                "AgeGroup",
+                "SusceptibilityToProgression"
+            ],
+            [
+                "AgeGroup",
+                "TypicalBacteriaInNasopharynx"
+            ],
+            [
+                "AgeGroup",
+                "TypicalBacterialPneumonia"
+            ],
+            [
+                "AgeGroup",
+                "Wheezing"
+            ],
+            [
+                "AntibioticExposure",
+                "BloodCultureResult"
+            ],
+            [
+                "AntibioticExposure",
+                "PleuralFluidResult"
+            ],
+            [
+                "AntibioticExposure",
+                "TypicalBacteriaInNasopharynx"
+            ],
+            [
+                "BloodCulturePerformed",
+                "BloodCultureResult"
+            ],
+            [
+                "BloodCultureResult",
+                "DiagnosisBacterialPneumonia"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "AbdominalPain"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "BloodCultureResult"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "BreathingDifficulty"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "CReactiveProteins"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "ChestPain"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "ChillSweat"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "Cough"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "Crackles"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "CurrentPhenotype"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "Diarrhoea"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "EnergyLoss"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "Fever"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "Headache"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "HighestTemperature"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "Irritable"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "NeutrophilProportion"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "O2Type"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "OtherPain"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "OxygenSaturation"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "PleuralEffusion"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "PleuralFluidResult"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "Rash"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "ReducedOralIntake"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "RespiratoryRate"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "SubjectGroup"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "Vomiting"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "Wheezing"
+            ],
+            [
+                "CausativePathogenForPneumonia",
+                "WhiteCellCount"
+            ],
+            [
+                "ChildcareDays",
+                "LevelOfExposure"
+            ],
+            [
+                "ChronicRespiratoryDisease",
+                "SusceptibilityToProgression"
+            ],
+            [
+                "ChronicRespiratoryDisease",
+                "Wheezing"
+            ],
+            [
+                "CurrentPhenotype",
+                "AbdominalPain"
+            ],
+            [
+                "CurrentPhenotype",
+                "BreathingDifficulty"
+            ],
+            [
+                "CurrentPhenotype",
+                "CReactiveProteins"
+            ],
+            [
+                "CurrentPhenotype",
+                "ChestPain"
+            ],
+            [
+                "CurrentPhenotype",
+                "ChillSweat"
+            ],
+            [
+                "CurrentPhenotype",
+                "Cough"
+            ],
+            [
+                "CurrentPhenotype",
+                "Crackles"
+            ],
+            [
+                "CurrentPhenotype",
+                "Diarrhoea"
+            ],
+            [
+                "CurrentPhenotype",
+                "EnergyLoss"
+            ],
+            [
+                "CurrentPhenotype",
+                "Fever"
+            ],
+            [
+                "CurrentPhenotype",
+                "Headache"
+            ],
+            [
+                "CurrentPhenotype",
+                "HighestTemperature"
+            ],
+            [
+                "CurrentPhenotype",
+                "Irritable"
+            ],
+            [
+                "CurrentPhenotype",
+                "NeutrophilProportion"
+            ],
+            [
+                "CurrentPhenotype",
+                "O2Type"
+            ],
+            [
+                "CurrentPhenotype",
+                "OtherPain"
+            ],
+            [
+                "CurrentPhenotype",
+                "OxygenSaturation"
+            ],
+            [
+                "CurrentPhenotype",
+                "PleuralEffusion"
+            ],
+            [
+                "CurrentPhenotype",
+                "Rash"
+            ],
+            [
+                "CurrentPhenotype",
+                "ReducedOralIntake"
+            ],
+            [
+                "CurrentPhenotype",
+                "RespiratoryRate"
+            ],
+            [
+                "CurrentPhenotype",
+                "Vomiting"
+            ],
+            [
+                "CurrentPhenotype",
+                "Wheezing"
+            ],
+            [
+                "CurrentPhenotype",
+                "WhiteCellCount"
+            ],
+            [
+                "Diarrhoea",
+                "AbdominalPain"
+            ],
+            [
+                "Diarrhoea",
+                "ReducedOralIntake"
+            ],
+            [
+                "DurationOfSymptomsOnset",
+                "CurrentPhenotype"
+            ],
+            [
+                "Ethnicity",
+                "ChildcareDays"
+            ],
+            [
+                "Ethnicity",
+                "HospitalTransfer"
+            ],
+            [
+                "Ethnicity",
+                "InfluenzaVaccine"
+            ],
+            [
+                "Ethnicity",
+                "LevelOfExposure"
+            ],
+            [
+                "Ethnicity",
+                "PneumococcalVaccine"
+            ],
+            [
+                "Ethnicity",
+                "Prematurity"
+            ],
+            [
+                "Ethnicity",
+                "SmokerInHousehold"
+            ],
+            [
+                "HMPVInNasopharynx",
+                "ThroatInfection"
+            ],
+            [
+                "HMPVInNasopharynx",
+                "ViralLikePneumonia"
+            ],
+            [
+                "HMPVInNasopharynx",
+                "ViralNasopharyngealInfection"
+            ],
+            [
+                "HighestTemperature",
+                "ChillSweat"
+            ],
+            [
+                "HospitalTransfer",
+                "AntibioticExposure"
+            ],
+            [
+                "HospitalTransfer",
+                "BloodCulturePerformed"
+            ],
+            [
+                "HospitalTransfer",
+                "CurrentPhenotype"
+            ],
+            [
+                "HospitalTransfer",
+                "DurationOfSymptomsOnset"
+            ],
+            [
+                "ImpairedImmunity",
+                "AntibioticExposure"
+            ],
+            [
+                "ImpairedImmunity",
+                "SusceptibilityToColonisation"
+            ],
+            [
+                "ImpairedImmunity",
+                "SusceptibilityToProgression"
+            ],
+            [
+                "InfluenzaInNasopharynx",
+                "ThroatInfection"
+            ],
+            [
+                "InfluenzaInNasopharynx",
+                "ViralLikePneumonia"
+            ],
+            [
+                "InfluenzaInNasopharynx",
+                "ViralNasopharyngealInfection"
+            ],
+            [
+                "InfluenzaSeason",
+                "HMPVInNasopharynx"
+            ],
+            [
+                "InfluenzaSeason",
+                "InfluenzaInNasopharynx"
+            ],
+            [
+                "InfluenzaSeason",
+                "RSVInNasopharynx"
+            ],
+            [
+                "InfluenzaVaccine",
+                "InfluenzaInNasopharynx"
+            ],
+            [
+                "LevelOfExposure",
+                "HMPVInNasopharynx"
+            ],
+            [
+                "LevelOfExposure",
+                "InfluenzaInNasopharynx"
+            ],
+            [
+                "LevelOfExposure",
+                "MycoplasmaInNasopharynx"
+            ],
+            [
+                "LevelOfExposure",
+                "ParainfluenzaInNasopharynx"
+            ],
+            [
+                "LevelOfExposure",
+                "RSVInNasopharynx"
+            ],
+            [
+                "LevelOfExposure",
+                "TypicalBacteriaInNasopharynx"
+            ],
+            [
+                "MycoplasmaInNasopharynx",
+                "ThroatInfection"
+            ],
+            [
+                "MycoplasmaInNasopharynx",
+                "ViralLikePneumonia"
+            ],
+            [
+                "MycoplasmaInNasopharynx",
+                "ViralNasopharyngealInfection"
+            ],
+            [
+                "O2Type",
+                "OxygenSaturation"
+            ],
+            [
+                "OxygenSaturation",
+                "BreathingDifficulty"
+            ],
+            [
+                "OxygenSaturation",
+                "RespiratoryRate"
+            ],
+            [
+                "ParainfluenzaInNasopharynx",
+                "ThroatInfection"
+            ],
+            [
+                "ParainfluenzaInNasopharynx",
+                "ViralLikePneumonia"
+            ],
+            [
+                "ParainfluenzaInNasopharynx",
+                "ViralNasopharyngealInfection"
+            ],
+            [
+                "PleuralEffusion",
+                "AbdominalPain"
+            ],
+            [
+                "PleuralEffusion",
+                "BloodCultureResult"
+            ],
+            [
+                "PleuralEffusion",
+                "ChestPain"
+            ],
+            [
+                "PleuralEffusion",
+                "DiagnosisBacterialPneumonia"
+            ],
+            [
+                "PleuralEffusion",
+                "PleuralFluidResult"
+            ],
+            [
+                "PneumococcalVaccine",
+                "TypicalBacteriaInNasopharynx"
+            ],
+            [
+                "PneumococcalVaccine",
+                "TypicalBacterialPneumonia"
+            ],
+            [
+                "Prematurity",
+                "ChildcareDays"
+            ],
+            [
+                "Prematurity",
+                "InfluenzaVaccine"
+            ],
+            [
+                "RSVInNasopharynx",
+                "ThroatInfection"
+            ],
+            [
+                "RSVInNasopharynx",
+                "ViralLikePneumonia"
+            ],
+            [
+                "RSVInNasopharynx",
+                "ViralNasopharyngealInfection"
+            ],
+            [
+                "ReducedOralIntake",
+                "EnergyLoss"
+            ],
+            [
+                "SmokerInHousehold",
+                "Prematurity"
+            ],
+            [
+                "SmokerInHousehold",
+                "SusceptibilityToColonisation"
+            ],
+            [
+                "SusceptibilityToColonisation",
+                "PreviousSignificantInfection"
+            ],
+            [
+                "SusceptibilityToColonisation",
+                "TypicalBacteriaInNasopharynx"
+            ],
+            [
+                "SusceptibilityToProgression",
+                "CurrentPhenotype"
+            ],
+            [
+                "SusceptibilityToProgression",
+                "PreviousSignificantInfection"
+            ],
+            [
+                "ThroatInfection",
+                "TypicalBacterialPneumonia"
+            ],
+            [
+                "ThroatInfection",
+                "UpperAirwayInvolvment"
+            ],
+            [
+                "ThroatInfection",
+                "ViralLikePneumonia"
+            ],
+            [
+                "TypicalBacteriaInNasopharynx",
+                "TypicalBacterialPneumonia"
+            ],
+            [
+                "TypicalBacteriaInNasopharynx",
+                "UpperAirwayInvolvment"
+            ],
+            [
+                "TypicalBacterialPneumonia",
+                "CausativePathogenForPneumonia"
+            ],
+            [
+                "UpperAirwayInvolvment",
+                "BreathingDifficulty"
+            ],
+            [
+                "UpperAirwayInvolvment",
+                "Cough"
+            ],
+            [
+                "UpperAirwayInvolvment",
+                "Earache"
+            ],
+            [
+                "UpperAirwayInvolvment",
+                "Headache"
+            ],
+            [
+                "UpperAirwayInvolvment",
+                "Rhinorrhoea"
+            ],
+            [
+                "UpperAirwayInvolvment",
+                "SoreThroat"
+            ],
+            [
+                "UpperAirwayInvolvment",
+                "Wheezing"
+            ],
+            [
+                "ViralLikePneumonia",
+                "CausativePathogenForPneumonia"
+            ],
+            [
+                "ViralLikePneumonia",
+                "TypicalBacterialPneumonia"
+            ],
+            [
+                "ViralNasopharyngealInfection",
+                "ThroatInfection"
+            ],
+            [
+                "ViralNasopharyngealInfection",
+                "TypicalBacterialPneumonia"
+            ],
+            [
+                "ViralNasopharyngealInfection",
+                "UpperAirwayInvolvment"
+            ],
+            [
+                "ViralNasopharyngealInfection",
+                "ViralLikePneumonia"
+            ],
+            [
+                "Vomiting",
+                "ReducedOralIntake"
+            ]
+        ]
+    }
+}

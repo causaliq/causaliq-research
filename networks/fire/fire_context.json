@@ -1,0 +1,336 @@
+{
+    "schema_version": "2.0",
+    "network": "fire",
+    "domain": "fire_evacuation_psychology",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a psychological response in fire model, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "fire",
+        "source_reference": "Ramli2021",
+        "source_url": "https://doi.org/10.1007/s10694-020-01072-z",
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "The Fire network models psychological response during building fire emergencies, originally developed by Ramli, Ghani, Ahmad, and Hashim (2021) using fuzzy Bayesian networks elicited from expert judgement. It captures relationships between fire sensory cues, occupant knowledge and familiarity, emotional and stress responses, hazard perception, psychological incapacitation, and escape behaviour. Contains 11 nodes and 14 edges. All variables are binary. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a model of human psychological response during a building fire emergency.",
+            "The causal chain follows: sensory cues + prior knowledge → fire cue interpretation → emotional stability → stress → hazard perception and psychological incapacitation → escape behaviour.",
+            "Audio and visual fire cues are exogenous sensory inputs that determine whether an occupant interprets fire cues as consistent with a real fire.",
+            "Fire knowledge (prior training or experience) influences both cue interpretation and emotional stability.",
+            "Layout familiarity (knowing the building layout and exit routes) directly affects emotional stability under fire conditions.",
+            "Time pressure is an exogenous situational variable that drives both emotional stability and stress levels.",
+            "Emotional stability is a central hub node influenced by fire cue consistency, fire knowledge, layout familiarity, and time pressure, and it drives stress response.",
+            "Stress is the pathway through which emotional instability leads to both hazard perception distortion and psychological incapacitation.",
+            "Perceived hazard is influenced by fire knowledge and stress level — knowledgeable occupants under low stress perceive hazard more accurately.",
+            "Psychological incapacitation (freezing, panic) is driven by stress and directly impairs escape ability.",
+            "Escape is the terminal outcome determined by both perceived hazard level and degree of psychological incapacitation.",
+            "All variables are binary, reflecting the expert-elicited fuzzy Bayesian network methodology."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "AudioFireCues",
+            "display_name": "Auditory Fire Cues",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "exogenous",
+            "category": "sensory_input",
+            "short_description": "Presence of auditory cues indicating fire such as alarms or crackling sounds.",
+            "extended_description": "Whether the building occupant perceives auditory cues consistent with a fire event, including fire alarms, smoke detector alerts, crackling or roaring sounds, glass breaking, or verbal warnings from others. An exogenous sensory input that contributes to fire cue interpretation.",
+            "sensitivity_hints": "Exogenous sensory observation. Together with visual cues and fire knowledge, determines fire cue consistency interpretation.",
+            "related_domain_knowledge": [
+                "Fire alarms are the most common first cue in commercial buildings.",
+                "Occupants may initially ignore or misinterpret alarms due to frequent false alarms.",
+                "Auditory cues are especially important when visual cues are obscured by smoke."
+            ],
+            "references": [
+                "Ramli2021"
+            ],
+            "llm_name": "auditory_fire_cues"
+        },
+        {
+            "name": "EmotionalStability",
+            "display_name": "Emotional Stability Under Fire",
+            "type": "binary",
+            "states": [
+                "stable",
+                "unstable"
+            ],
+            "role": "endogenous",
+            "category": "psychological_state",
+            "short_description": "Emotional stability of the occupant during the fire event.",
+            "extended_description": "Whether the building occupant maintains emotional stability during the fire emergency. Determined by the consistency of fire cues, prior fire knowledge, familiarity with the building layout, and time pressure. Emotionally unstable occupants are more likely to experience high stress, leading to impaired decision-making and potential psychological incapacitation.",
+            "sensitivity_hints": "Central hub node. Driven by fire cue consistency, fire knowledge, layout familiarity, and time pressure. Directly causes stress response.",
+            "related_domain_knowledge": [
+                "Emotional stability is a key determinant of appropriate evacuation behaviour.",
+                "Prior training and familiarity with emergency procedures enhance emotional stability.",
+                "Ambiguous or inconsistent fire cues increase emotional distress.",
+                "Time pressure erodes emotional resilience even in trained occupants."
+            ],
+            "references": [
+                "Ramli2021"
+            ],
+            "llm_name": "emotional_stability"
+        },
+        {
+            "name": "Escape",
+            "display_name": "Successful Escape Behaviour",
+            "type": "binary",
+            "states": [
+                "successful",
+                "unsuccessful"
+            ],
+            "role": "endogenous",
+            "category": "behavioural_outcome",
+            "short_description": "Whether the occupant successfully initiates escape behaviour.",
+            "extended_description": "The terminal outcome representing whether the occupant successfully initiates and executes escape behaviour during the fire. Determined by the occupant’s perceived hazard level and degree of psychological incapacitation. Both accurate hazard perception and functional psychological state are needed for effective escape.",
+            "sensitivity_hints": "Terminal output node. Driven by perceived hazard and psychological incapacitation. All upstream variables affect this through their respective chains.",
+            "related_domain_knowledge": [
+                "Escape behaviour requires both motivation (perceived hazard) and capability (absence of incapacitation).",
+                "Severe psychological incapacitation (panic, freezing) is the primary barrier to escape.",
+                "Even high perceived hazard may not lead to escape if the occupant is psychologically incapacitated.",
+                "Escape decisions are time-critical — delays increase smoke exposure and reduce options."
+            ],
+            "references": [
+                "Ramli2021"
+            ],
+            "llm_name": "escape_behaviour"
+        },
+        {
+            "name": "FireCues",
+            "display_name": "Fire Cue Consistency",
+            "type": "binary",
+            "states": [
+                "consistent",
+                "inconsistent"
+            ],
+            "role": "endogenous",
+            "category": "situational_assessment",
+            "short_description": "Whether available fire cues are interpreted as consistent with a real fire.",
+            "extended_description": "The occupant’s assessment of whether the sensory cues (auditory and visual) are consistent with a genuine fire event. Influenced by both the presence of auditory and visual cues and the occupant’s prior fire knowledge. Consistent cues that match expectations from training or experience strengthen the interpretation. Inconsistent or ambiguous cues increase uncertainty and emotional distress.",
+            "sensitivity_hints": "Integrative assessment node. Driven by audio cues, visual cues, and fire knowledge. Affects emotional stability.",
+            "related_domain_knowledge": [
+                "Multiple consistent cues (seeing smoke AND hearing alarms) strongly confirm fire.",
+                "Fire knowledge helps occupants correctly interpret ambiguous cues.",
+                "Inconsistent cues (alarm but no smoke) often lead to delayed evacuation.",
+                "Cue interpretation is the critical first step in the fire response chain."
+            ],
+            "references": [
+                "Ramli2021"
+            ],
+            "llm_name": "fire_cue_consistency"
+        },
+        {
+            "name": "FireKnowledge",
+            "display_name": "Prior Fire Safety Knowledge",
+            "type": "binary",
+            "states": [
+                "knowledgeable",
+                "not_knowledgeable"
+            ],
+            "role": "exogenous",
+            "category": "occupant_background",
+            "short_description": "Whether the occupant has prior fire safety knowledge or training.",
+            "extended_description": "Whether the building occupant possesses prior knowledge of fire behaviour, evacuation procedures, or fire safety training. An exogenous background variable that influences fire cue interpretation, emotional stability, and hazard perception. Knowledgeable occupants respond more appropriately and maintain greater composure.",
+            "sensitivity_hints": "Exogenous background variable. Affects three downstream nodes: fire cue consistency, emotional stability, and perceived hazard.",
+            "related_domain_knowledge": [
+                "Fire safety training significantly improves evacuation outcomes.",
+                "Knowledge enables correct interpretation of fire cues and appropriate action selection.",
+                "Occupants with fire training evacuate faster and with less hesitation.",
+                "Only about 37% of building occupants have meaningful fire safety knowledge."
+            ],
+            "references": [
+                "Ramli2021"
+            ],
+            "llm_name": "fire_safety_knowledge"
+        },
+        {
+            "name": "LayoutFamiliarity",
+            "display_name": "Building Layout Familiarity",
+            "type": "binary",
+            "states": [
+                "familiar",
+                "unfamiliar"
+            ],
+            "role": "exogenous",
+            "category": "occupant_background",
+            "short_description": "Whether the occupant is familiar with the building layout and exit routes.",
+            "extended_description": "Whether the building occupant knows the physical layout of the building, including locations of exits, stairwells, and alternative escape routes. An exogenous background variable that directly influences emotional stability — occupants who know where to go are less likely to panic.",
+            "sensitivity_hints": "Exogenous background variable. Directly affects emotional stability. Does not affect cue interpretation or hazard perception.",
+            "related_domain_knowledge": [
+                "Layout familiarity is one of the strongest predictors of successful evacuation.",
+                "Regular occupants (employees) have better outcomes than visitors or new occupants.",
+                "Wayfinding difficulty under smoke conditions greatly increases stress.",
+                "About 59% of building occupants are familiar with the layout."
+            ],
+            "references": [
+                "Ramli2021"
+            ],
+            "llm_name": "building_layout_familiarity"
+        },
+        {
+            "name": "PerceivedHazard",
+            "display_name": "Perceived Hazard Level",
+            "type": "binary",
+            "states": [
+                "risky",
+                "not_risky"
+            ],
+            "role": "endogenous",
+            "category": "situational_assessment",
+            "short_description": "Occupant’s perception of how hazardous the fire situation is.",
+            "extended_description": "The occupant’s subjective assessment of the danger level of the current fire situation. Determined by fire safety knowledge and current stress level. Knowledgeable occupants under low stress perceive hazard more accurately; high stress can paradoxically reduce perceived hazard through denial or increase it through catastrophisation.",
+            "sensitivity_hints": "Driven by fire knowledge and stress. Directly affects escape outcome. Mediates between cognitive state and behavioural action.",
+            "related_domain_knowledge": [
+                "Accurate hazard perception is critical for motivating evacuation.",
+                "Stress can cause both under-estimation (denial) and over-estimation (panic) of hazard.",
+                "Trained occupants tend to perceive hazard more accurately.",
+                "Social cues from others’ behaviour also influence hazard perception (not modelled here)."
+            ],
+            "references": [
+                "Ramli2021"
+            ],
+            "llm_name": "perceived_hazard_level"
+        },
+        {
+            "name": "PsychologicalIncapacitation",
+            "display_name": "Psychological Incapacitation",
+            "type": "binary",
+            "states": [
+                "mild",
+                "severe"
+            ],
+            "role": "endogenous",
+            "category": "psychological_state",
+            "short_description": "Degree of psychological incapacitation (panic, freezing, confusion).",
+            "extended_description": "The extent to which the occupant is psychologically incapacitated by the fire emergency, ranging from mild (manageable anxiety) to severe (panic, freezing, or confusion that prevents purposeful action). Driven by stress level. Severe incapacitation directly impairs the ability to escape.",
+            "sensitivity_hints": "Driven solely by stress level. Directly affects escape outcome. Represents the debilitating effect of extreme stress.",
+            "related_domain_knowledge": [
+                "Psychological incapacitation is distinct from physical incapacitation by smoke or heat.",
+                "Panic behaviour (irrational flight, trampling) is relatively rare but devastating.",
+                "Freezing (behavioural inaction) is more common than panic in fire scenarios.",
+                "Severe incapacitation makes escape nearly impossible regardless of other factors."
+            ],
+            "references": [
+                "Ramli2021"
+            ],
+            "llm_name": "psychological_incapacitation"
+        },
+        {
+            "name": "Stress",
+            "display_name": "Stress Level",
+            "type": "binary",
+            "states": [
+                "low",
+                "high"
+            ],
+            "role": "endogenous",
+            "category": "psychological_state",
+            "short_description": "Overall stress level of the occupant during the fire.",
+            "extended_description": "The occupant’s overall stress level during the fire event, determined by emotional stability and time pressure. Stress is the central mediator between emotional state and downstream outcomes: it drives both hazard perception and the risk of psychological incapacitation.",
+            "sensitivity_hints": "Key mediator node. Driven by emotional stability and time pressure. Affects both perceived hazard and psychological incapacitation.",
+            "related_domain_knowledge": [
+                "Stress follows an inverted-U relationship with performance (Yerkes–Dodson law).",
+                "Moderate stress can enhance alertness; extreme stress impairs cognition.",
+                "Time pressure is a primary amplifier of stress in fire emergencies.",
+                "Stress-induced tunnel vision reduces awareness of alternative escape routes."
+            ],
+            "references": [
+                "Ramli2021"
+            ],
+            "llm_name": "occupant_stress_level"
+        },
+        {
+            "name": "TimePressure",
+            "display_name": "Perceived Time Pressure",
+            "type": "binary",
+            "states": [
+                "low",
+                "high"
+            ],
+            "role": "exogenous",
+            "category": "situational_context",
+            "short_description": "Perceived urgency or time pressure during the fire event.",
+            "extended_description": "The degree of time pressure perceived by the occupant, determined by the fire’s progression speed, proximity to danger, and available escape window. An exogenous situational variable that directly undermines emotional stability and amplifies stress.",
+            "sensitivity_hints": "Exogenous situational variable. Directly affects both emotional stability and stress. A key driver of the stress cascade.",
+            "related_domain_knowledge": [
+                "Rapidly developing fires create extreme time pressure.",
+                "Time pressure reduces the quality of decision-making.",
+                "Perceived time pressure may differ from actual available time.",
+                "About 37% of fire scenarios involve high time pressure."
+            ],
+            "references": [
+                "Ramli2021"
+            ],
+            "llm_name": "perceived_time_pressure"
+        },
+        {
+            "name": "VisualFireCues",
+            "display_name": "Visual Fire Cues",
+            "type": "binary",
+            "states": [
+                "present",
+                "absent"
+            ],
+            "role": "exogenous",
+            "category": "sensory_input",
+            "short_description": "Presence of visual cues indicating fire such as smoke or flames.",
+            "extended_description": "Whether the building occupant perceives visual cues consistent with a fire event, including visible smoke, flames, glow, flickering light, or emergency lighting activation. An exogenous sensory input that contributes to fire cue interpretation.",
+            "sensitivity_hints": "Exogenous sensory observation. Together with audio cues and fire knowledge, determines fire cue consistency interpretation.",
+            "related_domain_knowledge": [
+                "Smoke is typically the first visual cue detected in fire emergencies.",
+                "Dense smoke rapidly obscures visual cues and exit signs.",
+                "Visual confirmation of fire strongly motivates immediate evacuation.",
+                "Early-stage fires may produce cues that are easily dismissed (slight haze, faint smell)."
+            ],
+            "references": [
+                "Ramli2021"
+            ],
+            "llm_name": "visual_fire_cues"
+        }
+    ]
+}

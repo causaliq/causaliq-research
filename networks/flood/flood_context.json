@@ -1,0 +1,565 @@
+{
+    "schema_version": "2.0",
+    "network": "flood",
+    "domain": "natural_flood_management_agriculture",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a natural flood management model that trades off farm production against flood alleviation through land use and tillage practices, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "flood",
+        "source_reference": "Ali, Q. (2023). A trade-off between farm production and flood alleviation using land use tillage preferences as a natural flood management (NFM) strategy. Smart Agricultural Technology, 6, 100361.",
+        "source_url": "https://doi.org/10.1016/j.atech.2023.100361",
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "The flood network models the trade-off between agricultural productivity and natural flood management (NFM) through land use and tillage decisions, originally developed by Ali (2023) using a Bayesian network elicited from domain expertise and field data from UK farms. It captures relationships between land management, soil properties, weather, crop growth, runoff hydrology, erosion, and two competing outcomes: farm yield versus flood alleviation. Contains 22 nodes and 42 edges. Variables include binary, quaternary, quinary, senary, and septenary discrete states. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a model of natural flood management (NFM) that examines trade-offs between agricultural production and flood risk reduction.",
+            "The central tension is between farm productivity and flood alleviation — land use and tillage decisions influence both outcomes through distinct but overlapping causal pathways.",
+            "Land use type (arable, arable with grass, grassland, woodland) and soil texture (loamy, clay) jointly determine tillage practice (conservational vs conventional).",
+            "Land use, texture, and tillage jointly determine two key soil properties: bulk density (soil compaction) and soil organic matter content (SOMC).",
+            "Soil organic matter content (SOMC) and tillage determine weed presence — conservational tillage tends to promote weed growth.",
+            "Bulk density, SOMC, and texture together determine the Visual Evaluation of Soil Structure (VESS) score, ranging from fragile to very compact.",
+            "Rainfall and temperature jointly determine water stress on crops, which along with rainfall and temperature drives crop weight (biomass).",
+            "Crop weight and SOMC determine the senescence (die-back) of plant material, which in turn affects soil water content.",
+            "Water content is determined by rainfall, senescence, and tillage practice.",
+            "Daily runoff volume depends on rainfall, slope, and water content — higher water saturation increases runoff.",
+            "Total runoff is a central node driven by bulk density, daily runoff, VESS, and weed presence — compacted, structurally poor soils with no weed cover produce more runoff.",
+            "Flood alleviation is a direct consequence of runoff: low runoff means positive flood alleviation.",
+            "Erosion depends on bulk density, runoff, and tillage — conventional tillage with high runoff on compacted soil causes high erosion.",
+            "Soil nutrients depend on erosion, SOMC, and weed presence — higher organic matter and weed absence improve nutrient retention.",
+            "Product weight (harvestable crop mass) is derived from total crop weight (biomass).",
+            "Crop yield (increase or decrease) depends on land use, nutrient availability, and product weight.",
+            "Farm yield (positive or negative outcome) is a direct function of crop yield.",
+            "The model captures a UK agricultural context with temperate climate variables and typical British farming practices.",
+            "All CPTs were elicited from domain expertise combined with observational field data from UK farms."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "states",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references",
+                "llm_name"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "Bulk_Density",
+            "display_name": "Bulk Density",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.25",
+                "0.25 to 0.5",
+                "0.5 to 0.75",
+                "0.75 to 1",
+                "1 to 1.25",
+                "1.25 to 1.5"
+            ],
+            "units": "g/cm³",
+            "role": "endogenous",
+            "category": "soil_property",
+            "short_description": "Soil bulk density indicating compaction level.",
+            "extended_description": "Soil bulk density measures the mass of dry soil per unit volume and serves as an indicator of soil compaction. Higher values indicate more compacted soil with fewer pore spaces, reducing water infiltration and increasing surface runoff. Determined by land use type, soil texture, and tillage practice. Conventional tillage on clay soils under arable use tends to produce higher bulk density.",
+            "sensitivity_hints": "Influenced by land use, texture, and tillage practice. Drives runoff, erosion, and soil structure quality (VESS).",
+            "related_domain_knowledge": [
+                "Bulk density typically ranges from 0.1–1.8 g/cm³ for agricultural soils.",
+                "Compacted soils with high bulk density impede root growth and reduce water infiltration."
+            ],
+            "references": [],
+            "llm_name": "SoilCompaction"
+        },
+        {
+            "name": "Daily_Runoff",
+            "display_name": "Daily Runoff",
+            "type": "ordinal",
+            "states": [
+                "0 to 18",
+                "18 to 36",
+                "36 to 54",
+                "54 to 72"
+            ],
+            "units": "mm/day",
+            "role": "endogenous",
+            "category": "hydrology",
+            "short_description": "Volume of daily surface water runoff.",
+            "extended_description": "Daily runoff represents the volume of water flowing over the soil surface per day rather than infiltrating. It depends on rainfall intensity, terrain slope, and current soil water content. Saturated soils on sloped terrain during heavy rainfall generate the highest runoff volumes. This quantity feeds into the overall runoff assessment for flood risk.",
+            "sensitivity_hints": "Strongly driven by rainfall amount and soil water saturation. Slope amplifies runoff generation.",
+            "related_domain_knowledge": [
+                "Surface runoff is the primary driver of overland flooding in agricultural catchments.",
+                "Flat terrain retains more water, reducing daily runoff volume."
+            ],
+            "references": [],
+            "llm_name": "DailySurfaceFlow"
+        },
+        {
+            "name": "Erosion",
+            "display_name": "Erosion",
+            "type": "categorical",
+            "states": [
+                "High",
+                "Low"
+            ],
+            "role": "endogenous",
+            "category": "soil_degradation",
+            "short_description": "Severity of soil erosion.",
+            "extended_description": "Erosion severity indicates the degree of topsoil loss due to water action. It is driven by soil compaction (bulk density), total runoff volume, and tillage practice. Conventional tillage on compacted soils with high runoff produces high erosion. Conservational tillage reduces erosion by maintaining crop residues on the soil surface. Erosion depletes soil nutrients and degrades long-term productivity.",
+            "sensitivity_hints": "Strongly influenced by tillage type — conservational tillage dramatically reduces erosion. High runoff on compacted soil is the worst-case scenario for erosion.",
+            "related_domain_knowledge": [
+                "Soil erosion is a major concern for long-term agricultural sustainability.",
+                "Erosion removes nutrient-rich topsoil, reducing crop productivity."
+            ],
+            "references": [],
+            "llm_name": "SoilErosionSeverity"
+        },
+        {
+            "name": "Farm_Yield",
+            "display_name": "Farm Yield",
+            "type": "categorical",
+            "states": [
+                "Positive",
+                "Negative"
+            ],
+            "role": "endogenous",
+            "category": "outcome",
+            "short_description": "Overall farm yield outcome — positive or negative.",
+            "extended_description": "Farm yield represents the final agricultural productivity outcome, directly determined by crop yield. A yield increase translates to a positive farm outcome, while a decrease translates to a negative outcome. This is one of the two terminal outcome nodes in the model, representing the agricultural production side of the NFM trade-off.",
+            "sensitivity_hints": "Directly determined by crop yield. Indirectly influenced by the entire agricultural pathway from land use to harvest.",
+            "related_domain_knowledge": [
+                "Farm yield is the primary economic indicator for agricultural decision-making.",
+                "NFM strategies that reduce flood risk may also reduce farm yield."
+            ],
+            "references": [],
+            "llm_name": "FarmProductivityOutcome"
+        },
+        {
+            "name": "Flood_Alleviation",
+            "display_name": "Flood Alleviation",
+            "type": "categorical",
+            "states": [
+                "Positive",
+                "Negative"
+            ],
+            "role": "endogenous",
+            "category": "outcome",
+            "short_description": "Effectiveness of flood alleviation — positive or negative.",
+            "extended_description": "Flood alleviation indicates whether land management practices are successfully reducing downstream flood risk. Low runoff means positive flood alleviation (water is retained on agricultural land rather than flowing downstream). This is one of the two terminal outcome nodes, representing the flood management side of the NFM trade-off. It is directly determined by total runoff volume.",
+            "sensitivity_hints": "Directly and solely determined by total runoff. Indirectly influenced by all factors affecting runoff: soil properties, weather, land management.",
+            "related_domain_knowledge": [
+                "Natural flood management (NFM) aims to reduce peak river flows by slowing surface water across agricultural landscapes.",
+                "Positive flood alleviation means reduced downstream flood risk."
+            ],
+            "references": [],
+            "llm_name": "FloodRiskReduction"
+        },
+        {
+            "name": "Land_Use",
+            "display_name": "Land Use",
+            "type": "categorical",
+            "states": [
+                "Arable",
+                "Arable With Grass",
+                "Grassland",
+                "Woodland"
+            ],
+            "role": "exogenous",
+            "category": "land_management",
+            "short_description": "Type of agricultural land use.",
+            "extended_description": "Land use type represents the primary agricultural activity on the land. Arable land is used for crop cultivation, arable with grass combines cropping with grass leys, grassland is permanent pasture, and woodland includes forested areas. Land use is a root cause variable that influences tillage practice, soil organic matter content, bulk density, and ultimately crop yield. Woodland and grassland generally improve soil structure and reduce runoff compared to arable farming.",
+            "sensitivity_hints": "Key decision variable that cascades through the entire model. Arable farming dominates (54%), with woodland least common (7%).",
+            "related_domain_knowledge": [
+                "UK agricultural land is predominantly arable in eastern regions with grassland in western and upland areas.",
+                "Woodland intercepts rainfall and has deep root systems that improve water infiltration."
+            ],
+            "references": [],
+            "llm_name": "LandManagementType"
+        },
+        {
+            "name": "Nutrients",
+            "display_name": "Nutrients",
+            "type": "categorical",
+            "states": [
+                "High",
+                "Low"
+            ],
+            "role": "endogenous",
+            "category": "soil_property",
+            "short_description": "Level of available soil nutrients.",
+            "extended_description": "Soil nutrient availability indicates whether sufficient nutrients are present to support crop growth. It depends on erosion (which removes nutrients), soil organic matter content (which supplies nutrients through decomposition), and weed presence (weeds compete for nutrients). High SOMC with low erosion and absent weeds yields the highest nutrient levels. Low nutrient availability reduces crop yield.",
+            "sensitivity_hints": "Erosion is a primary driver — high erosion depletes nutrients. SOMC provides the nutrient reservoir; weeds compete for the available pool.",
+            "related_domain_knowledge": [
+                "Nitrogen, phosphorus, and potassium are the primary macronutrients for crop growth.",
+                "Organic matter decomposition is a key source of plant-available nutrients."
+            ],
+            "references": [],
+            "llm_name": "SoilNutrientLevel"
+        },
+        {
+            "name": "Product_Weight",
+            "display_name": "Product Weight",
+            "type": "ordinal",
+            "states": [
+                "0 to 2550",
+                "2550 to 5100",
+                "5100 to 7650",
+                "7650 to 10200"
+            ],
+            "units": "kg/ha",
+            "role": "endogenous",
+            "category": "crop_production",
+            "short_description": "Harvestable crop product weight per hectare.",
+            "extended_description": "Product weight represents the mass of the harvestable component of the crop (grain, tubers, etc.) per hectare. It is derived directly from total crop biomass weight. Higher biomass generally translates to higher product weight, though the conversion is non-linear. Product weight directly influences whether crop yield increases or decreases.",
+            "sensitivity_hints": "Directly determined by total crop weight (biomass). Feeds into the yield determination alongside nutrients and land use.",
+            "related_domain_knowledge": [
+                "Harvest index (ratio of product to total biomass) varies by crop type.",
+                "Typical UK wheat yields are 7,000–9,000 kg/ha in good conditions."
+            ],
+            "references": [],
+            "llm_name": "HarvestableProductMass"
+        },
+        {
+            "name": "Rainfall",
+            "display_name": "Rainfall",
+            "type": "ordinal",
+            "states": [
+                "0 to 0.4",
+                "0.4 to 0.8",
+                "0.8 to 1.2",
+                "1.2 to 1.6",
+                "1.6 to 2",
+                "2 to 2.4",
+                "2.4 to 2.8"
+            ],
+            "units": "mm/day",
+            "role": "exogenous",
+            "category": "weather",
+            "short_description": "Daily rainfall amount.",
+            "extended_description": "Rainfall is the daily precipitation amount, a key exogenous driver of the hydrological and agricultural systems. It influences water stress on crops, crop weight through water availability, soil water content, and daily runoff. The distribution is right-skewed with the most common range being 1.6–2.0 mm/day (50% of observations). Very low rainfall (<0.4 mm) is rare. Excessive rainfall increases runoff and flood risk while also reducing crop water stress.",
+            "sensitivity_hints": "Major driver of both the flood pathway and the crop growth pathway. Most rainfall falls in the 1.2–2.0 mm/day range.",
+            "related_domain_knowledge": [
+                "UK average annual rainfall is approximately 1,200 mm, predominantly in western regions.",
+                "Rainfall intensity matters more than total amount for surface runoff generation."
+            ],
+            "references": [],
+            "llm_name": "DailyPrecipitation"
+        },
+        {
+            "name": "Runoff",
+            "display_name": "Runoff",
+            "type": "ordinal",
+            "states": [
+                "0 to 7.7",
+                "7.7 to 15.4"
+            ],
+            "units": "mm",
+            "role": "endogenous",
+            "category": "hydrology",
+            "short_description": "Total surface runoff volume.",
+            "extended_description": "Total runoff represents the cumulative surface water flow from the field. It is a central node driven by four factors: bulk density (soil compaction), daily runoff volume, VESS score (soil structure quality), and weed presence. Compacted soils with poor structure, high daily runoff, and no weed ground cover generate the most runoff. This node directly determines both flood alleviation and erosion outcomes.",
+            "sensitivity_hints": "Central mediator between soil/weather processes and the two outcome variables. Weed presence has a counterintuitive protective effect — weeds reduce runoff by providing ground cover.",
+            "related_domain_knowledge": [
+                "Runoff from agricultural land is a major contributor to downstream flooding in the UK.",
+                "Natural flood management aims to slow and retain runoff on farmland."
+            ],
+            "references": [],
+            "llm_name": "TotalSurfaceRunoff"
+        },
+        {
+            "name": "Senesced",
+            "display_name": "Senesced",
+            "type": "ordinal",
+            "states": [
+                "0 to 77.5",
+                "77.5 to 155",
+                "155 to 232.5",
+                "232.5 to 310"
+            ],
+            "units": "kg/ha",
+            "role": "endogenous",
+            "category": "crop_biology",
+            "short_description": "Mass of senesced (dead) plant material.",
+            "extended_description": "Senesced plant material represents the mass of dead or dying crop residue per hectare. It is determined by soil organic matter content (SOMC) and total crop weight. Higher biomass crops produce more senesced material. Senesced material on the soil surface influences water retention and infiltration, feeding into the soil water content calculation. It acts as a bridge between the crop growth pathway and the hydrology pathway.",
+            "sensitivity_hints": "Driven by crop weight and SOMC. Influences soil water content, connecting crop growth to flood hydrology.",
+            "related_domain_knowledge": [
+                "Crop residues on the soil surface reduce evaporation and improve water retention.",
+                "Senescence is the natural process of plant tissue ageing and death."
+            ],
+            "references": [],
+            "llm_name": "PlantResidueAmount"
+        },
+        {
+            "name": "Slope",
+            "display_name": "Slope",
+            "type": "categorical",
+            "states": [
+                "Flat",
+                "Sloped"
+            ],
+            "role": "exogenous",
+            "category": "terrain",
+            "short_description": "Terrain slope — flat or sloped.",
+            "extended_description": "Slope indicates whether the field terrain is flat or sloped. Sloped terrain increases the speed and volume of surface runoff due to gravitational flow, directly affecting daily runoff volumes. The distribution is uniform (50%/50%). In combination with rainfall and soil water content, slope determines how much water flows off the field versus infiltrating into the soil.",
+            "sensitivity_hints": "Only influences daily runoff directly. Amplifies the effect of rainfall on surface flow.",
+            "related_domain_knowledge": [
+                "UK agricultural land varies from flat fenland to steeply sloped upland pastures.",
+                "Contour ploughing on slopes can reduce runoff."
+            ],
+            "references": [],
+            "llm_name": "TerrainGradient"
+        },
+        {
+            "name": "SOMC",
+            "display_name": "Soil Organic Matter Content",
+            "type": "ordinal",
+            "states": [
+                "0 to 1.833e5",
+                "1.833e5 to 3.666e5",
+                "3.666e5 to 5.499e5",
+                "5.499e5 to 7.322e5",
+                "7.322e5 to 9.165e5"
+            ],
+            "units": "kg/ha",
+            "role": "endogenous",
+            "category": "soil_property",
+            "short_description": "Soil organic matter content per hectare.",
+            "extended_description": "Soil organic matter content (SOMC) measures the quantity of decomposed organic material in the soil. It is determined by land use type, soil texture, and tillage practice. Higher SOMC improves soil structure, water retention, nutrient availability, and biological activity. Grassland and woodland typically accumulate more organic matter than arable land. SOMC is a key mediator linking land management decisions to soil health outcomes.",
+            "sensitivity_hints": "Influenced by land use, texture, and tillage. Drives weed ecology, soil structure (VESS), nutrient availability, and senescence.",
+            "related_domain_knowledge": [
+                "Organic matter improves soil aggregate stability, reducing compaction and erosion.",
+                "Conversion from grassland to arable typically reduces soil organic matter."
+            ],
+            "references": [],
+            "llm_name": "SoilOrganicMatter"
+        },
+        {
+            "name": "Temperature",
+            "display_name": "Temperature",
+            "type": "ordinal",
+            "states": [
+                "7.5 to 8.54",
+                "8.54 to 9.06",
+                "9.06 to 9.58",
+                "9.58 to 10.1",
+                "10.1 to 10.62"
+            ],
+            "units": "°C",
+            "role": "exogenous",
+            "category": "weather",
+            "short_description": "Average daily air temperature.",
+            "extended_description": "Temperature is the average daily air temperature, an exogenous weather variable that influences plant water stress and crop biomass growth. The range (7.5–10.6°C) is typical of UK temperate conditions. Most observations fall in the 7.5–9.6°C range. Temperature interacts with rainfall to determine water stress, which then influences crop weight.",
+            "sensitivity_hints": "Influences water stress and crop weight. The narrow range reflects UK temperate climate conditions.",
+            "related_domain_knowledge": [
+                "UK mean annual temperature is approximately 9–10°C.",
+                "Crop growth rate increases with temperature up to species-specific optima."
+            ],
+            "references": [],
+            "llm_name": "AirTemperature"
+        },
+        {
+            "name": "Texture",
+            "display_name": "Texture",
+            "type": "categorical",
+            "states": [
+                "Loamy",
+                "Clay"
+            ],
+            "role": "exogenous",
+            "category": "soil_property",
+            "short_description": "Soil texture type — loamy or clay.",
+            "extended_description": "Soil texture indicates the predominant particle size composition of the soil. Loamy soils have a balanced mix of sand, silt, and clay providing good drainage and workability. Clay soils have high clay content, leading to poor drainage, higher water retention, and greater compaction risk. Texture influences tillage choice, bulk density, SOMC, and VESS. Loamy soils dominate in the dataset (73%).",
+            "sensitivity_hints": "Fundamental soil property affecting multiple downstream variables. Clay soils are more prone to compaction and waterlogging.",
+            "related_domain_knowledge": [
+                "Soil texture is determined by geological parent material and cannot be altered by management.",
+                "Clay soils swell when wet, reducing hydraulic conductivity."
+            ],
+            "references": [],
+            "llm_name": "SoilTextureClass"
+        },
+        {
+            "name": "Tillage",
+            "display_name": "Tillage",
+            "type": "categorical",
+            "states": [
+                "Conservational",
+                "Conventional"
+            ],
+            "role": "endogenous",
+            "category": "land_management",
+            "short_description": "Tillage practice — conservational or conventional.",
+            "extended_description": "Tillage practice represents the soil cultivation method used. Conservational tillage (reduced or no-till) minimises soil disturbance, preserving structure and organic matter. Conventional tillage involves ploughing, which inverts and loosens the soil. Tillage type is determined by land use and soil texture. It influences bulk density, SOMC, weed ecology, erosion, and soil water dynamics. Conversational tillage is a key NFM intervention.",
+            "sensitivity_hints": "Determined by land use and texture. A primary management lever that affects both flood and productivity pathways.",
+            "related_domain_knowledge": [
+                "Conservational tillage reduces erosion by maintaining crop residue cover.",
+                "Conventional tillage can temporarily reduce soil compaction but increases long-term degradation risk."
+            ],
+            "references": [],
+            "llm_name": "CultivationMethod"
+        },
+        {
+            "name": "VESS",
+            "display_name": "Visual Evaluation of Soil Structure",
+            "type": "ordinal",
+            "states": [
+                "Fragile",
+                "Intact",
+                "Firm",
+                "Compact",
+                "Very Compact"
+            ],
+            "role": "endogenous",
+            "category": "soil_property",
+            "short_description": "Visual evaluation of soil structure quality.",
+            "extended_description": "VESS (Visual Evaluation of Soil Structure) is a field assessment method scoring soil structure quality from fragile (good, well-aggregated) to very compact (poor, massive structure). It is determined by bulk density, SOMC, and soil texture. Higher organic matter and lower bulk density produce better (more fragile) soil structure. VESS directly influences total runoff — poorly structured (compact) soils generate more surface runoff.",
+            "sensitivity_hints": "Driven by bulk density and SOMC. Directly influences total runoff volume.",
+            "related_domain_knowledge": [
+                "VESS is a standardised field method developed for rapid soil quality assessment.",
+                "Scores range from Sq1 (fragile) to Sq5 (very compact) in the original method."
+            ],
+            "references": [],
+            "llm_name": "SoilStructureScore"
+        },
+        {
+            "name": "Water",
+            "display_name": "Water",
+            "type": "ordinal",
+            "states": [
+                "0 to 159",
+                "159 to 318",
+                "318 to 477",
+                "477 to 636"
+            ],
+            "units": "mm",
+            "role": "endogenous",
+            "category": "hydrology",
+            "short_description": "Soil water content.",
+            "extended_description": "Water represents the soil water content, determined by rainfall, senesced plant material, and tillage practice. Higher rainfall increases soil moisture. Senesced crop residues on the surface reduce evaporation and help retain moisture. Conservational tillage preserves surface residues, affecting water dynamics. Soil water content directly influences daily runoff — saturated soils cannot absorb additional rainfall, leading to surface flow.",
+            "sensitivity_hints": "Driven by rainfall, senescence, and tillage. Feeds into daily runoff calculation — the link between soil water and flood risk.",
+            "related_domain_knowledge": [
+                "Field capacity is the maximum water content a soil can hold against gravity.",
+                "Saturated soils generate overland flow regardless of slope or soil type."
+            ],
+            "references": [],
+            "llm_name": "SoilMoistureContent"
+        },
+        {
+            "name": "Water_Stress",
+            "display_name": "Water Stress",
+            "type": "ordinal",
+            "states": [
+                "0 to 3.66",
+                "3.66 to 7.32",
+                "7.32 to 10.98",
+                "10.98 to 14.64"
+            ],
+            "units": "dimensionless index",
+            "role": "endogenous",
+            "category": "crop_biology",
+            "short_description": "Crop water stress index.",
+            "extended_description": "Water stress is a dimensionless index quantifying the degree of water deficit experienced by crops. It is determined by rainfall and temperature — insufficient rainfall combined with high temperatures increases evapotranspiration demand relative to supply. Water stress reduces crop biomass production and ultimate yield. It acts as a mediator between weather conditions and crop growth.",
+            "sensitivity_hints": "Driven by the interaction of rainfall and temperature. Directly influences crop weight (biomass production).",
+            "related_domain_knowledge": [
+                "Water stress occurs when plant water demand exceeds supply from soil moisture.",
+                "UK crops are less drought-prone than Mediterranean regions but vulnerable in dry summers."
+            ],
+            "references": [],
+            "llm_name": "CropWaterDeficit"
+        },
+        {
+            "name": "Weeds",
+            "display_name": "Weeds",
+            "type": "categorical",
+            "states": [
+                "Present",
+                "Absent"
+            ],
+            "role": "endogenous",
+            "category": "crop_biology",
+            "short_description": "Presence or absence of weeds.",
+            "extended_description": "Weed presence indicates whether significant weed growth exists in the field. It is determined by soil organic matter content and tillage practice. Conservational tillage (which avoids ploughing) tends to promote weed growth. Weeds have a dual role: they compete with crops for nutrients (reducing available nutrients for crops), but they also provide ground cover that reduces surface runoff. This creates an important trade-off in the model.",
+            "sensitivity_hints": "Tillage is the dominant driver — conservational tillage strongly promotes weed growth. Weeds have opposing effects: reduce nutrients but also reduce runoff.",
+            "related_domain_knowledge": [
+                "Weed management is a major challenge in conservational tillage systems.",
+                "Cover crops and weed ground cover can serve similar runoff-reduction functions."
+            ],
+            "references": [],
+            "llm_name": "WeedPresence"
+        },
+        {
+            "name": "Weight",
+            "display_name": "Weight",
+            "type": "ordinal",
+            "states": [
+                "0 to 5000",
+                "5000 to 10000",
+                "10000 to 15000",
+                "15000 to 20000",
+                "20000 to 25000"
+            ],
+            "units": "kg/ha",
+            "role": "endogenous",
+            "category": "crop_production",
+            "short_description": "Total crop biomass weight per hectare.",
+            "extended_description": "Weight represents the total above-ground crop biomass per hectare. It is determined by rainfall, temperature, and water stress — adequate rainfall and moderate temperatures with low water stress produce the highest biomass. Crop weight feeds into both the production pathway (via product weight and yield) and the hydrology pathway (via senesced material affecting soil water). It is a key junction node connecting weather to both outcomes.",
+            "sensitivity_hints": "Driven by the interaction of rainfall, temperature, and water stress. Junction node feeding both productivity and flood pathways.",
+            "related_domain_knowledge": [
+                "Above-ground biomass includes both harvestable product and crop residues.",
+                "Typical UK cereal biomass ranges from 10,000–20,000 kg/ha."
+            ],
+            "references": [],
+            "llm_name": "CropBiomass"
+        },
+        {
+            "name": "Yield",
+            "display_name": "Yield",
+            "type": "categorical",
+            "states": [
+                "Decrease",
+                "Increase"
+            ],
+            "role": "endogenous",
+            "category": "crop_production",
+            "short_description": "Crop yield change — decrease or increase.",
+            "extended_description": "Yield indicates whether crop productivity has increased or decreased relative to baseline. It is determined by land use type, nutrient availability, and product weight. Higher product weight and nutrient levels favour yield increase. Arable land with high nutrients under arable management yields the best results. Yield directly determines the farm yield outcome. This node integrates information from the crop production and soil nutrient pathways.",
+            "sensitivity_hints": "Determined by land use, nutrients, and product weight. Directly drives the farm yield outcome.",
+            "related_domain_knowledge": [
+                "Crop yield depends on both genetic potential and environmental conditions.",
+                "Nutrient deficiency is a primary yield-limiting factor in UK agriculture."
+            ],
+            "references": [],
+            "llm_name": "CropYieldChange"
+        }
+    ]
+}

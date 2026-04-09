@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This network was created in BNBENCH -->
+<smile version="1.0" id="bnbench" numsamples="100000" discsamples="100000">
+    <nodes>
+        <cpt id="AdverseWeather">
+            <state id="No" />
+            <state id="Yes" />
+            <probabilities>0.53 0.47</probabilities>
+        </cpt>
+        <cpt id="EngineerQualification">
+            <state id="No" />
+            <state id="Yes" />
+            <probabilities>0.33 0.67</probabilities>
+        </cpt>
+        <cpt id="Sex">
+            <state id="No" />
+            <state id="Yes" />
+            <probabilities>0.47 0.53</probabilities>
+        </cpt>
+        <cpt id="Attitude">
+            <state id="No" />
+            <state id="Yes" />
+            <probabilities>0.1 0.9</probabilities>
+        </cpt>
+        <cpt id="Age">
+            <state id="No" />
+            <state id="Yes" />
+            <probabilities>0.27 0.73</probabilities>
+        </cpt>
+        <cpt id="OwnerFinance">
+            <state id="No" />
+            <state id="Yes" />
+            <probabilities>0.1 0.9</probabilities>
+        </cpt>
+        <cpt id="SkilledWorkers">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>OwnerFinance</parents>
+            <probabilities>0.17 0.83 0.24 0.76</probabilities>
+        </cpt>
+        <cpt id="WorkingTools">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>OwnerFinance</parents>
+            <probabilities>0.34 0.66 0.213 0.787</probabilities>
+        </cpt>
+        <cpt id="MaterialPresence">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>OwnerFinance</parents>
+            <probabilities>0.373 0.627 0.113 0.887</probabilities>
+        </cpt>
+        <cpt id="HealthStatus">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>AdverseWeather</parents>
+            <probabilities>0.353 0.647 0.56 0.44</probabilities>
+        </cpt>
+        <cpt id="PlanningAndMethod">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>EngineerQualification</parents>
+            <probabilities>0.27 0.73 0.373 0.627</probabilities>
+        </cpt>
+        <cpt id="Experience">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>Age</parents>
+            <probabilities>0.537 0.463 0.297 0.703</probabilities>
+        </cpt>
+        <cpt id="Workmanship">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>Experience</parents>
+            <probabilities>0.4 0.6 0.2 0.8</probabilities>
+        </cpt>
+        <cpt id="WorkingFrequency">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>Attitude MaterialPresence Sex SkilledWorkers WorkingTools</parents>
+            <probabilities>0.473 0.527 0.273 0.727 0.373 0.627 0.473 0.527 0.773 0.227 0.673 0.327 0.473 0.527 0.87 0.13 0.473 0.527 0.873 0.127 0.87 0.13 0.273 0.727 0.273 0.727 0.573 0.427 0.473 0.527 0.373 0.627 0.373 0.627 0.373 0.627 0.673 0.327 0.373 0.627 0.173 0.827 0.873 0.127 0.273 0.727 0.5735736 0.4264264 0.773 0.227 0.673 0.327 0.273 0.727 0.273 0.727 0.573 0.427 0.473 0.527 0.373 0.627 0.173 0.827</probabilities>
+        </cpt>
+        <cpt id="TechnologyLevel">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>PlanningAndMethod</parents>
+            <probabilities>0.3 0.7 0.27 0.73</probabilities>
+        </cpt>
+        <cpt id="Accidents">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>HealthStatus</parents>
+            <probabilities>0.413 0.587 0.383 0.617</probabilities>
+        </cpt>
+        <cpt id="TaskComplexity">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>Workmanship</parents>
+            <probabilities>0.597 0.403 0.297 0.703</probabilities>
+        </cpt>
+        <cpt id="Productivity">
+            <state id="No" />
+            <state id="Yes" />
+            <parents>Accidents TaskComplexity TechnologyLevel WorkingFrequency</parents>
+            <probabilities>0.673 0.327 0.273 0.727 0.573 0.427 0.773 0.227 0.273 0.727 0.873 0.127 0.573 0.427 0.473 0.527 0.273 0.727 0.673 0.327 0.173 0.827 0.473 0.527 0.673 0.327 0.373 0.627 0.673 0.327 0.373 0.627</probabilities>
+        </cpt>
+    </nodes>
+    <extensions>
+        <genie version="1.0" app="GeNIe 4.0.1922.0 ACADEMIC" name="Network1">
+            <node id="AdverseWeather">
+                <name>AdverseWeather</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 100 100 140</position>
+            </node>
+            <node id="EngineerQualification">
+                <name>EngineerQualification</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 100 200 140</position>
+            </node>
+            <node id="Sex">
+                <name>Sex</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 100 300 140</position>
+            </node>
+            <node id="Attitude">
+                <name>Attitude</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 100 400 140</position>
+            </node>
+            <node id="Age">
+                <name>Age</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 100 500 140</position>
+            </node>
+            <node id="OwnerFinance">
+                <name>OwnerFinance</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>520 100 600 140</position>
+            </node>
+            <node id="SkilledWorkers">
+                <name>SkilledWorkers</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 200 100 240</position>
+            </node>
+            <node id="WorkingTools">
+                <name>WorkingTools</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 200 200 240</position>
+            </node>
+            <node id="MaterialPresence">
+                <name>MaterialPresence</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 200 300 240</position>
+            </node>
+            <node id="HealthStatus">
+                <name>HealthStatus</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 200 400 240</position>
+            </node>
+            <node id="PlanningAndMethod">
+                <name>PlanningAndMethod</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 200 500 240</position>
+            </node>
+            <node id="Experience">
+                <name>Experience</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>520 200 600 240</position>
+            </node>
+            <node id="Workmanship">
+                <name>Workmanship</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 300 100 340</position>
+            </node>
+            <node id="WorkingFrequency">
+                <name>WorkingFrequency</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 300 200 340</position>
+            </node>
+            <node id="TechnologyLevel">
+                <name>TechnologyLevel</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 300 300 340</position>
+            </node>
+            <node id="Accidents">
+                <name>Accidents</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 300 400 340</position>
+            </node>
+            <node id="TaskComplexity">
+                <name>TaskComplexity</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 400 100 440</position>
+            </node>
+            <node id="Productivity">
+                <name>Productivity</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 500 100 540</position>
+            </node>
+        </genie>
+    </extensions>
+</smile>

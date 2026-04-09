@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This network was created in BNBENCH -->
+<smile version="1.0" id="bnbench" numsamples="100000" discsamples="100000">
+    <nodes>
+        <cpt id="LayoutFamiliarity">
+            <state id="No" />
+            <state id="Yes" />
+            <probabilities>0.41 0.59</probabilities>
+        </cpt>
+        <cpt id="TimePressure">
+            <state id="High" />
+            <state id="Low" />
+            <probabilities>0.37 0.63</probabilities>
+        </cpt>
+        <cpt id="FireKnowledge">
+            <state id="No" />
+            <state id="Yes" />
+            <probabilities>0.63 0.37</probabilities>
+        </cpt>
+        <cpt id="AudioFireCues">
+            <state id="No" />
+            <state id="Yes" />
+            <probabilities>0.5 0.5</probabilities>
+        </cpt>
+        <cpt id="VisualFireCues">
+            <state id="No" />
+            <state id="Yes" />
+            <probabilities>0.5 0.5</probabilities>
+        </cpt>
+        <cpt id="FireCues">
+            <state id="Consistent" />
+            <state id="Not_consistent" />
+            <parents>AudioFireCues FireKnowledge VisualFireCues</parents>
+            <probabilities>0.04 0.96 0.25 0.75 0.41 0.59 0.59 0.41 0.25 0.75 0.41 0.59 0.71 0.29 0.86 0.14</probabilities>
+        </cpt>
+        <cpt id="EmotionalStability">
+            <state id="Stable" />
+            <state id="Unstable" />
+            <parents>FireCues FireKnowledge LayoutFamiliarity TimePressure</parents>
+            <probabilities>0.41 0.59 0.63 0.37 0.59 0.41 0.75 0.25 0.59 0.41 0.75 0.25 0.63 0.37 0.86 0.14 0.25 0.75 0.41 0.59 0.37 0.63 0.59 0.41 0.41 0.59 0.59 0.41 0.59 0.41 0.75 0.25</probabilities>
+        </cpt>
+        <cpt id="Stress">
+            <state id="High" />
+            <state id="Low" />
+            <parents>EmotionalStability TimePressure</parents>
+            <probabilities>0.75 0.25 0.14 0.86 0.75 0.25 0.14 0.86</probabilities>
+        </cpt>
+        <cpt id="PsychologicalIncapacitation">
+            <state id="Mild" />
+            <state id="Severe" />
+            <parents>Stress</parents>
+            <probabilities>0.37 0.63 0.86 0.14</probabilities>
+        </cpt>
+        <cpt id="PerceivedHazard">
+            <state id="Not_risky" />
+            <state id="Risky" />
+            <parents>FireKnowledge Stress</parents>
+            <probabilities>0.37 0.63 0.86 0.14 0.41 0.59 0.75 0.25</probabilities>
+        </cpt>
+        <cpt id="Escape">
+            <state id="False" />
+            <state id="True" />
+            <parents>PerceivedHazard PsychologicalIncapacitation</parents>
+            <probabilities>0.37 0.63 0.59 0.41 0.37 0.63 0.71 0.29</probabilities>
+        </cpt>
+    </nodes>
+    <extensions>
+        <genie version="1.0" app="GeNIe 4.0.1922.0 ACADEMIC" name="Network1">
+            <node id="LayoutFamiliarity">
+                <name>LayoutFamiliarity</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 100 100 140</position>
+            </node>
+            <node id="TimePressure">
+                <name>TimePressure</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 100 200 140</position>
+            </node>
+            <node id="FireKnowledge">
+                <name>FireKnowledge</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>220 100 300 140</position>
+            </node>
+            <node id="AudioFireCues">
+                <name>AudioFireCues</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>320 100 400 140</position>
+            </node>
+            <node id="VisualFireCues">
+                <name>VisualFireCues</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>420 100 500 140</position>
+            </node>
+            <node id="FireCues">
+                <name>FireCues</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 200 100 240</position>
+            </node>
+            <node id="EmotionalStability">
+                <name>EmotionalStability</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 300 100 340</position>
+            </node>
+            <node id="Stress">
+                <name>Stress</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 400 100 440</position>
+            </node>
+            <node id="PsychologicalIncapacitation">
+                <name>PsychologicalIncapacitation</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 500 100 540</position>
+            </node>
+            <node id="PerceivedHazard">
+                <name>PerceivedHazard</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>120 500 200 540</position>
+            </node>
+            <node id="Escape">
+                <name>Escape</name>
+                <interior color="e5f6f7" />
+                <outline color="000080" />
+                <font color="000000" name="Arial" size="8" />
+                <position>20 600 100 640</position>
+            </node>
+        </genie>
+    </extensions>
+</smile>

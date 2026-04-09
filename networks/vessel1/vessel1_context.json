@@ -1,0 +1,459 @@
+{
+    "schema_version": "2.0",
+    "network": "vessel1",
+    "domain": "fishing_vessel_sinking_accidents",
+    "purpose": "Provide structured metadata to assist LLMs in proposing causal edges for a Bayesian network modelling sinking accidents in fishing vessels, with disguised variable names to prevent benchmark memorisation.",
+    "provenance": {
+        "source_network": "vessel1",
+        "source_reference": "Ugurlu, F., Yildiz, S., Boran, M., Ugurlu, O., & Wang, J. (2020). Analysis of fishing vessel accidents with Bayesian network and Chi-square methods. Ocean Engineering, 198, 106956.",
+        "source_url": "https://doi.org/10.1016/j.oceaneng.2019.106956",
+        "source_repository": "bnRep",
+        "access_date": "2026-04-09",
+        "disguise_strategy": "semantic_rename",
+        "memorization_risk": "low",
+        "notes": "The vessel1 network models the causal factors leading to fishing vessel sinking, originally developed by Ugurlu, Yildiz, Boran, Ugurlu, and Wang (2020) using Bayesian network and Chi-square methods applied to Turkish maritime accident investigation data. It captures the chain from vessel condition and operational factors through structural and buoyancy loss to the sinking outcome. Contains 16 binary nodes and 17 edges. The paper also includes a separate collision model (vessel2). CPTs were derived from expert judgement informed by historical accident data. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."
+    },
+    "llm_guidance": {
+        "usage_notes": [
+            "This is a risk model of fishing vessel sinking accidents, developed from Turkish maritime accident investigation reports.",
+            "The causal chain follows: vessel characteristics and operational conditions → structural degradation and loading failures → water ingress → buoyancy and stability loss → sinking.",
+            "All 16 nodes are binary, representing the presence or absence of each risk factor or failure mode.",
+            "Vessel age is a central exogenous factor that drives multiple degradation pathways: vessel structure wear, pipeline corrosion, and loss of water-tightness.",
+            "Planned maintenance status moderates vessel pipeline condition jointly with vessel age.",
+            "Water intake is a critical intermediate node determined by the physical integrity of the vessel: structure condition, pipeline condition, and water-tightness of hull openings.",
+            "Loss of buoyancy is a direct consequence of water intake — once water enters the hull, buoyancy decreases.",
+            "Loss of stability has a separate causal pathway related to loading: hunting equipment overload, unstable loading of cargo, and vessel design defects can all compromise stability.",
+            "Hunting equipment overload depends on whether fishing gear (nets, winches, catch) is used properly or improperly.",
+            "Carrying load above transport limits is a deterministic function of general overload — if the vessel is overloaded, it necessarily exceeds safe transport limits.",
+            "Sinking is the terminal outcome node driven by four factors: loss of stability, loss of buoyancy, carrying load above transport limits, and weather and sea conditions.",
+            "Weather and sea conditions act as an environmental modifier at the final sinking stage — bad weather increases the probability that a compromised vessel will actually sink.",
+            "The network represents expert knowledge about fishing vessel safety derived from analysis of 337 accident reports from the Turkish Maritime Accident Investigation Commission.",
+            "Fishing vessels are particularly vulnerable to sinking due to their small size, open working decks, heavy deck equipment, and frequent operation in adverse weather."
+        ],
+        "do_not_provide": [
+            "Exact ground-truth edges.",
+            "The original benchmark name or variable names.",
+            "Any hint that this is a well-known benchmark network.",
+            "The conditional probability tables."
+        ]
+    },
+    "prompt_details": {
+        "minimal": {
+            "description": "Only variable names (stress-test LLM world-knowledge and naming semantics).",
+            "include_fields": [
+                "name"
+            ]
+        },
+        "standard": {
+            "description": "Names + type + short description + plausible states.",
+            "include_fields": [
+                "name",
+                "type",
+                "short_description",
+                "states"
+            ]
+        },
+        "rich": {
+            "description": "All available metadata including process role, category, function, constraints, domain notes, and literature references.",
+            "include_fields": [
+                "name",
+                "display_name",
+                "type",
+                "role",
+                "category",
+                "short_description",
+                "extended_description",
+                "states",
+                "sensitivity_hints",
+                "related_domain_knowledge",
+                "references"
+            ]
+        }
+    },
+    "variables": [
+        {
+            "name": "VesselAge",
+            "display_name": "Vessel Age",
+            "type": "binary",
+            "states": [
+                "Old",
+                "New"
+            ],
+            "role": "exogenous",
+            "category": "vessel_characteristic",
+            "short_description": "Age category of the fishing vessel.",
+            "extended_description": "Classifies the fishing vessel as old or new. Vessel age is a key exogenous factor affecting multiple degradation pathways: older vessels are more prone to structural wear, pipeline corrosion, and loss of water-tightness. The prior probability is heavily weighted towards old vessels (74%), reflecting the typical ageing fleet profile of fishing vessels in the study population.",
+            "sensitivity_hints": "Central exogenous driver. Parent of vessel structure, vessel pipelines, and loss of water-tightness. High prior probability of old (74%).",
+            "related_domain_knowledge": [
+                "Fishing vessels tend to have long operational lifespans, often exceeding 20–30 years.",
+                "Ageing vessels accumulate structural fatigue, corrosion, and component degradation over time.",
+                "Older vessels may not comply with modern safety standards and classification requirements.",
+                "Maritime safety statistics consistently show vessel age as a significant risk factor for accidents."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "vessel_age_category"
+        },
+        {
+            "name": "PlannedMaintenance",
+            "display_name": "Planned Maintenance Status",
+            "type": "binary",
+            "states": [
+                "Completed",
+                "Uncompleted"
+            ],
+            "role": "exogenous",
+            "category": "operational_management",
+            "short_description": "Whether scheduled maintenance has been completed.",
+            "extended_description": "Indicates whether the vessel's planned maintenance programme has been properly completed or left uncompleted. Completed maintenance reduces the likelihood of pipeline corrosion by ensuring regular inspection and repair of piping systems. The prior strongly favours completed maintenance (90%), suggesting most vessels nominally follow maintenance schedules.",
+            "sensitivity_hints": "Exogenous operational factor. Jointly with vessel age, determines pipeline condition. High prior for completed (90%).",
+            "related_domain_knowledge": [
+                "Planned maintenance systems (PMS) are required under ISM Code for commercial vessels.",
+                "Maintenance compliance is often lower in small fishing vessels compared to large merchant fleets.",
+                "Incomplete maintenance accelerates corrosion and material degradation in piping and hull systems.",
+                "Classification societies require periodic dry-docking and hull surveys to maintain vessel certification."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "maintenance_completion_status"
+        },
+        {
+            "name": "DesignDefect",
+            "display_name": "Vessel Design Defect",
+            "type": "binary",
+            "states": [
+                "Yes",
+                "No"
+            ],
+            "role": "exogenous",
+            "category": "vessel_characteristic",
+            "short_description": "Presence of inherent design defects affecting vessel stability.",
+            "extended_description": "Indicates whether the fishing vessel has inherent design defects that compromise its stability characteristics. Design defects may include inadequate freeboard, insufficient metacentric height, or poor hull form that makes the vessel susceptible to capsizing or loss of stability under loading or environmental forces. The prior probability is low (4%), reflecting that most vessels meet basic naval architecture standards.",
+            "sensitivity_hints": "Rare exogenous factor (4% prior). Contributes to loss of stability alongside hunting equipment overload and unstable loading.",
+            "related_domain_knowledge": [
+                "Fishing vessel design must balance stability against operational requirements like low freeboard for net handling.",
+                "Many fishing vessels are built to traditional designs without formal naval architecture calculations.",
+                "Design defects in fishing vessels often relate to insufficient stability margins under loading variations.",
+                "IMO guidelines for fishing vessel stability are published in the Cape Town Agreement (2012)."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "hull_design_deficiency"
+        },
+        {
+            "name": "Overload",
+            "display_name": "Vessel Overload",
+            "type": "binary",
+            "states": [
+                "Yes",
+                "No"
+            ],
+            "role": "exogenous",
+            "category": "loading_condition",
+            "short_description": "Whether the vessel is loaded beyond safe capacity.",
+            "extended_description": "Indicates whether the fishing vessel is overloaded beyond its safe carrying capacity. Overloading reduces freeboard and stability margins, making the vessel more vulnerable to flooding and capsizing. Overload is an exogenous loading condition that deterministically causes the vessel to carry load above safe transport limits. The prior probability is 16%, reflecting the relatively common practice of overloading in fishing operations.",
+            "sensitivity_hints": "Exogenous loading factor. Deterministically drives carrying load above transport limits. Moderate prior (16%).",
+            "related_domain_knowledge": [
+                "Fishing vessels are frequently overloaded when catches are unexpectedly large.",
+                "Overloading reduces freeboard, increases the risk of green water on deck, and lowers stability.",
+                "Load line regulations for fishing vessels are less stringent than for cargo ships in many jurisdictions.",
+                "Economic pressure to maximise catch per trip contributes to overloading behaviour."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "vessel_overloading"
+        },
+        {
+            "name": "UnstableLoading",
+            "display_name": "Unstable Loading",
+            "type": "binary",
+            "states": [
+                "Yes",
+                "No"
+            ],
+            "role": "exogenous",
+            "category": "loading_condition",
+            "short_description": "Whether cargo or catch is loaded in an unstable configuration.",
+            "extended_description": "Indicates whether the vessel's cargo, catch, or stores are loaded in a manner that creates an unstable weight distribution. Unstable loading shifts the centre of gravity, reduces righting moments, and can cause sudden loss of stability during rolling or turning manoeuvres. The prior probability is 13%, reflecting the risk of improper stowage practices on fishing vessels.",
+            "sensitivity_hints": "Exogenous loading factor. Contributes to loss of stability alongside hunting equipment overload and design defects. Moderate prior (13%).",
+            "related_domain_knowledge": [
+                "Fish catch stored in unpartitioned holds can shift freely (free surface effect), dramatically reducing stability.",
+                "Asymmetric loading of fishing gear or catch on one side causes a permanent list.",
+                "Icing on superstructure and rigging in cold waters creates top-heavy loading that reduces stability.",
+                "Proper stowage plans are often absent on smaller fishing vessels."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "unstable_cargo_loading"
+        },
+        {
+            "name": "UsedHuntingEquipment",
+            "display_name": "Fishing Gear Usage",
+            "type": "binary",
+            "states": [
+                "Proper",
+                "Improper"
+            ],
+            "role": "exogenous",
+            "category": "operational_practice",
+            "short_description": "Whether fishing equipment (nets, winches, gear) is used properly.",
+            "extended_description": "Indicates whether the vessel's fishing equipment — including nets, trawl gear, winches, and catch-handling equipment — is used in a proper or improper manner. Improper use of fishing gear can lead to equipment overload situations that compromise vessel stability. The prior strongly favours proper usage (93%), but the 7% improper usage rate can have severe consequences.",
+            "sensitivity_hints": "Exogenous operational factor. Drives hunting equipment overload. High prior for proper use (93%) but improper use has significant consequences.",
+            "related_domain_knowledge": [
+                "Improper gear handling includes over-filling trawl nets, asymmetric deployment, and overloading catch bins.",
+                "Winch and crane operations on fishing vessels can create large heeling moments if not properly managed.",
+                "Entanglement of fishing gear with seabed objects can cause sudden capsizing forces.",
+                "Training in safe gear handling is a key element of fishing vessel safety programmes."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "fishing_gear_usage_quality"
+        },
+        {
+            "name": "WeatherAndSeaConditions",
+            "display_name": "Weather and Sea Conditions",
+            "type": "binary",
+            "states": [
+                "Bad",
+                "Good"
+            ],
+            "role": "exogenous",
+            "category": "environmental_condition",
+            "short_description": "Prevailing weather and sea state conditions.",
+            "extended_description": "Classifies the prevailing weather and sea conditions as bad or good at the time of the potential accident. Bad weather encompasses high winds, heavy seas, poor visibility, and other adverse meteorological conditions that increase the risk of vessel sinking. The prior indicates 33% probability of bad conditions, reflecting the harsh operating environments of fishing vessels.",
+            "sensitivity_hints": "Exogenous environmental modifier at the terminal sinking stage. Bad weather (33% prior) amplifies the probability of sinking when other failures are present.",
+            "related_domain_knowledge": [
+                "Fishing vessels are particularly vulnerable to adverse weather due to their small size and open deck designs.",
+                "Heavy seas increase the risk of green water on deck, progressive flooding, and parametric rolling.",
+                "Wind and wave forces can overwhelm a vessel with reduced stability from other factors.",
+                "Many fishing vessel sinkings occur during sudden weather deterioration when return to port is not possible."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "weather_sea_state"
+        },
+        {
+            "name": "VesselStructure",
+            "display_name": "Vessel Structural Condition",
+            "type": "binary",
+            "states": [
+                "Worn",
+                "Normal"
+            ],
+            "role": "endogenous",
+            "category": "vessel_degradation",
+            "short_description": "Structural condition of the vessel hull and framework.",
+            "extended_description": "Represents the overall structural integrity of the vessel's hull platework, frames, and longitudinal members. Worn structure indicates thinning, cracking, or weakening due to age-related fatigue, corrosion, and operational stresses. Vessel structure condition is determined by vessel age, with older vessels having a 72% probability of worn structure compared to 37.5% for newer vessels.",
+            "sensitivity_hints": "Endogenous degradation node driven by vessel age. Contributes to water intake alongside pipeline condition and water-tightness.",
+            "related_domain_knowledge": [
+                "Hull structural deterioration is caused by fatigue cracking, general corrosion, and localised wastage.",
+                "Fishing vessels experience high cyclic loading from wave impacts, trawl gear forces, and cargo operations.",
+                "Steel thickness diminishes with age through corrosion, reducing structural reserve and burst strength.",
+                "Classification society surveys measure hull plate thickness to assess remaining structural life."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "hull_structural_integrity"
+        },
+        {
+            "name": "VesselPipelines",
+            "display_name": "Vessel Pipeline Condition",
+            "type": "binary",
+            "states": [
+                "Corroded",
+                "Normal"
+            ],
+            "role": "endogenous",
+            "category": "vessel_degradation",
+            "short_description": "Condition of the vessel's internal piping systems.",
+            "extended_description": "Represents the condition of the vessel's internal pipelines including bilge pumping systems, sea water cooling lines, fuel lines, and other piping. Corroded pipelines can leak, allowing sea water ingress or reducing the effectiveness of bilge pumping. Pipeline condition is determined jointly by vessel age and planned maintenance status: old vessels with uncompleted maintenance have the worst pipeline condition.",
+            "sensitivity_hints": "Endogenous degradation node driven by vessel age and maintenance status. Contributes to water intake. Worst condition when vessel is old and maintenance is incomplete.",
+            "related_domain_knowledge": [
+                "Internal piping on fishing vessels is exposed to sea water, fish processing water, and fuel, all promoting corrosion.",
+                "Bilge pump piping failure can prevent dewatering during flooding emergencies.",
+                "Sea water cooling system leaks can introduce water below the waterline.",
+                "Regular maintenance and inspection of piping systems is critical for preventing progressive flooding."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "pipeline_corrosion_state"
+        },
+        {
+            "name": "LossOfWaterTightness",
+            "display_name": "Loss of Water-Tightness",
+            "type": "binary",
+            "states": [
+                "Present",
+                "Absent"
+            ],
+            "role": "endogenous",
+            "category": "vessel_degradation",
+            "short_description": "Whether the vessel's water-tight integrity is compromised.",
+            "extended_description": "Indicates whether the vessel has lost its water-tight integrity through deteriorated hatch covers, worn door seals, corroded hull penetrations, or other breaches in the hull envelope. Loss of water-tightness allows sea water to enter the vessel during heavy weather or when freeboard is reduced. Determined solely by vessel age: old vessels have a 9% probability of water-tightness loss, while new vessels have zero probability.",
+            "sensitivity_hints": "Endogenous degradation node driven solely by vessel age. Contributes to water intake alongside structure and pipeline condition. Only occurs in old vessels.",
+            "related_domain_knowledge": [
+                "Water-tight integrity depends on the condition of hatches, doors, hull penetrations, and sealing systems.",
+                "Fishing vessels frequently have open or poorly sealed working deck openings for catch handling.",
+                "Deteriorated rubber seals on water-tight doors are a common finding in accident investigations.",
+                "Maintaining water-tight integrity is a fundamental principle of ship survivability."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "watertight_integrity_loss"
+        },
+        {
+            "name": "HuntingEquipmentOverload",
+            "display_name": "Fishing Equipment Overload",
+            "type": "binary",
+            "states": [
+                "Yes",
+                "No"
+            ],
+            "role": "endogenous",
+            "category": "loading_failure",
+            "short_description": "Whether fishing equipment is overloaded beyond safe limits.",
+            "extended_description": "Indicates whether the fishing vessel's equipment — nets, trawl warps, winches, and associated gear — is overloaded beyond safe operational limits. Equipment overload occurs when fishing gear is used improperly, such as hauling excessively heavy nets or overloading catch bins on deck. This creates destabilising forces and top-heavy weight distribution that can cause loss of stability.",
+            "sensitivity_hints": "Endogenous loading failure driven by fishing gear usage quality. Contributes to loss of stability. Overload probability is 13% when gear is used properly, 100% when improper.",
+            "related_domain_knowledge": [
+                "Net overloading is a major cause of fishing vessel capsizing, especially during hauling operations.",
+                "Heavy trawl gear suspended from booms or gantries creates large heeling moments.",
+                "Deck-loaded catch weight raises the vessel's centre of gravity, reducing metacentric height.",
+                "Sudden release of snagged gear can cause snap-back capsizing."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "fishing_gear_overload"
+        },
+        {
+            "name": "CarryingLoadAboveTransportLimits",
+            "display_name": "Carrying Load Above Transport Limits",
+            "type": "binary",
+            "states": [
+                "Yes",
+                "No"
+            ],
+            "role": "endogenous",
+            "category": "loading_failure",
+            "short_description": "Whether the vessel carries load exceeding safe transport limits.",
+            "extended_description": "Indicates whether the total load on the vessel exceeds the safe transport limits defined by its load line and stability documentation. This is a deterministic consequence of general overload: if the vessel is overloaded, it necessarily carries load above transport limits. Exceeding transport limits reduces freeboard and stability margins, making the vessel directly vulnerable to sinking.",
+            "sensitivity_hints": "Deterministic function of overload. Directly influences sinking probability. When overload is Yes, this is always Yes; when No, always No.",
+            "related_domain_knowledge": [
+                "Transport limits are defined by the vessel's assigned load line (freeboard mark).",
+                "Exceeding load limits reduces freeboard, increasing the likelihood of deck flooding in heavy seas.",
+                "Many small fishing vessels lack formal load line assignments, making overloading harder to detect.",
+                "Enforcement of loading limits for fishing vessels varies significantly between maritime jurisdictions."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "exceeding_load_limits"
+        },
+        {
+            "name": "WaterIntake",
+            "display_name": "Water Intake into Hull",
+            "type": "binary",
+            "states": [
+                "Yes",
+                "No"
+            ],
+            "role": "endogenous",
+            "category": "flooding_mechanism",
+            "short_description": "Whether sea water is entering the vessel hull.",
+            "extended_description": "Represents whether sea water is entering the vessel's hull through structural failures, corroded pipelines, or breaches in water-tight integrity. Water intake is a critical intermediate node that aggregates three physical degradation pathways: worn vessel structure allows hull leaks, corroded pipelines allow internal flooding, and loss of water-tightness allows deck flooding. The combination of all three conditions virtually guarantees water intake.",
+            "sensitivity_hints": "Key intermediate aggregation node. Driven by vessel structure, pipeline condition, and water-tightness. Directly causes loss of buoyancy. Probability ranges from 0% (all normal) to 100% (all degraded).",
+            "related_domain_knowledge": [
+                "Progressive flooding through small hull breaches can be insidious and go undetected until stability is compromised.",
+                "Bilge alarm and pumping systems provide the first line of defence against water intake.",
+                "Water intake into fish holds is particularly dangerous as it mixes with catch and becomes hard to pump.",
+                "Simultaneous failure of multiple water-tight barriers dramatically increases flooding rate."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "hull_water_ingress"
+        },
+        {
+            "name": "LossOfBuoyancy",
+            "display_name": "Loss of Buoyancy",
+            "type": "binary",
+            "states": [
+                "Yes",
+                "No"
+            ],
+            "role": "endogenous",
+            "category": "sinking_mechanism",
+            "short_description": "Whether the vessel has lost sufficient buoyancy to risk sinking.",
+            "extended_description": "Indicates whether the vessel has lost buoyancy due to water intake. As water floods internal compartments, the vessel's reserve buoyancy diminishes, causing it to settle lower in the water and eventually become unable to support its own weight. Loss of buoyancy is essentially certain when water intake occurs and very unlikely (4%) when no water intake is present.",
+            "sensitivity_hints": "Endogenous node driven by water intake. Near-deterministic relationship: water intake almost always causes buoyancy loss. Feeds directly into sinking outcome.",
+            "related_domain_knowledge": [
+                "Reserve buoyancy is the volume of enclosed watertight hull above the waterline.",
+                "Progressive flooding reduces reserve buoyancy, causing the vessel to settle deeper and take on more water.",
+                "Fishing vessels have relatively low reserve buoyancy due to their small size and open deck designs.",
+                "Loss of buoyancy can be sudden if a major compartment floods or gradual through progressive leakage."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "buoyancy_loss"
+        },
+        {
+            "name": "LossOfStability",
+            "display_name": "Loss of Stability",
+            "type": "binary",
+            "states": [
+                "Yes",
+                "No"
+            ],
+            "role": "endogenous",
+            "category": "sinking_mechanism",
+            "short_description": "Whether the vessel has lost adequate stability.",
+            "extended_description": "Indicates whether the vessel has lost sufficient stability (righting ability) to resist capsizing. Loss of stability arises from the loading pathway: hunting equipment overload, unstable loading, and design defects can individually or jointly reduce the vessel's metacentric height and righting lever curve below safe thresholds. When all three factors are present, stability loss is certain; with none present, the vessel remains fully stable.",
+            "sensitivity_hints": "Endogenous node aggregating loading-pathway failures. Driven by hunting equipment overload, unstable loading, and design defects. Feeds into sinking outcome.",
+            "related_domain_knowledge": [
+                "Stability is measured by metacentric height (GM) and the GZ curve (righting lever vs. heel angle).",
+                "Fishing vessels are inherently low-stability craft due to their beam, freeboard, and weight distribution.",
+                "Dynamic stability reduction during beam-sea rolling can cause sudden capsizing even with adequate static stability.",
+                "Loss of stability is the most common proximate cause of fishing vessel capsizing worldwide."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "stability_loss"
+        },
+        {
+            "name": "Sinking",
+            "display_name": "Vessel Sinking",
+            "type": "binary",
+            "states": [
+                "Yes",
+                "No"
+            ],
+            "role": "endogenous",
+            "category": "accident_outcome",
+            "short_description": "Whether the fishing vessel sinks.",
+            "extended_description": "The terminal outcome node representing whether the fishing vessel sinks. Sinking is determined by the combination of four factors: loss of stability, loss of buoyancy, carrying load above transport limits, and weather and sea conditions. When all four adverse conditions are present, sinking is virtually certain. Good weather can partially mitigate other risk factors, while bad weather amplifies the risk. The network shows that even in good conditions, combinations of stability loss, buoyancy loss, and overloading can still cause sinking.",
+            "sensitivity_hints": "Terminal outcome node. Driven by loss of stability, loss of buoyancy, carrying load above transport limits, and weather conditions. Probability ranges from 0% (no risk factors in good weather) to 100% (all risk factors in bad weather).",
+            "related_domain_knowledge": [
+                "Fishing vessel sinking is a leading cause of maritime fatalities worldwide.",
+                "Sinking can result from progressive flooding (buoyancy loss), capsizing (stability loss), or both.",
+                "The interaction between overloading, stability loss, and adverse weather creates a particularly lethal combination.",
+                "Survival rates in fishing vessel sinkings depend critically on availability of life-saving appliances and rescue response time."
+            ],
+            "references": [
+                "Ugurlu2020_FishingVessel"
+            ],
+            "llm_name": "vessel_sinking_outcome"
+        }
+    ]
+}
