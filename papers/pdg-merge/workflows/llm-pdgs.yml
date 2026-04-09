@@ -3,17 +3,50 @@
 
 matrix:
   network:
-  - asia
-  - sports
-  sample_size:
-  - null
+  #- asia
+  #- sports
+  #- sachs
+  #- property
+  #- insurance
+  #- covid
+  #- alarm
+  #- child
+  #- diarrhoea
+  #- water
+  #- mildew
+  #- hepar2
+  #- barley
+  #- hailfinder
+  #- fire
+  #- constructionproductivity
+  #- corical
+  #- urinary
+  #- kosterhavet
+  #- earthquake
+  #- pneumonia
+  #- seismic
+  #- nuclearwaste
+  #- estuary
+  #- corrosion
+  #- flood
+  #- gasexplosion
+  #- macrophytes
+  #- permaBN
+  #- polymorphic
+  - vessel1
+  # Padding dims — not used by LLM but kept so every
+  # cache shares the same 8-column key structure.
+  series: [null]
+  sample_size: [null]
+  pdg_seed: [null]
   llm_model:
   # - groq/llama-3.3-70b-versatile # free tier, reliable
   # groq/llama-3.1-8b-instant # budget (truncation issues on sports)
   # groq/mixtral-8x7b-32768 # deprecated
-  - gemini/gemini-2.0-flash # budget (2.5-flash has truncation issues)
+  # gemini/gemini-2.0-flash # budget
+  - gemini/gemini-2.5-flash # budget (better reasoning than 2.0)
   # gemini/gemini-2.5-pro # premium
-  # - openai/gpt-4.1-mini # budget
+  - openai/gpt-4.1-mini # budget
   # openai/o3-mini # premium
   - anthropic/claude-haiku-4-5-20251001 # budget
   # anthropic/claude-sonnet-4-6 # premium
@@ -32,8 +65,13 @@ matrix:
   - minimal
   - standard
   # - rich
-  # llm_temperature:
-  # - 0.1
+  llm_temperature:
+  - 0.7
+  llm_seed:
+  - 0
+  - 1
+  - 2
+
 
 
 steps:
@@ -46,6 +84,10 @@ steps:
      llm_model: "{{llm_model}}"
      use_benchmark_names: false
      prompt_detail: "{{prompt_detail}}"
+     llm_temperature: "{{llm_temperature}}"
+     llm_max_tokens: 60000
+     llm_timeout: 180
+     llm_seed: "{{llm_seed}}"
      output: papers/pdg-merge/results/pdgs.db
 
 
@@ -70,6 +112,8 @@ steps:
    uses: "causaliq-analysis"
    with:
      action: "summarise"
+     filter: series is None
      input: papers/pdg-merge/results/pdgs.db
      metric: [f1.mean, shd.mean, equiv.f1.mean, equiv.shd.mean]
-     output: papers/pdg-merge/results/llm-dags.csv
+     output: papers/pdg-merge/results/llm-pdgs.csv
+

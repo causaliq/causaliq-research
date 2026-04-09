@@ -1,0 +1,10 @@
+# Export individual FGES evaluation results to CSV
+
+steps:
+  - name: "List individual FGES results"
+    uses: "causaliq-analysis"
+    with:
+      action: summarise
+      input: "papers/pdg-merge/results/bnsl.db"
+      output: "papers/pdg-merge/results/bnsl.csv"
+      metric: [f1.mean, shd.mean, equiv.f1.mean, equiv.shd.mean]

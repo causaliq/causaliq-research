@@ -1,17 +1,35 @@
 
-# Fuse LLM and FGES PDGs across model and sample size combinations
+# Fuse LLM and FGES PDGs using average strategy at threshold 0.3
 
 matrix:
   network:
-  - asia
-  - sports
+  #- asia
+  #- sports
+  #- sachs
+  #- property
+  #- insurance
+  #- covid
+  #- alarm
+  #- child
+  # - diarrhoea
+  - water
   llm_model:
   - anthropic/claude-haiku-4-5-20251001
-  - gemini/gemini-2.0-flash
+  - gemini/gemini-2.5-flash
+  prompt_detail:
+  - minimal
+  - standard
+  llm_temperature:
+  - 0.7
+  llm_seed: [null]
+  series:
+  - "TETRAD/FGES_BASE4"
   sample_size:
-  - 100
   - 1K
   - 10K
+  pdg_seed:
+  - 0
+  - 1
 
 steps:
  - name: "Merge LLM and FGES PDGs"
@@ -20,7 +38,13 @@ steps:
      action: "merge_graphs"
      object_type: pdg
      strategy: average
-     filter: (llm_model == '{{llm_model}}' and prompt_detail == 'standard') or str(sample_size) == str('{{sample_size}}')
+     filter: >-
+       network == '{{network}}'
+       and (
+         (llm_model == '{{llm_model}}' and prompt_detail == '{{prompt_detail}}')
+         or
+         (series == '{{series}}' and str(sample_size) == str('{{sample_size}}') and pdg_seed == {{pdg_seed}})
+       )
      input: papers/pdg-merge/results/pdgs.db
      output: papers/pdg-merge/results/fuse.db
 
@@ -49,3 +73,4 @@ steps:
      input: papers/pdg-merge/results/fuse.db
      metric: [f1.mean, shd.mean, equiv.f1.mean, equiv.shd.mean, f1.count]
      output: papers/pdg-merge/results/fuse.csv
+

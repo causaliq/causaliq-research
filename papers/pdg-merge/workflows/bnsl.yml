@@ -1,0 +1,64 @@
+
+# Migrate graphs learnt by FGES from legacy traces to graphml format
+
+matrix:
+  network: 
+  #- alarm
+  #- asia
+  #- sports
+  #- sachs
+  #- property
+  #- insurance
+  #- covid
+  #- child
+  #- diarrhoea
+  #- water
+  #- mildew
+  #- hepar2
+  #- barley
+  #- hailfinder
+  #- fire
+  #- constructionproductivity
+  #- corical
+  #- urinary
+  #- kosterhavet
+  #- earthquake
+  #- pneumonia
+  #- seismic
+  #- nuclearwaste
+  #- estuary
+  #- corrosion
+  #- flood
+  #- gasexplosion
+  #- macrophytes
+  #- permaBN
+  - polymorphic
+  #- vessel1
+  series: 
+  - TETRAD/FGES_BASE4
+  - TABU/SAMPLE/STABLE
+  - BNLEARN/PC_BASE4
+
+  sample_size: [1K, 10K]
+  seed: ["0-24"]
+
+steps:
+ - name: "Migrate trace to graph"
+   uses: "causaliq-analysis"
+   with:
+     action: "migrate_trace"
+     series: "{{series}}"
+     network: "{{network}}"
+     sample_size: "{{sample_size}}"
+     seed: "{{seed}}"
+     root_dir: "c:/dev/causaliq/discovery/experiments"
+     output: "papers/pdg-merge/results/bnsl.db"
+
+ - name: "Evaluate learnt graph"
+   uses: "causaliq-analysis"
+   with:
+     action: evaluate_graph
+     reference: networks/{{network}}/{{network}}.xdsl
+     input: "papers/pdg-merge/results/bnsl.db"
+     metric: [f1, shd, equiv.f1, equiv.shd]
+

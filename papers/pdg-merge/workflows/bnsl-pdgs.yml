@@ -1,0 +1,90 @@
+ 
+# Merge individual FGES graphs into PDGs, with bootstrap resampling
+# of seeds via pdg_seed dimension.
+
+matrix:
+  network:
+  #- alarm
+  #- asia
+  #- sports
+  #- sachs
+  #- property
+  #- insurance
+  #- covid
+  #- child
+  #- diarrhoea
+  #- water
+  #- mildew
+  #- hepar2
+  #- barley
+  #- hailfinder
+  #- fire
+  #- constructionproductivity
+  #- corical
+  #- urinary
+  #- kosterhavet
+  #- earthquake
+  #- pneumonia
+  #- seismic
+  #- nuclearwaste
+  #- estuary
+  #- corrosion
+  #- flood
+  #- gasexplosion
+  #- macrophytes
+  #- permaBN
+  - polymorphic
+  #- vessel1
+  series:
+  - TETRAD/FGES_BASE4
+  - TABU/SAMPLE/STABLE
+  - BNLEARN/PC_BASE4
+  sample_size:
+  - 1K
+  - 10K
+  pdg_seed:
+  - 0
+  - 1
+  # Padding dims — not used by FGES but kept so every
+  # cache shares the same 8-column key structure.
+  llm_model: [null]
+  prompt_detail: [null]
+  llm_temperature: [null]
+  llm_seed: [null]
+
+steps:
+ - name: "Merge FGES graphs with different seeds"
+   uses: "causaliq-analysis"
+   with:
+     action: "merge_graphs"
+     filter: seed in random(5, {{pdg_seed}})
+     input: papers/pdg-merge/results/bnsl.db
+     output: papers/pdg-merge/results/pdgs.db
+
+
+ - name: "generate FGES optimal DAG"
+   uses: "causaliq-analysis"
+   with:
+     action: "best_graph"
+     threshold: 0.5
+     input: papers/pdg-merge/results/pdgs.db
+
+
+ - name: "evaluate optimal DAG"
+   uses: "causaliq-analysis"
+   with:
+     action: "evaluate_graph"
+     reference: networks/{{network}}/{{network}}.xdsl
+     input: papers/pdg-merge/results/pdgs.db
+     metric: [f1, shd, equiv.f1, equiv.shd]
+
+
+ - name: "summarise FGES DAGs"
+   uses: "causaliq-analysis"
+   with:
+     action: "summarise"
+     filter: llm_model is None
+     input: papers/pdg-merge/results/pdgs.db
+     metric: [f1.mean, shd.mean, equiv.f1.mean, equiv.shd.mean, f1.count]
+     output: papers/pdg-merge/results/bnsl-pdgs.csv
+
