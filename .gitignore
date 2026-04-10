@@ -180,4 +180,5 @@ Desktop.ini
 # causaliq-research specific
 
 # exploratory models, experiments and results
-scratch
+scratch/**
+!scratch/*.py
