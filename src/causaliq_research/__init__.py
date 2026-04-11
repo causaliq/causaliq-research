@@ -4,7 +4,7 @@ causaliq-research: Template package for CausalIQ repos
 
 __version__ = "0.1.0"
 __author__ = "CausalIQ"
-__email__ = "info@causaliq.com"
+__email__ = "info@causaliq.org"
 
 # Package metadata
 __title__ = "causaliq-research"
