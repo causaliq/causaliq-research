@@ -7,6 +7,7 @@
         "source_network": "insurance",
         "source_reference": "Binder1997",
         "source_url": "https://link.springer.com/article/10.1023/A:1007421730016",
+        "source_repository": "bnlearn",
         "disguise_strategy": "semantic_rename",
         "memorization_risk": "moderate",
         "notes": "Network from Binder, Koller, Russell, and Kanazawa (1997) 'Adaptive Probabilistic Networks with Hidden Variables', Machine Learning 29(2-3):213-244. Contains 27 variables and 52 directed edges modelling automobile insurance risk assessment including policyholder demographics, vehicle properties, accident severity, theft, and resulting claim costs."

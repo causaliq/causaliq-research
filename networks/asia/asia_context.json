@@ -7,6 +7,7 @@
         "source_network": "asia",
         "source_reference": "Lauritzen1988",
         "source_url": "https://www.bnlearn.com/bnrepository/discrete-small.html#asia",
+        "source_repository": "bnlearn",
         "disguise_strategy": "semantic_rename",
         "memorization_risk": "high",
         "notes": "The Asia network is a classic BN benchmark. LLMs may have memorized it. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."

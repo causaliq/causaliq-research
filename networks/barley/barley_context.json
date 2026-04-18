@@ -7,6 +7,7 @@
         "source_network": "barley",
         "source_reference": "Kristensen2002",
         "source_url": "https://www.bnlearn.com/bnrepository/discrete-large.html#barley",
+        "source_repository": "bnlearn",
         "disguise_strategy": "semantic_rename",
         "memorization_risk": "low",
         "notes": "The Barley network models spring barley yield prediction in Denmark, originally developed by Kristensen and Rasmussen for decision support in malting barley production. It captures relationships between soil properties, climate, management decisions (sowing, fertilisation, pesticides), crop genetics, growth physiology, and yield/quality outcomes. Contains 48 nodes and 84 edges. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."

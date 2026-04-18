@@ -7,6 +7,7 @@
         "source_network": "child",
         "source_reference": "Spiegelhalter1992",
         "source_url": "https://www.bnlearn.com/bnrepository/discrete-medium.html#child",
+        "source_repository": "bnlearn",
         "disguise_strategy": "semantic_rename",
         "memorization_risk": "high",
         "notes": "The CHILD network from Spiegelhalter et al. (1992) models the diagnosis of congenital heart disease in newborns. It has 20 variables and 25 edges. Originally developed at Great Ormond Street Hospital, London. LLMs may have memorised this network."

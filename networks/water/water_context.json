@@ -7,6 +7,7 @@
         "source_network": "water",
         "source_reference": "Jensen1989",
         "source_url": "https://www.bnlearn.com/bnrepository/discrete-large.html#water",
+        "source_repository": "bnlearn",
         "disguise_strategy": "semantic_rename",
         "memorization_risk": "moderate",
         "notes": "The WATER network from Jensen et al. (1989) models water purification plant monitoring. It has 32 variables and 66 edges arranged as a dynamic Bayesian network with 8 water quality parameters measured at 4 time slices (15-minute intervals). LLMs may have encountered this network in literature."

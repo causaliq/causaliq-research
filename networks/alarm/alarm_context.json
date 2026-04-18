@@ -7,6 +7,7 @@
         "source_network": "alarm",
         "source_reference": "Beinlich1989",
         "source_url": "https://link.springer.com/chapter/10.1007/978-3-642-93437-7_28",
+        "source_repository": "bnlearn",
         "disguise_strategy": "semantic_rename",
         "memorization_risk": "high",
         "notes": "The ALARM (A Logical Alarm Reduction Mechanism) network from Beinlich et al. (1989) is a widely-used causal discovery benchmark with 37 variables and 46 edges. It models an ICU monitoring system. Published in Proceedings of the 2nd European Conference on AI in Medicine, pp. 247-256, Springer-Verlag. LLMs may have memorised this network."

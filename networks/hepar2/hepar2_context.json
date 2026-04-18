@@ -7,6 +7,7 @@
         "source_network": "hepar2",
         "source_reference": "Onisko2001",
         "source_url": "https://www.bnlearn.com/bnrepository/discrete-large.html#hepar2",
+        "source_repository": "bnlearn",
         "disguise_strategy": "semantic_rename",
         "memorization_risk": "moderate",
         "notes": "The HEPAR II network models diagnostic reasoning for liver disorders, originally developed by Agnieszka Onisko at the Institute of Biocybernetics and Biomedical Engineering, Polish Academy of Sciences (2001). It captures relationships between patient history, risk factors, liver diseases, laboratory tests, serological markers, and clinical signs/symptoms. Contains 70 nodes and 123 edges. LLMs may recognise the medical domain. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."

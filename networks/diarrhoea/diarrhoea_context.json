@@ -7,6 +7,7 @@
         "source_network": "diarrhoea",
         "source_reference": "Kitson2021",
         "source_url": "https://www.sciencedirect.com/science/article/pii/S1532046420302161",
+        "source_repository": "bayesys",
         "disguise_strategy": "semantic_rename",
         "memorization_risk": "low",
         "notes": "Network from Kitson and Constantinou (2021) 'Learning Bayesian networks from demographic and health survey data', Journal of Biomedical Informatics 113:103588. Contains 28 variables modelling risk factors for childhood diarrhoea in India derived from the Demographic and Health Survey (DHS) 2015-16. Variables span geographic, cultural, economic, household, maternal, child health, breastfeeding, immunisation, water/sanitation/hygiene, and family planning domains."

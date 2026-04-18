@@ -7,6 +7,7 @@
         "source_network": "mildew",
         "source_reference": "Rasmussen1995",
         "source_url": "https://www.bnlearn.com/bnrepository/discrete-medium.html#mildew",
+        "source_repository": "bnlearn",
         "disguise_strategy": "semantic_rename",
         "memorization_risk": "moderate",
         "notes": "The Mildew network models the progression of powdery mildew (Erysiphe graminis) in spring barley over a growing season, originally developed at the Danish Institute of Agricultural Sciences. It is a dynamic Bayesian network with 4 time slices representing fortnightly intervals during the growing season. LLMs may recognise the domain. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."

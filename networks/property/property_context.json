@@ -7,6 +7,7 @@
         "source_network": "property",
         "source_reference": "Constantinou2016Property",
         "source_url": "https://www.bnlearn.com/bnrepository/discrete-medium.html#property",
+        "source_repository": "bnlearn",
         "disguise_strategy": "semantic_rename",
         "memorization_risk": "low",
         "notes": "A Bayesian network for residential buy-to-let property investment analysis. Models the causal relationships between purchase price, financing, rental yields, operating expenses, taxation, and overall profitability. Includes time-stepped variables (T1) representing values after one year of growth. 27 variables and 26 directed edges."

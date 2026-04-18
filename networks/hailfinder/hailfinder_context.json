@@ -7,6 +7,7 @@
         "source_network": "hailfinder",
         "source_reference": "Abramson1996",
         "source_url": "https://www.bnlearn.com/bnrepository/discrete-large.html#hailfinder",
+        "source_repository": "bnlearn",
         "disguise_strategy": "semantic_rename",
         "memorization_risk": "moderate",
         "notes": "The Hailfinder network models severe convective weather forecasting for northeast Colorado, originally developed by Abramson, Finizza, and colleagues at the National Weather Service (1996). It captures relationships between atmospheric observations, synoptic weather patterns, convective parameters, mesoscale processes, and forecast outputs for hail and severe weather prediction. Contains 56 nodes and 66 edges. Use 'llm_name' for LLM queries, 'name' for ground truth evaluation."

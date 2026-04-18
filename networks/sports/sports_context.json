@@ -7,6 +7,7 @@
         "source_network": "sports",
         "source_reference": "Constantinou2021AsianHandicap",
         "source_url": "https://journals.sagepub.com/doi/10.3233/JSA-200588",
+        "source_repository": "bayesys",
         "disguise_strategy": "none",
         "memorization_risk": "low",
         "notes": "Original model from Constantinou (2021) for English Premier League match prediction. Combines pi-ratings with hybrid Bayesian network to model possession → shots → shots on target → goals → outcome chain."
